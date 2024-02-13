@@ -1784,3 +1784,18 @@ Stack trace:
 #0 /home/oouthsal/public_html/excel_import/import_tax.php(45): mysqli_query(Object(mysqli), 'UPDATE allow_de...')
 #1 {main}
   thrown in /home/oouthsal/public_html/excel_import/import_tax.php on line 45
+[24-Jan-2024 14:25:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '130 ,date_insert = '2024-01-24 14:25:32', inserted_by = '277' where allow_id = '' at line 1 in /home/oouthsal/public_html/excel_import/import_tax.php:45
+Stack trace:
+#0 /home/oouthsal/public_html/excel_import/import_tax.php(45): mysqli_query(Object(mysqli), 'UPDATE allow_de...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/excel_import/import_tax.php on line 45
+[24-Jan-2024 14:25:41 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '130 ,date_insert = '2024-01-24 14:25:41', inserted_by = '277' where allow_id = '' at line 1 in /home/oouthsal/public_html/excel_import/import_tax.php:45
+Stack trace:
+#0 /home/oouthsal/public_html/excel_import/import_tax.php(45): mysqli_query(Object(mysqli), 'UPDATE allow_de...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/excel_import/import_tax.php on line 45
+[25-Jan-2024 10:12:35 UTC] PHP Warning:  require_once(../Connections/hms.php): Failed to open stream: No such file or directory in /home/oouthsal/public_html/excel_import/index.php on line 3
+[25-Jan-2024 10:12:35 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '../Connections/hms.php' (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/oouthsal/public_html/excel_import/index.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/oouthsal/public_html/excel_import/index.php on line 3
