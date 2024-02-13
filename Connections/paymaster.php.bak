@@ -1,0 +1,10 @@
+<?php
+# FileName="Connection_php_mysql.htm"
+# Type="MYSQL"
+# HTTP="true"
+$hostname_salary = "localhost";
+$database_salary = "salary";
+$username_salary = "root";
+$password_salary = "oluwaseyi";
+$salary = mysql_pconnect($hostname_salary, $username_salary, $password_salary) or trigger_error(mysql_error(),E_USER_ERROR); 
+?>

@@ -1,0 +1,13 @@
+[10-Jan-2024 09:24:47 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
+[10-Jan-2024 09:24:47 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
+[10-Jan-2024 09:26:29 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
+[10-Jan-2024 09:26:29 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
+[10-Jan-2024 09:37:01 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
+[10-Jan-2024 09:37:01 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
+[10-Jan-2024 21:23:36 UTC] PHP Warning:  Undefined array key 1 in /home/oouthsal/public_html/split_name.php on line 7
+[11-Jan-2024 11:45:35 UTC] PHP Deprecated:  Implicit conversion from float 504515.00000000006 to int loses precision in /home/oouthsal/public_html/multiAdjustment.php on line 12
+[13-Jan-2024 20:11:44 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
+[13-Jan-2024 20:11:44 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
+[14-Jan-2024 13:44:18 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
+[14-Jan-2024 13:44:18 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
+[14-Jan-2024 15:30:39 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31

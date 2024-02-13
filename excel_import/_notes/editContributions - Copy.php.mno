@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_Period" value="name:Periodid;datatype:int,name:PayrollPeriod;datatype:string" />
+	<infoitem key="UD_commodity" value="name:itemsid;datatype:int,name:items;datatype:string" />
+</info>

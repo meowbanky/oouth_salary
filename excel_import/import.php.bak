@@ -1,0 +1,70 @@
+<?php
+ini_set('max_execution_time','0');
+require_once('../Connections/paymaster.php');
+
+
+//if(isset($_POST["Import"])){
+ 
+ 
+		 $filename=$_FILES["file"]["tmp_name"];
+ 
+ 
+			 
+ 
+		 if($_FILES["file"]["size"] > 0)
+		 {
+				 $emptySql = "delete from tax2";
+				  mysqli_select_db($salary,$database_salary);
+				  $result2 = mysqli_query( $salary,$emptySql) or die(mysql_error());
+				  
+				  
+		  	$file = fopen($filename, "r");
+	         while (($emapData = fgetcsv($file, 10000, ",")) !== FALSE)
+	         {
+ 				echo $emapData[0] = str_replace(',','',$emapData[0]);
+				echo $emapData[1] = str_replace(',','',$emapData[1]);
+//				$emapData[3] = str_replace(',','',$emapData[3]);
+//				$emapData[4] = str_replace(',','',$emapData[4]);
+//				$emapData[5] = str_replace(',','',$emapData[5]);
+//				$emapData[6] = str_replace(',','',$emapData[6]);
+//				$emapData[7] = str_replace(',','',$emapData[7]);
+//				$emapData[8] = str_replace(',','',$emapData[8]);
+
+				mysqli_select_db($salary,$database_salary);
+ 				$sqlStaff_id = "select staff_id from employee where staff_id ='".$emapData[0]."'";		
+				$Staff_id = mysqli_query($salary,$sqlStaff_id) or die(mysql_error());
+				$row_Staff_id = mysqli_fetch_assoc($Staff_id);
+				$Staff_id = $row_Staff_id['staff_id'];
+				
+	          //It wiil insert a row to our subject table from our csv file`
+	           $sql = "INSERT into tax2 (staff_id,amount) values ('".$emapData[0]."','".$emapData[1]."')";
+	         //we are using mysql_query function. it returns a resource on true else False on error
+	          mysqli_select_db($salary,$database_salary);
+			  $result = mysqli_query($salary,$sql) or die(mysql_error());
+				if(!$result )
+				{
+					echo "<script type=\"text/javascript\">
+							alert(\"Invalid File:Please Upload CSV File.\");
+							window.location = \"index.php\"
+						</script>";
+ 
+				}
+ 
+	         }
+	         fclose($file);
+	         //throws a message if data successfully imported to mysql database from excel file
+	         echo "<script type=\"text/javascript\">
+						alert(\"CSV File has been successfully Imported.\");
+						window.location = \"index.php\"
+					</script>";
+ 
+ 
+ 
+			 //close of connection
+			mysql_close($salary); 
+ 
+ 
+ 
+		 }
+	//}	 
+?>		
