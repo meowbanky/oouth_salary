@@ -1,11 +1,13 @@
 <?php
+ob_start();
+
 session_start();
 
 include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
+if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) === '')) {
     header("location: ../index.php");
-    exit();
+    exit;
 }
 require 'office_vendor/autoload.php';
 
@@ -19,261 +21,232 @@ use PHPMailer\PHPMailer\SMTP;
 require 'vendor/autoload.php';
 
 
+$period = filter_input(INPUT_POST, 'period', FILTER_VALIDATE_INT) ?: -1;
+$deduction = filter_input(INPUT_POST, 'deduction', FILTER_VALIDATE_INT) ?: -1;
+$deduction_text = filter_input(INPUT_POST, 'deduction_text', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: '';
+$period_text = filter_input(INPUT_POST, 'period_text', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: '';
+$code = filter_input(INPUT_POST, 'code', FILTER_VALIDATE_INT) ?: -1;
 
 
-
-if (!function_exists("GetSQLValueString")) {
-    function GetSQLValueString($con, $theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-    {
-
-        $theValue = function_exists("mysqli_real_escape_string") ? mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
-        switch ($theType) {
-            case "text":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "long":
-            case "int":
-                $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-                break;
-            case "double":
-                $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-                break;
-            case "date":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "defined":
-                $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-                break;
-        }
-        return $theValue;
-    }
-}
-
-if (!isset($_POST['period']) or !isset($_POST['deduction'])) {
-    $period = -1;
-    $deduction = -1;
-} else {
-    $period = $_POST['period'];
-    $deduction = $_POST['deduction'];
-}
-
-if (isset($_POST['deduction_text'])) {
-    $deduction_text = $_POST['deduction_text'];
-} else {
-    $deduction_text = '';
-}
-
-if (isset($_POST['period_text'])) {
-    $period_text =    $_POST['period_text'];
-} else {
-    $period_text = '';
-}
-
-
-if (isset($_POST['code'])) {
-    $code =    $_POST['code'];
-} else {
-    $code = -1;
-}
-
-
-$response['data'] = array();
-$response['code'] = 1;
-$Data['S/No.'] = ' S/No.';
-$Data['StaffNo'] = 'Staff No.';
-$Data['Name'] = 'Name';
-$Data['Amount'] = 'Amount';
-
-if ($deduction == 87 || $deduction == 85) {
-    $Data['Balance'] = 'Balance';
-}
-
-array_push($response['data'], $Data);
-
-$query = $conn->prepare('SELECT * FROM email_deductionlist WHERE allow_id = ? ');
-$res = $query->execute(array($deduction));
-$existtrans = $query->fetch();
-
-try {
+function prepareSqlStatement($code, $deduction, $period) {
+    // Example SQL statement logic based on the provided code
     if ($code == 1) {
-        $sql = 'SELECT tbl_master.allow as deduc, master_staff.staff_id, master_staff.`NAME` FROM tbl_master INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id WHERE tbl_master.allow_id = ? and tbl_master.period = ? and master_staff.period = ? order by master_staff.staff_id asc';
+        $sql = 'SELECT master_staff.staff_id,master_staff.`NAME`,tbl_master.allow as deduc 
+                FROM tbl_master 
+                INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id 
+                WHERE tbl_master.allow_id = :deduction AND tbl_master.period = :period AND master_staff.period = :period 
+                ORDER BY master_staff.staff_id ASC';
     } else {
-        $sql = 'SELECT tbl_master.deduc as deduc, master_staff.staff_id, master_staff.`NAME` FROM tbl_master INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id WHERE tbl_master.allow_id = ? and tbl_master.period = ? and master_staff.period = ? order by master_staff.staff_id asc';
+        $sql = 'SELECT master_staff.staff_id,master_staff.`NAME`,tbl_master.deduc as deduc 
+                FROM tbl_master 
+                INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id
+                WHERE tbl_master.allow_id = :deduction AND tbl_master.period = :period AND master_staff.period = :period 
+                ORDER BY master_staff.staff_id ASC';
     }
 
-    $query = $conn->prepare($sql);
-    $fin = $query->execute(array($deduction, $period, $period));
-    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-    $numberofstaff = count($res);
-    $counter = 1;
-    //sdsd
-    $sumAll = 0;
-    $sumDeduct = 0;
-    $sumTotal = 0;
-    $i = 1;
+    return $sql;
+}
 
-    foreach ($res as $row => $link) {
+function fetchDataFromDatabase($deduction, $period, $code, $conn) {
+    $sql = prepareSqlStatement($code, $deduction, $period);
+    $stmt = $conn->prepare($sql);
+    // Bind parameters as an associative array
+    $stmt->execute([
+        ':deduction' => $deduction, 
+        ':period' => $period
+    ]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $Data['S/No.']  = $i;
-        $Data['StaffNo']  = $link['staff_id'];
-        $Data['Name'] = $link['NAME'];
-        $Data['Amount']  = ($link['deduc']);
-        if ($deduction == 87 || $deduction == 85) {
-            $loan = retrieveLoanStatus($link['staff_id'], $deduction);
-            $repayment = retrieveLoanBalanceStatus($link['staff_id'], $deduction, $period);
-            $Data['Balance'] = ($loan - $repayment);
-        }
-
-        $sumTotal = $sumTotal + floatval($link['deduc']);
-        $counter++;
-        ++$i;
-
-        array_push($response['data'], $Data);
-    }
-
-    $Data['S/No.']  = '';
-    $Data['StaffNo']  = '';
-    $Data['Name'] = 'TOTAL';
-    $Data['Amount']  = ($sumTotal);
-    if ($deduction == 87 || $deduction == 85) {
-        $loan = retrieveLoanStatus($link['staff_id'], $deduction);
-        $repayment = retrieveLoanBalanceStatus($link['staff_id'], $deduction, $period);
-        $Data['Balance'] = '';
-    }
-    array_push($response['data'], $Data);
-} catch (PDOException $e) {
-    echo $e->getMessage();
+    return $results;
 }
 
 
-$spreadsheet = new Spreadsheet();
-$activeWorksheet = $spreadsheet->getActiveSheet();
-$activeWorksheet->fromArray(
-    $response['data'],
-    null,
-    'A1'
-);
-$tempfilepath = $deduction_text . ' - ' . $period_text . '.xlsx';
-$writer = new Xlsx($spreadsheet);
-$writer->save($tempfilepath);
 
+function generateExcelFile($data, $deductionText, $periodText) {
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
 
-if ($existtrans) {
-    $email_register = $existtrans['email'];
+    // Define headers
+    $headers = ['S/No.', 'Staff No.', 'Name', 'Amount'];
 
+    // Add headers to the first row
+    $sheet->fromArray([$headers], null, 'A1');
 
-    //$email_register = 'bankole.adesoji@gmail.com';
-    $first_name = $deduction_text;
+    // Initialize total sum
+    $totalSum = 0;
 
-    $sendmessage = "Find attached " . $deduction_text . " List  for the Month of " . $period_text;
-
-
-    //Create a new PHPMailer instance
-    $mail = new PHPMailer();
-
-    //Tell PHPMailer to use SMTP
-    $mail->isSMTP();
-
-    //Enable SMTP debugging
-    //SMTP::DEBUG_OFF = off (for production use)
-    //SMTP::DEBUG_CLIENT = client messages
-    //SMTP::DEBUG_SERVER = client and server messages
-    $mail->SMTPDebug = SMTP::DEBUG_OFF;
-    // $mail->SMTPDebug = SMTP::DEBUG_CLIENT;
-    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
-
-    //Set the hostname of the mail server
-    $mail->Host = "mail.oouthsalary.com.ng";
-    //Use `$mail->Host = gethostbyname('smtp.gmail.com');`
-    //if your network does not support SMTP over IPv6,
-    //though this may cause issues with TLS
-
-    //Set the SMTP port number:
-    // - 465 for SMTP with implicit TLS, a.k.a. RFC8314 SMTPS or
-    // - 587 for SMTP+STARTTLS
-    $mail->Port = 465;
-
-    //Set the encryption mechanism to use:
-    // - SMTPS (implicit TLS on port 465) or
-    // - STARTTLS (explicit TLS on port 587)
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-
-    //Whether to use SMTP authentication
-    $mail->SMTPAuth = true;
-
-    //Username to use for SMTP authentication - use full email address for gmail
-    $mail->Username = "salary@oouthsalary.com.ng";
-
-    //Password to use for SMTP authentication
-    $mail->Password = "b07NwW3_5WNr";
-
-    //Set who the message is to be sent from
-    //Note that with gmail you can only use your account address (same as `Username`)
-    //or predefined aliases that you have configured within your account.
-    //Do not use user-submitted addresses in here
-    $mail->setFrom("no-reply@oouth.com", "OOUTHSALARY");
-
-    //Set an alternative reply-to address
-    //This is a good place to put user-submitted addresses
-    $mail->addReplyTo("no-reply@oouth.com", "OOUTHSALARY");
-
-    //Set who the message is to be sent to
-    $mail->addAddress($email_register, $first_name);
-    $mail->addBCC('bankole.adesoji@gmail.com');
-
-    //Set the subject line
-    $mail->Subject = "OOUTH " . $deduction_text . " List";
-
-    //Read an HTML message body from an external file, convert referenced images to embedded,
-    //convert HTML into a basic plain-text alternative body
-    //$mail->msgHTML(file_get_contents('contents.html'), __DIR__);
-
-    //Replace the plain text body with one created manually
-    $mail->AltBody = "This is a plain-text message body";
-
-    $mail->Body = $sendmessage;
-
-    //Attach an image file
-    $mail->addAttachment($tempfilepath);
-
-
-
-    header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment; filename="' . $tempfilepath);
-    header('Cache-Control: max-age=0');
-
-    // Read the Excel file content
-    readfile($tempfilepath);
-
-
-
-
-
-    //send the message, check for errors
-    if (!$mail->send()) {
-        echo "Mailer Error: " . $mail->ErrorInfo;
-    } else {
-
-        if (file_exists($tempfilepath)) {
-            $status  = unlink($tempfilepath);
-        } else {
-            // echo 'The file '.$tempfilepath.".xlsx".' doesnot exist';
-        }
-        echo "2";
+    // Add serial numbers to each row of data and calculate total sum
+    $formattedData = [];
+    foreach ($data as $key => $row) {
+        $formattedRow = [
+            $key + 1, // S/No.
+            $row['staff_id'], // Staff No.
+            $row['NAME'], // Name
+            $row['deduc'] // Amount
+        ];
+        $formattedData[] = $formattedRow;
+        $totalSum += $row['deduc']; // Accumulate the sum of the Amount column
     }
+
+    // Add data with serial numbers and amounts starting from the second row
+    $sheet->fromArray($formattedData, null, 'A2');
+
+    // Add the total sum as a footer after the data
+    $footerRowIndex = count($data) + 2; // Add 2 because data starts from row 2
+    $sheet->setCellValue("A{$footerRowIndex}", 'Total');
+    $sheet->mergeCells("A{$footerRowIndex}:C{$footerRowIndex}"); // Merge the cells for the 'Total' label
+    $sheet->setCellValue("D{$footerRowIndex}", $totalSum); // Set the total sum in the Amount column
+
+    // Style the footer row if needed
+    $footerStyle = [
+        'font' => ['bold' => true],
+        'borders' => [
+            'top' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+        ],
+    ];
+    $sheet->getStyle("A{$footerRowIndex}:D{$footerRowIndex}")->applyFromArray($footerStyle);
+    
+    $fileName = "{$deductionText} - {$periodText}.xlsx";
+    $tempFilePath = sys_get_temp_dir() . '/' . $fileName;
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($tempFilePath);
+    
+    return $tempFilePath;
+}
+
+
+
+
+// Database operations encapsulated in a function
+$responseData = fetchDataFromDatabase($deduction, $period,$code,$conn);
+
+// Generate Excel file
+
+$filePath = generateExcelFile($responseData, $deduction_text, $period_text);
+
+
+
+function getRecipientEmail($conn, $deduction) {
+    // Prepare the SQL statement
+    $query = $conn->prepare('SELECT * FROM email_deductionlist WHERE allow_id = ?');
+    // Execute the query with the provided deduction id
+    $query->execute([$deduction]);
+    // Fetch the result
+    $existTrans = $query->fetch(PDO::FETCH_ASSOC);
+
+    // Return the email address if it exists, otherwise return a default or an empty string
+    return [
+        'email' => $existTrans ? $existTrans['email'] : '',
+        'email_cc' => $existTrans && isset($existTrans['bcc']) ? $existTrans['bcc'] : ''
+    ];
+}
+
+$recipientEmail = getRecipientEmail($conn, $deduction);
+
+function sendEmail($filePath, $deductionText, $periodText, $recipientEmail, $ccEmail = '') {
+    $mail = new PHPMailer(true); // Passing `true` enables exceptions
+    
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host = 'mail.oouthsalary.com.ng';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'salary@oouthsalary.com.ng';
+        $mail->Password = 'b07NwW3_5WNr';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+        
+        // Recipients
+        $mail->setFrom('no-reply@oouth.com', 'OOUTHSALARY');
+        $mail->addAddress($recipientEmail); // Add a recipient
+        $mail->addReplyTo("no-reply@oouth.com", "OOUTHSALARY");
+        if (!empty($ccEmail)) {
+        $mail->addCC($ccEmail); // Add CC recipient if provided
+            }
+        // Attachments
+        $mail->addAttachment($filePath); // Add attachments
+        
+        // Content
+        $mail->isHTML(true); // Set email format to HTML
+        $mail->Subject = "OOUTH  {$deductionText}  List";
+        $mail->Body    = "Here is the report for {$deductionText} for the period of {$periodText}.";
+        
+        $mail->send();
+        echo 'Message has been sent';
+    } catch (Exception $e) {
+        echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
+    } finally {
+        if (file_exists($filePath)) {
+            unlink($filePath); // Clean up the temporary file
+        }
+    }
+}
+
+
+function downloadExcelFile($filePath, $fileName) {
+    if (file_exists($filePath)) {
+        if (headers_sent($filename, $linenum)) {
+            echo "Headers already sent in $filename on line $linenum";
+            exit;
+        }
+
+        // Now turn off error reporting to prevent corrupting file content
+        error_reporting(0);
+        ini_set('display_errors', 0);
+
+        // Clear the output buffer
+        ob_end_clean();
+
+        // Send download headers
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . basename($fileName) . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+
+        // Clear the output buffer again and flush all output buffers
+        ob_clean();
+        flush();
+
+        // Read the file and send it to the output buffer
+        readfile($filePath);
+
+        // Delete the file after download
+        unlink($filePath);
+
+        // Terminate the script to prevent further output
+        exit;
+    } else {
+        echo "The file does not exist.";
+    }
+}
+
+
+
+if ($recipientEmail) {
+    // Proceed with sending the email
+sendEmail($filePath, $deduction_text, $period_text, $recipientEmail['email'], $recipientEmail['email_cc']);
+
 } else {
-    // header('Content-Type: application/vnd.ms-excel');
-    header('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="' . $tempfilepath);
-    header('Cache-Control: max-age=0');
-
-    // Read the Excel file content
-    readfile($tempfilepath);
-
-    if (file_exists($tempfilepath)) {
-        $status  = unlink($tempfilepath);
-    } else {
-        // echo 'The file '.$tempfilepath.".xlsx".' doesnot exist';
-    }
-    echo "2";
+   $fileName = basename($filePath);
+    downloadExcelFile($filePath, $fileName);
 }
+
+
+//     $Data['S/No.']  = '';
+//     $Data['StaffNo']  = '';
+//     $Data['Name'] = 'TOTAL';
+//     $Data['Amount']  = ($sumTotal);
+//     if ($deduction == 87 || $deduction == 85) {
+//         $loan = retrieveLoanStatus($link['staff_id'], $deduction);
+//         $repayment = retrieveLoanBalanceStatus($link['staff_id'], $deduction, $period);
+//         $Data['Balance'] = '';
+//     }
+//     array_push($response['data'], $Data);
+// } catch (PDOException $e) {
+//     echo $e->getMessage();
+// }
+
+?>
