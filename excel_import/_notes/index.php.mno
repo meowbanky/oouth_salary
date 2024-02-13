@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<info>
+	<infoitem key="UD_Period" value="name:Periodid;datatype:int,name:PayrollPeriod;datatype:string" />
+</info>

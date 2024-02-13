@@ -1,0 +1,253 @@
+<?php require_once('Connections/paymaster.php');
+include_once('classes/model.php'); 
+session_start();
+	
+	//Check whether the session variable SESS_MEMBER_ID is present or not
+	if(!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
+		header("location: index.php");
+		exit();
+	}
+	
+	if (!function_exists("GetSQLValueString")) {
+function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "") 
+{
+  if (PHP_VERSION < 6) {
+    $theValue = get_magic_quotes_gpc() ? stripslashes($theValue) : $theValue;
+  }
+
+  $theValue = function_exists("mysql_real_escape_string") ? mysql_real_escape_string($theValue) : mysql_escape_string($theValue);
+
+  switch ($theType) {
+    case "text":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;    
+    case "long":
+    case "int":
+      $theValue = ($theValue != "") ? intval($theValue) : "NULL";
+      break;
+    case "double":
+      $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
+      break;
+    case "date":
+      $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+      break;
+    case "defined":
+      $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
+      break;
+  }
+  return $theValue;
+}
+}
+
+
+if (!isset($_SESSION['SESS_INVOICE']) or ($_SESSION['SESS_INVOICE'] == '')){
+$_SESSION['SESS_INVOICE'] = 'SIV-'.createRandomPassword();
+}
+?>
+	
+<!DOCTYPE html>
+	<?php include('header1.php');?>		
+	<body data-color="grey" class="flat" style="zoom: 1;">
+		<div class="modal fade hidden-print" id="myModal"></div>
+		<div id="wrapper" class="minibar">
+		<div id="header" class="hidden-print">
+			<h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>		
+				<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>	
+		<div class="clear"></div>
+		</div>
+		
+		
+		
+		
+		<div id="user-nav" class="hidden-print hidden-xs">
+			<ul class="btn-group ">
+				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text">	Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
+				<li class="btn  hidden-xs disabled">
+					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
+				  <?php
+								$Today = date('y:m:d',mktime());
+								$new = date('l, F d, Y', strtotime($Today));
+								echo $new;
+								?>				</span></a>
+				</li>
+									<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
+				        <li class="btn  ">
+					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>				</li>
+			</ul>
+		</div>
+				
+			<?php include('sidebar.php') ;?>
+        
+       
+        
+		<div id="content" class="clearfix sales_content_minibar">
+		
+ <div class="clear"></div>
+ 
+<div id="sale-grid-big-wrapper" class="clearfix">
+
+    
+</div>
+</div>
+
+<div id="register_container" class="sales clearfix">
+	<div id="content-header" class="hidden-print sales_header_container">
+	<h1 class="headigs"> <i class="icon fa fa-shopping-cart"></i>
+		Issue Register&nbsp; <?php echo $_SESSION['SESS_INVOICE'] ?><span id="ajax-loader" style="display: none;"><img src="img/ajax-loader.gif" alt=""></span>
+			</h1>
+	
+    
+    
+</div>
+
+<div class="clear"></div>
+	<!--Left small box-->
+	<div class="row">
+		<div class="sale_register_leftbox col-md-9">
+			<div class="row forms-area">
+										<div class="col-md-8 no-padd">
+							<div class="input-append">
+								<form action="SalesAdd.php" method="post" accept-charset="utf-8" id="add_item_form" class="form-inline" autocomplete="off">								<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span><input type="text" name="item" value="Enter item name or scan barcode" id="item" class="input-xlarge ui-autocomplete-input focus" accesskey="i" placeholder="Enter item name or scan barcode" autocomplete="off"><input name="item_id" type="hidden" id="item_id" value="">	<input name="code" type="hidden" id="code" value="<?php if (isset($error)){echo $error; }else {echo -1;} ?>" />							<a href="new_item.php" class="btn btn-primary none new_item_btn" title="New Item">New Item</a>								<a href="sales_suspend.php" class="btn btn-primary none suspended_sales_btn" title="Suspended Sales"><div class="small_button">Suspended Sales</div></a>
+								  <input name="invoice_no" type="hidden" id="invoice_no" value="<?php if (isset($_SESSION['SESS_INVOICE'])){echo $_SESSION['SESS_INVOICE']; }?>">
+								</form>
+							</div>
+						</div>					
+												
+				<div class="col-md-4 no-padd">
+					
+										
+			</div>
+	
+			</div>
+		
+		<div class="row">
+			
+						<div class="table-responsive">
+				<table id="register" class="table table-bordered">
+
+					<thead>
+						<tr>
+							<th></th>
+							<th class="item_name_heading">Item Name</th>
+							<th class="sales_item sales_items_number">Item #</th>
+							<th class="sales_stock">Stock</th>
+							<th class="sales_price">Price</th>
+							<th class="sales_quality">Qty.</th>
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody id="cart_contents" class="sa">
+												<tr class="cart_content_area">
+							<td colspan="7">
+								<div class="text-center text-warning"> <h3>There are no items in the cart</h3></div>
+							</td>
+						</tr>
+										</tbody>
+			</table>
+			</div>
+				<ul class="list-inline pull-left">
+						<li>
+				
+												
+												 
+			</ul>				
+									<ul class="list-inline pull-right" id="global_discount">
+						<li></li>
+					</ul>
+											
+						</div>
+						
+						
+							
+
+					</div>
+					<!-- Right small box  -->
+				<div class="col-md-3 sale_register_rightbox">
+					<ul class="list-group">
+						<li class="list-group-item nopadding">
+							<!-- Cancel and suspend buttons -->
+							<div>
+														</div>
+					</li>
+					<li class="list-group-item item_tier">
+						<!-- Customer info starts here-->
+						<h5 class="customer-basic-information">Select Customer (Optional)</h5>
+						<div class="row nomargin">
+						<div class="clearfix" id="customer_info_shell">
+													<form action="http://www.optimumlinkup.com.ng/pos/index.php/sales/select_customer" method="post" accept-charset="utf-8" id="select_customer_form" autocomplete="off">						<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span><input type="text" name="customer" value="Type customer name..." id="customer" size="30" placeholder="Type customer name..." accesskey="c" class="ui-autocomplete-input" autocomplete="off">					</form>
+					<div id="add_customer_info">
+							<div id="common_or" class="common_or">
+								OR								<a href="http://www.optimumlinkup.com.ng/pos/index.php/customers/view/-1/1" class="btn btn-primary none" title="New Customer" id="new-customer"><div class="small_button"> <span>New Customer</span> </div></a>							</div>
+					</div>
+
+											</div>
+				</div>
+				</li>
+				<li class="list-group-item spacing">
+				</li>
+				<li class="list-group-item nopadding">
+
+					<div id="sale_details">
+						<table id="sales_items" class="table">
+							<tbody><tr class="warning">
+								<td class="left">Items In Cart:</td>
+								<td class="right">0</td>
+							</tr>
+														<tr class="info">
+								<td class="left">Sub Total:</td>
+								<td class="right">0.00</td>
+							</tr>
+														<tr class="success">
+								<td><h3 class="sales_totals">Total:</h3></td>
+								<td><h3 class="currency_totals">0.00</h3></td>
+							</tr>
+						</tbody></table>
+					</div>
+				</li>
+				<li class="list-group-item spacing">
+				</li>
+
+				<li class="list-group-item nopadding">
+								</li>
+		</ul>
+
+		</div>
+</div>
+   
+
+
+</div>
+
+
+
+
+<script type="text/javascript">
+$(document).ready(function()
+{
+	
+	if ($("#invoice_no").val() != ''){
+		$("#register_container").load('salesAdd.php');
+		}
+	
+	
+
+	
+
+setTimeout(function(){$('#item').focus();}, 10);
+});
+</script>
+
+
+<div id="footer" class="col-md-12 hidden-print">
+	Please visit our 
+		<a href="#" target="_blank">
+			website		</a> 
+	to learn the latest information about the project.
+		<span class="text-info"> <span class="label label-info"> 14.1</span></span>
+</div>
+
+</div><!--end #content-->
+</div><!--end #wrapper-->
+
+
+<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul><ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-2" tabindex="0" style="display: none;"></ul></body></html>
