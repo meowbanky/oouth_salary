@@ -383,3 +383,9 @@ Stack trace:
 [07-Feb-2024 15:27:36 UTC] PHP Warning:  include_once(): Failed opening 'Connections/paymaster.php' for inclusion (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/oouthsal/public_html/classes/model.php on line 8
 [13-Feb-2024 14:44:54 UTC] PHP Warning:  include_once(Connections/paymaster.php): Failed to open stream: No such file or directory in /home/oouthsal/public_html/classes/model.php on line 8
 [13-Feb-2024 14:44:54 UTC] PHP Warning:  include_once(): Failed opening 'Connections/paymaster.php' for inclusion (include_path='.:/opt/cpanel/ea-php81/root/usr/share/pear') in /home/oouthsal/public_html/classes/model.php on line 8
+[19-Feb-2024 10:09:09 UTC] PHP Warning:  Undefined variable $ouput in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188
+[19-Feb-2024 10:09:09 UTC] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188
+[19-Feb-2024 10:13:59 UTC] PHP Warning:  Undefined variable $ouput in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188
+[19-Feb-2024 10:13:59 UTC] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188
+[19-Feb-2024 10:24:09 UTC] PHP Warning:  Undefined variable $ouput in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188
+[19-Feb-2024 10:24:09 UTC] PHP Deprecated:  number_format(): Passing null to parameter #1 ($num) of type float is deprecated in /home/oouthsal/public_html/classes/runPayrollindividual.php on line 188

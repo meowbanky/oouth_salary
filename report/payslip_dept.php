@@ -28,7 +28,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
         <div id="user-nav" class="hidden-print hidden-xs">
             <ul class="btn-group ">
-                <li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
+                <li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b>
+                                <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
                 <li class="btn  hidden-xs disabled">
                     <a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
                             <?php
@@ -73,7 +74,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                             <?php
                             global $conn;
                             $deptName = '';
-                            $dept = '';
+                            $dept = -1;
                             if (!isset($_POST['Dept'])) {
                                 $dept = -1;
                             } else {
@@ -97,7 +98,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                             <div class="col-md-12 pull-left">
                                 <img src="img/oouth_logo.gif" width="10%" height="10%" class="header-logo hidden-print" id="header-logo" alt="">
                                 <h2 class="page-title pull-right hidden-print">
-                                    <p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL <br><?php echo $deptName; ?> Payslip Report
+                                    <p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                                        <br><?php echo $deptName; ?> Payslip Report
                                     <p align="center">
                                         for the Month of:
                                         <?php
@@ -125,7 +127,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                             <div class="col-md-12 hidden-print">
                                 <form class="form-horizontal form-horizontal-mobiles" method="POST" action="payslip_dept.php">
                                     <div class="form-group">
-                                        <label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period :</label>
+                                        <label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period
+                                            :</label>
                                         <div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
                                             <div class="input-group">
                                                 <span class="input-group-addon"><i class="fa fa-location-arrow hidden-print"></i></span>
@@ -186,6 +189,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                         </div>
 
                                     </div>
+                                    <input type="hidden" name="dept_hidden" id="dept_hidden" value="<?php echo $dept; ?>">
                                     <div class="form-actions">
                                         <button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
                                     </div>
@@ -217,13 +221,30 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                 <div class="portlet-body">
                                     <div class="table-toolbar hidden-print">
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <button class="btn btn-sm btn-primary" type="button">
                                                     Payroll Period <span class="badge"><?php print $_SESSION['activeperiodDescription'] ?></span>
                                                 </button>
                                                 <button class="btn btn-sm purple" type="button">
-                                                    Number of master_staffs <span class="badge"><?php print $count ?></span>
+                                                    Number of Staff <span class="badge"><?php print $count ?></span>
                                                 </button>
+                                                <button class="btn btn-sm purple" type="button" id="sendmail">
+                                                    Send email
+                                                </button>
+                                                <div id="loading-indicator" style="display:none;"><img src="img/ajax-loader.gif" alt="">Sending mail...</div>
+                                                <div class="form-group">
+
+
+
+                                                    <div id="sample_1" style="display: block;">
+
+                                                        <div id="progress" style="border:1px solid #ccc; border-radius: 5px;"></div>
+                                                        <div id="information" style="width:500px"></div>
+                                                        <div id="message" style="width:500px">
+                                                        </div>
+
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="btn-group pull-right">
@@ -304,7 +325,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                                             OOUTH, SAGAMU
                                                                         </b></div>
                                                                     <div class="col-md-12 txt-ctr text-uppercase">
-                                                                        <b> PAYSLIP FOR <b> <?php print $_SESSION['activeperiodDescription'] ?> </b></b>
+                                                                        <b> PAYSLIP FOR <b>
+                                                                                <?php print $_SESSION['activeperiodDescription'] ?>
+                                                                            </b></b>
                                                                     </div>
 
                                                                 </div>
@@ -331,12 +354,15 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
                                                                             </span>
                                                                         </div>
-                                                                        <div class="col-md-6 col-xs-6 txt-left" style="white-space:nowrap;"><?php
-                                                                                                                                            //  echo $out['NAME'];
-                                                                                                                                            ?></div>
+                                                                        <div class="col-md-6 col-xs-6 txt-left" style="white-space:nowrap;">
+                                                                            <?php
+                                                                            //  echo $out['NAME'];
+                                                                            ?>
+                                                                        </div>
                                                                     </div>
                                                                     <div class="row header-label">
-                                                                        <div class="col-md-6 col-xs-6" style="white-space:nowrap;">Staff No.: <?php print_r($thisemployee); ?> </div>
+                                                                        <div class="col-md-6 col-xs-6" style="white-space:nowrap;">Staff No.:
+                                                                            <?php print_r($thisemployee); ?> </div>
 
                                                                     </div>
                                                                     <div class="row header-label">
@@ -382,11 +408,13 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
                                                         <div class="payslip-body">
                                                             <div class="row header-label">
-                                                                <div class="col-md-12 col-xs-12"><b>CONSOLIDATED SALARY</b></div>
+                                                                <div class="col-md-12 col-xs-12"><b>CONSOLIDATED
+                                                                        SALARY</b></div>
                                                             </div>
 
                                                             <div class="row header-label">
-                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">CONSOLIDATED SALARY: </div>
+                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">CONSOLIDATED SALARY:
+                                                                </div>
                                                                 <div class="col-md-6 col-xs-6 txt-right">
                                                                     <?php
                                                                     $consolidated = 0;
@@ -395,9 +423,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                                         $fin = $query->execute(array('1', $thisemployee, $period));
                                                                         //$res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                                         $res = $query->fetch();
-                                                                        if($query->rowCount()> 0){
-                                                                        $consolidated = $res['allow'];
-                                                                        }else{
+                                                                        if ($query->rowCount() > 0) {
+                                                                            $consolidated = $res['allow'];
+                                                                        } else {
                                                                             $consolidated = 0;
                                                                         }
 
@@ -414,7 +442,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
                                                             </div>
                                                             <div class="row header-label">
-                                                                <div class="col-md-12 col-xs-12"><b><u>ALLOWANCES</u></b></div>
+                                                                <div class="col-md-12 col-xs-12">
+                                                                    <b><u>ALLOWANCES</u></b>
+                                                                </div>
                                                             </div>
                                                             <div class="row payslip-data">
                                                                 <?php
@@ -454,7 +484,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
                                                         <div class="payslip-body">
                                                             <div class="row header-label">
-                                                                <div class="col-md-12 col-xs-12"><b><u>Deductions</u></b></div>
+                                                                <div class="col-md-12 col-xs-12">
+                                                                    <b><u>Deductions</u></b>
+                                                                </div>
                                                             </div>
                                                             <div class="row payslip-data">
                                                                 <?php
@@ -486,7 +518,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
 
                                                             <div class="row payslip-total">
-                                                                <div class="col-md-8 col-xs-8"><b>Total Deductions</b></div>
+                                                                <div class="col-md-8 col-xs-8"><b>Total Deductions</b>
+                                                                </div>
                                                                 <div class="col-md-4 col-xs-4 payslip-amount"><b>
                                                                         <?php
                                                                         echo number_format($totalDeduction);
@@ -549,7 +582,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
         <span class="text-info"> <span class="label label-info"> 14.1</span></span>
     </div>
 
-    </div><!--end #content-->
+    </div>
+    <!--end #content-->
     <!--end #wrapper-->
 
 
@@ -568,6 +602,76 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
             $("#report_date_range_simple").change(function() {
                 $("#simple_radio").prop('checked', true);
+            });
+
+            $('#sendmail').click(function() {
+                event.preventDefault();
+                const staff_no = $('#staff_no').val();
+                const period = $('#period').val();
+                const All = 2;
+                const dept = $('#dept_hidden').val();
+                $('#sample_1').css("display", "block")
+                $('#sendmail').attr('disabled', true);
+
+                $('#form_payprocess').ajaxSubmit({
+                    data: {
+                        staff_no: staff_no,
+                        period: period,
+                        All: All,
+                        dept: dept
+                    },
+                    url: 'callPdf.php',
+                    xhrFields: {
+                        onprogress: function(e) {
+                            $('#sample_1').html(e.target.responseText);
+                            // console.log(e.target.responseText);
+                        }
+                    },
+                    success: function(response, message) {
+                        if (message == 'success') {
+
+                            $('#sendmail').attr('disabled', false);
+                            alert("Mail for the month succesfully Processed");
+
+                            gritter("Success", message, 'gritter-item-success', false, false);
+
+
+                        } else {
+                            gritter("Error", message, 'gritter-item-error', false, false);
+
+                        }
+
+                        $('#sendmail').attr('disabled', false);
+                        $('#sample_1').css("display", "block")
+
+                    }
+                })
+            });
+
+            $('#sendmail').click(function() {
+                const staff_no = $('#staff_no').val();
+                const period = $('#period').val();
+                const All = 2;
+                const dept = $('#dept_hidden').val();
+                if (staff_no != '') {
+                    $('#loading-indicator').show();
+                    $.post("callPdf.php", {
+                            staff_no: staff_no,
+                            period: period,
+                            All: All,
+                            dept: dept
+                        })
+                        .done(function(data) {
+                            gritter("Success", "Mail Sent", 'gritter-item-success', false, true);
+                        })
+                        .always(function() {
+                            // hide loading indicator
+                            $('#loading-indicator').hide();
+                        });
+                } else {
+
+                    gritter("Danger", "Select Staff First", 'gritter-item-danger', false, true);
+                }
             });
 
         });
