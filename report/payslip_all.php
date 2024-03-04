@@ -663,7 +663,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                     $.post("callPdf.php", {
                             staff_no: staff_no,
                             period: period,
-                            All: All
+                            All: 3
                         })
                         .done(function(data) {
                             gritter("Success", "Mail Sent", 'gritter-item-success', false, true);
