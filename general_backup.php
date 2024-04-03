@@ -27,4 +27,3 @@ function backup()
     // Delete the local dump file
     unlink($dumpFilePath . $dumpFileName);
 }
-backup();

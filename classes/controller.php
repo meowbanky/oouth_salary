@@ -1064,7 +1064,7 @@ switch ($act) {
 		//exit(var_dump(is_int($_SESSION['currentactiveperiod')));
 		try {
 
-			backup();
+			//backup($hostname_salary, $username_salary, $password_salary, $database_salary);
 
 			//check for replication and create period
 			$query = $conn->prepare('SELECT * FROM payperiods WHERE description = ? AND periodYear = ? ');

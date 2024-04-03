@@ -26,6 +26,27 @@ body {
 .modal .modal-header {
   background: #6e7dc7;
 }
+.overlay {
+  position: fixed; /* Sit on top of the page content */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a modal */
+  cursor: pointer; /* Add a pointer on hover */
+}
+
+.overlay-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
 #menu-trigger i {
   color: #fff;
   padding-top: 9px;
