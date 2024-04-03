@@ -629,7 +629,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                     },
                     success: function(response, message) {
                         if (message == 'success') {
-
+                            console.log(message);
                             $('#sendmail').attr('disabled', false);
                             alert("Mail for the month succesfully Processed");
 

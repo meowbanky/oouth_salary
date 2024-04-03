@@ -56,6 +56,14 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 <?php include('header1.php'); ?>
 
 <body data-color="grey" class="flat" style="zoom: 1;">
+	<!-- Overlay -->
+	<div id="backupOverlay" class="overlay" style="display:none;">
+		<div class="overlay-content">
+			<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i> <!-- Include your spinner image -->
+			<p>Backing up the database, please wait...</p>
+		</div>
+	</div>
+
 	<div class="modal fade hidden-print" id="myModal"></div>
 	<div id="wrapper">
 		<div id="header" class="hidden-print">
@@ -134,11 +142,11 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 						</li> <?php  } ?>
 
 					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="call_backup.php"> <i class="text-info fa fa-hdd-o left fa-3x "></i><br> Backup</a>
+							<a class="padding-top" href="call_backup.php" id="backupButton"> <i class=" text-info fa fa-hdd-o left fa-3x "></i><br> Backup</a>
 						</li> <?php  } ?>
 
 					<?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'pfa') { ?> <li>
-							<a class="padding-top" href="pfa.php"> <i class="text-info fa fa-download left fa-3x "></i><br> Pension Fund Update</a>
+							<a class=" padding-top" href="pfa.php"> <i class="text-info fa fa-download left fa-3x "></i><br> Pension Fund Update</a>
 						</li> <?php  } ?>
 
 
@@ -223,6 +231,29 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
 	<script type="text/javascript">
 		$(document).ready(function() {
+
+			$("#backupButton").click(function() { // Assume you have a button to trigger backup
+				//event.preventDefault();
+				$("#backupOverlay").show(); // Show the overlay
+
+				// Perform the AJAX request for backup
+				$.ajax({
+					url: 'call_backup.php', // Your backup script
+					type: 'POST',
+					data: {}, // Any data you need to pass to your script
+					success: function(response) {
+						// Backup complete
+						$("#backupOverlay").hide(); // Hide the overlay
+						// You might want to show a success message or handle errors
+					},
+					error: function() {
+						// Handle AJAX error
+						$("#backupOverlay").hide(); // Ensure overlay is hidden on error
+						// Show error message
+					}
+				});
+			});
+
 			$('#link_deletetransaction').click(function() {
 				$('#deletetransaction').modal('show');
 			});
