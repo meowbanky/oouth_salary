@@ -281,7 +281,7 @@ WHERE tbl_master.period = ? and master_staff.period = ? GROUP BY tbl_master.staf
 										<td></td>
 									</tr>
 									<tr class="odd gradeX">
-										<td colspan="3">ADEKANMBI 'MUYIWA</td>
+										<td colspan="3"></td>
 										<td>SIGNATURE</td>
 										<td>DATE</td>
 									</tr>

@@ -64,7 +64,10 @@ $result = mysqli_query($salary, $qry) or die(mysqli_error($salary));
 $row_qry = mysqli_fetch_assoc($result);
 $totalRows_result = mysqli_num_rows($result);
 
-
+$qry_bus = "SELECT * FROM tbl_business";
+$result_bus = mysqli_query($salary, $qry_bus) or die(mysqli_error($salary));
+$row_bus = mysqli_fetch_assoc($result_bus);
+$totalRows_bus = mysqli_num_rows($result_bus);
 
 
 
@@ -77,6 +80,10 @@ if ($result) {
 		session_regenerate_id();
 		//$member = mysql_fetch_assoc($result);
 
+		$_SESSION['BUSINESSNAME'] = $row_qry['business_name'];
+		$_SESSION['town'] = $row_qry['town'];
+		$_SESSION['state'] = $row_qry['state'];
+		$_SESSION['tel'] = $row_qry['tel'];
 
 		$_SESSION['SESS_MEMBER_ID'] = $row_qry['staff_id'];
 		$_SESSION['SESS_FIRST_NAME'] = $row_qry['name'];

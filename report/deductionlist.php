@@ -169,12 +169,12 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 													global $conn;
 
 													try {
-														$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed , tbl_earning_deduction.code FROM tbl_earning_deduction WHERE edType > ? and `status` = ? order by ed_id asc');
+														$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed , tbl_earning_deduction.type FROM tbl_earning_deduction WHERE edType > ? and `status` = ? order by ed_id asc');
 														$res = $query->execute(array('0', 'Active'));
 														$out = $query->fetchAll(PDO::FETCH_ASSOC);
 
 														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['ed_id'] . '" data-code="' . $row['code'] . '"';
+															echo '<option value="' . $row['ed_id'] . '" data-code="' . $row['type'] . '"';
 															if ($row['ed_id'] == $deduction) {
 																echo 'selected = "selected"';
 															};
@@ -241,12 +241,12 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 										$deduction = $_POST['deduction'];
 									}
 									try {
-										$query = $conn->prepare('SELECT  tbl_earning_deduction.code FROM tbl_earning_deduction WHERE ed_id = ? order by ed_id');
+										$query = $conn->prepare('SELECT  tbl_earning_deduction.type FROM tbl_earning_deduction WHERE ed_id = ? order by ed_id');
 										$res = $query->execute(array($deduction));
 										$out = $query->fetchAll(PDO::FETCH_ASSOC);
 
 										while ($row = array_shift($out)) {
-											$type = $row['code'];
+											$type = $row['type'];
 										}
 									} catch (PDOException $e) {
 										echo $e->getMessage();

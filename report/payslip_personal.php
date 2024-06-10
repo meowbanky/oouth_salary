@@ -25,7 +25,7 @@ if (isset($_GET['period'])) {
     <div class="modal fade hidden-print" id="myModal"></div>
     <div id="wrapper">
         <div id="header" class="hidden-print">
-            <h1><a href="../index.php"><img src="images/oouth_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
+            <h1><a href="../index.php"><img src="img/tasce_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
             <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
             <div class="clear"></div>
         </div>
@@ -102,9 +102,9 @@ if (isset($_GET['period'])) {
 
 
                             <div class="col-md-12 pull-left">
-                                <img src="img/oouth_logo.gif" width="10%" height="10%" class="header-logo hidden-print" id="header-logo" alt="">
+                                <img src="../img/tasce_logo.png" width="10%" height="10%" class="header-logo hidden-print" id="header-logo" alt="">
                                 <h2 class="page-title pull-right hidden-print">
-                                    <p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL <br><?php echo $deptName; ?> Payslip Report
+                                    <p align="center"> <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?> <br><?php echo $deptName; ?> Payslip Report
                                     <p align="center">
                                         for the Month of:
                                         <?php
@@ -330,7 +330,7 @@ if (isset($_GET['period'])) {
                                                                         <div class=" payslip-header">
                                                                             <div class="row header-label">
                                                                                 <div class="col-md-12 txt-ctr text-uppercase"><b>
-                                                                                        OOUTH, SAGAMU
+                                                                                        <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?>
                                                                                     </b></div>
                                                                                 <div class="col-md-12 txt-ctr text-uppercase">
                                                                                     <b> PAYSLIP FOR <b> <?php echo $fullPeriod; ?> </b></b>
@@ -384,7 +384,7 @@ if (isset($_GET['period'])) {
                                                                             </div>
                                                                             <div class="row header-label">
 
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">CONSOLIDATED:
+                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">BASIC:
                                                                                     <?php
                                                                                     echo $out['GRADE'] . '/' . $out['STEP'];
                                                                                     ?>
@@ -400,11 +400,11 @@ if (isset($_GET['period'])) {
 
                                                                     <div class="payslip-body">
                                                                         <div class="row header-label">
-                                                                            <div class="col-md-12 col-xs-12"><b>CONSOLIDATED SALARY</b></div>
+                                                                            <div class="col-md-12 col-xs-12"><b>BASIC SALARY</b></div>
                                                                         </div>
 
                                                                         <div class="row header-label">
-                                                                            <div class="col-md-6 col-xs-6" style="white-space:nowrap;">CONSOLIDATED SALARY: </div>
+                                                                            <div class="col-md-6 col-xs-6" style="white-space:nowrap;">BASIC SALARY: </div>
                                                                             <div class="col-md-6 col-xs-6 txt-right">
                                                                                 <?php
                                                                                 $consolidated = 0;
@@ -438,7 +438,7 @@ if (isset($_GET['period'])) {
                                                                             <?php
                                                                             $totalAllow = 0;
                                                                             try {
-                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and type = ?');
+                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
                                                                                 $fin = $query->execute(array('1', $thisemployee, $period, '1'));
                                                                                 $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                                                 //print_r($res);
@@ -478,7 +478,7 @@ if (isset($_GET['period'])) {
                                                                             <?php
                                                                             $totalDeduction = 0;
                                                                             try {
-                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and type = ?');
+                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
                                                                                 $fin = $query->execute(array($thisemployee, $period, '2'));
                                                                                 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -561,7 +561,7 @@ if (isset($_GET['period'])) {
 
             <div id="footer" class="col-md-12 hidden-print">
                 Please visit our
-                <a href="http://www.oouth.com/" target="_blank">
+                <a href="https://tasce.edu.ng/site/" target="_blank">
                     website </a>
                 to learn the latest information about the project.
                 <span class="text-info"> <span class="label label-info"> 14.1</span></span>

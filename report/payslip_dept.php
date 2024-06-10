@@ -98,7 +98,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                             <div class="col-md-12 pull-left">
                                 <img src="img/oouth_logo.gif" width="10%" height="10%" class="header-logo hidden-print" id="header-logo" alt="">
                                 <h2 class="page-title pull-right hidden-print">
-                                    <p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                                    <p align="center"> <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?>
                                         <br><?php echo $deptName; ?> Payslip Report
                                     <p align="center">
                                         for the Month of:
@@ -322,7 +322,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                             <div class="payslip-header">
                                                                 <div class="row header-label">
                                                                     <div class="col-md-12 txt-ctr text-uppercase"><b>
-                                                                            OOUTH, SAGAMU
+                                                                            <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?>
                                                                         </b></div>
                                                                     <div class="col-md-12 txt-ctr text-uppercase">
                                                                         <b> PAYSLIP FOR <b>
@@ -450,7 +450,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                                 <?php
                                                                 $totalAllow = 0;
                                                                 try {
-                                                                    $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and type = ?');
+                                                                    $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
                                                                     $fin = $query->execute(array('1', $thisemployee, $period, '1'));
                                                                     $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                                     //print_r($res);
@@ -492,7 +492,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                                 <?php
                                                                 $totalDeduction = 0;
                                                                 try {
-                                                                    $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and type = ?');
+                                                                    $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
                                                                     $fin = $query->execute(array($thisemployee, $_SESSION['currentactiveperiod'], '2'));
                                                                     $res = $query->fetchAll(PDO::FETCH_ASSOC);
 
