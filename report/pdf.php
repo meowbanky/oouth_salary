@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Assuming 'config.php' contains database and SMTP configuration settings
 require_once('../../config.php');
 //require_once 'tcpdf/tcpdf.php';
@@ -59,12 +60,12 @@ function configurePDF($pdf)
 
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetAuthor('SALARY UNIT');
-    $pdf->SetTitle('OOUTH PAYSLIP');
+    $pdf->SetTitle($_SESSION['BUSINESSNAME'] . ' PAYSLIP');
     $pdf->SetSubject('Pay Slip');
-    $pdf->SetKeywords('OOUTH, payslip, Sagamu');
+    $pdf->SetKeywords($_SESSION['BUSINESSNAME'] . ' payslip, Sagamu');
     $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE . ' 009', PDF_HEADER_STRING);
 
-    $pdf->setHeaderData('oouth_logo.png', 10, 'Olabisi Onabanjo University Teaching Hospital', 'Generated on ' . date('d-m-Y:H:s'), array(0, 64, 255), array(0, 64, 128));
+    $pdf->setHeaderData('../img/tasce_logo.png', 10, $_SESSION['BUSINESSNAME'], 'Generated on ' . date('d-m-Y:H:s'), array(0, 64, 255), array(0, 64, 128));
     $pdf->setFooterData(array(0, 64, 0), array(0, 64, 128));
     $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
     $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
@@ -124,9 +125,9 @@ function fetchPayslipDetails($conn, $employeeId, $period)
     // Fetch Consolidated Salary
     $sqlConsolidated = "SELECT allow FROM tbl_master WHERE staff_id = :employeeId AND period = :period AND allow_id = '1'";
     // Fetch Allowances
-    $sqlAllowances = "SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = :employeeId AND period = :period AND allow_id <> '1' AND type = '1'";
+    $sqlAllowances = "SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = :employeeId AND period = :period AND allow_id <> '1' AND tbl_earning_deduction.type = '1'";
     // Fetch Deductions
-    $sqlDeductions = "SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = :employeeId AND period = :period AND type = '2'";
+    $sqlDeductions = "SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = :employeeId AND period = :period AND tbl_earning_deduction.type = '2'";
 
     try {
         // Consolidated Salary
@@ -216,7 +217,7 @@ function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
     </style>
     <table class="details-table">
         <tr class="header">
-            <th colspan="2">OOUTH, SAGAMU PAYSLIP FOR <?php echo $fullPeriod; ?></th>
+            <th colspan="2"><? $_SESSION['BUSINESSNAME'] ?> <?php echo $_SESSION['town']; ?> PAYSLIP FOR <?php echo $fullPeriod; ?></th>
         </tr>
         <tr>
             <td>Name:</td>
@@ -246,10 +247,10 @@ function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
 
     <table class="totals-table">
         <tr class="section-header">
-            <th colspan="2">CONSOLIDATED SALARY</th>
+            <th colspan="2">BASIC SALARY</th>
         </tr>
         <tr>
-            <td>CONSOLIDATED SALARY:</td>
+            <td>BASIC SALARY:</td>
             <td class="right"><?php echo number_format($payslipDetails['consolidated'], 2); ?></td>
         </tr>
         <tr class="section-header">
@@ -328,7 +329,7 @@ function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
     $mail->isHTML(true);
     $mail->Subject = $employeeDetails['employee_name'] . ' ' . $fullPeriod . ' Pay Slip';
     $mail->Body = '<html><body>';
-    $mail->Body .= '<div style="padding-left:0;padding-bottom:15px;padding-right:0;padding-top:0;font-weight:normal;font-size:14px;line-height:18px;color:#808080"><img src="https://oouth.com/images/logo.png">';
+    $mail->Body .= '<div style="padding-left:0;padding-bottom:15px;padding-right:0;padding-top:0;font-weight:normal;font-size:14px;line-height:18px;color:#808080"><img src="https://tasce.edu.ng/site/wp-content/uploads/2020/10/logo3.png">';
     $mail->Body .= '<table width="100%" cellspacing="0" cellpadding="0" border="0" align="left" style="font-weight:normal;font-family:Arial,Helvetica,sans-serif;margin-top:0;margin-right:0;margin-bottom:0;margin-left:0;padding-top:0;padding-right:0;padding-bottom:0;padding-left:0;background-color:#ffffff" bgcolor="#ffffff">
                     <tbody><tr><td style="padding-left:0;padding-bottom:10px;padding-right:0;padding-top:35px;border-top-color:#eeeeee;border-top-width:1px;border-top-style:solid;font-size:18px;line-height:25px;color:#356ae9">Payslip</td></tr>
                     <tr><td style="padding-left:0;padding-bottom:15px;padding-right:0;padding-top:0;font-weight:normal;font-size:14px;line-height:18px;color:#808080">

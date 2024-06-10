@@ -174,7 +174,6 @@ $today = date('Y-m-d');
                                                 <th> Grade/Step </th>
                                                 <th> PFA </th>
                                                 <th> Bank details - NO. </th>
-                                                <th>Call Duty </th>
                                                 <th> Actions </th>
 
 
@@ -195,9 +194,9 @@ $today = date('Y-m-d');
                                             try {
                                                 $start_from = ($page - 1) * $results_per_page;
                                                 if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD,tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE,  employee.STEP, employee.ACCTNO, employee.CALLTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD ORDER BY statuscd,staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
+                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD, tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE, employee.STEP, employee.ACCTNO, SALARYTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD INNER JOIN tbl_salaryType ON tbl_salaryType.salaryType_id = employee.SALARY_TYPE ORDER BY statuscd ASC,  staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
                                                 } else {
-                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD,tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE,  employee.STEP, employee.ACCTNO, employee.CALLTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD WHERE staff_id = ' . $_GET['item'] . ' ORDER BY statuscd,staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
+                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD,tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE,  employee.STEP, employee.ACCTNO, SALARYTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD WHERE staff_id = ' . $_GET['item'] . ' ORDER BY statuscd,staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
                                                 }
                                                 $query = $conn->prepare($sql);
                                                 $fin = $query->execute();
@@ -227,22 +226,13 @@ $today = date('Y-m-d');
                                                         echo '</td><td>';
                                                         echo $link['dept'];
                                                         echo '</td><td>';
-                                                        echo $link['GRADE'] . '/' . $link['STEP'];
+                                                        echo $link['SALARYTYPE'] . ' ' . $link['GRADE'] . '/' . $link['STEP'];
                                                         echo '</td><td>';
                                                         echo $link['PFANAME'];
                                                         echo '</td><td>';
                                                         echo $link['BNAME'] . '-' . $link['ACCTNO'];
-                                                        echo '</td><td>';
-                                                        if ($link['CALLTYPE'] == 0) {
-                                                            echo 'NONE';
-                                                        } elseif ($link['CALLTYPE'] == 1) {
-                                                            echo 'DOCTOR';
-                                                        } elseif ($link['CALLTYPE'] == 3) {
-                                                            echo 'NURSE';
-                                                        } elseif ($link['CALLTYPE'] == 2) {
-                                                            echo 'OTHERS';
-                                                        }
                                                         echo '</td>';
+
 
                                                         echo '<td> 
                                                                              		
@@ -724,7 +714,7 @@ $today = date('Y-m-d');
                                                                     <div class="row">
                                                                         <div class="co-md-6">
                                                                             <div class="form-group">
-                                                                                <label>oouth email</label>
+                                                                                <label>tasce email</label>
                                                                                 <input type="text" autocomplete="off" name="email" id="email" class="form-control" required placeholder="Enter email in this format: surname.firstname">
                                                                             </div>
                                                                         </div>
@@ -846,45 +836,38 @@ $today = date('Y-m-d');
                                                                         </div>
 
                                                                     </div>
+
                                                                     <div class="row">
                                                                         <div class="col-md-6">
-                                                                            <div class="form-group"><br>
-                                                                                <label for="callType" class="required  control-label ">Call Duty Type:</label><br>
-                                                                                <label><br>
-                                                                                    <input name="callType" type="radio" class="radio-inline" id="payType_01" value="0" checked>
-                                                                                    None</label><br>
-                                                                                <label>
-                                                                                    <input name="callType" type="radio" class="radio-inline" id="payType_0" value="1" <?php if ($empd['CALLTYPE'] == 1) {
-                                                                                                                                                                            echo 'checked';
-                                                                                                                                                                        } ?>>
-                                                                                    Doctors</label><br>
-                                                                                <label>
-                                                                                    <input type="radio" name="callType" value="2" id="payType_1" class="radio-inline" <?php if ($empd['CALLTYPE'] == 2) {
-                                                                                                                                                                            echo 'checked';
-                                                                                                                                                                        } ?>>
-                                                                                    Others</label><br>
-                                                                                <label>
-                                                                                    <input type="radio" name="callType" value="3" id="payType_2" class="radio-inline" <?php if ($empd['CALLTYPE'] == 3) {
-                                                                                                                                                                            echo 'checked';
-                                                                                                                                                                        } ?>>
-                                                                                    Nurse</label>
+                                                                            <div class="form-group">
+                                                                                <label>OGNO 3</label>
+                                                                                <input type="text" name="ogNo" class="form-control" placeholder="OG NO">
+
                                                                             </div>
+
                                                                         </div>
                                                                         <div class="col-md-6">
-                                                                            <div class="form-group"><br>
-                                                                                <label for="hazardType" class="required  control-label ">Hazard Type:</label><br>
+                                                                            <div class="form-group">
+                                                                                <label>Salary Type</label>
+                                                                                <select name="salary_type" class="form-control">
+                                                                                    <option value="">- - - Salary Type - - -</option>
+                                                                                    <?php
 
-                                                                                <label>
-                                                                                    <input name="hazardType" type="radio" class="radio-inline" id="hazardType_0" value="1">
-                                                                                    Clinical</label><br>
-                                                                                <label>
-                                                                                    <input type="radio" name="hazardType" value="2" id="hazardType_1" class="radio-inline">
-                                                                                    Non-clinical</label><br>
+                                                                                    $query = $conn->prepare('SELECT * FROM tbl_salaryType');
+                                                                                    $res = $query->execute();
+                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
 
+                                                                                    while ($row = array_shift($out)) {
+                                                                                        echo ('<option value="' . $row['salaryType_id'] . '">' .  $row['SalaryType'] . '</option>');
+                                                                                    }
+
+                                                                                    ?>
+                                                                                </select>
                                                                             </div>
-                                                                        </div>
 
+                                                                        </div>
                                                                     </div>
+
                                                                     <div class="row">
                                                                         <div class="col-md-6">
                                                                             <div class="form-group">

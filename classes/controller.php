@@ -58,6 +58,17 @@ switch ($act) {
 			// password_verify( 
 			if (($row = $query->fetch()) and (password_verify($pass, $row['password']))) {
 
+
+				$query_bus = $conn->prepare('SELECT * FROM tbl_business');
+				$fin_bus = $query_bus->execute(array());
+				$row_bus = $query_bus->fetch();
+
+				$_SESSION['BUSINESSNAME'] = $row_bus['business_name'];
+				$_SESSION['town'] = $row_bus['town'];
+				$_SESSION['state'] = $row_bus['state'];
+				$_SESSION['tel'] = $row_bus['tel'];
+
+
 				$_SESSION['logged_in'] = '1';
 				$_SESSION['user'] = $row['username'];
 				$_SESSION['SESS_MEMBER_ID'] = $row['staff_id'];
@@ -778,12 +789,12 @@ switch ($act) {
 			} else {
 				if ($earningamount > -1) {
 
-					$query = $conn->prepare('SELECT code FROM tbl_earning_deduction WHERE ed_id = ?');
+					$query = $conn->prepare('SELECT type FROM tbl_earning_deduction WHERE ed_id = ?');
 					$res = $query->execute(array($edcode));
 					$existtrans = $query->fetch();
-					$code = $existtrans['code'];
+					$code = $existtrans['type'];
 
-					$query = 'INSERT INTO allow_deduc (transcode,staff_id, allow_id, value, date_insert, inserted_by) VALUES (?,?,?,?,?,?)';
+					$query = 'INSERT INTO allow_deduc (allow_ded,staff_id, allow_id, value, date_insert, inserted_by) VALUES (?,?,?,?,?,?)';
 					$conn->prepare($query)->execute(array($code, $currentempl, $edcode, $earningamount, $recordtime, $_SESSION['SESS_MEMBER_ID']));
 					$_SESSION['msg'] = $msg = "Earning successfully saved";
 					$_SESSION['alertcolor'] = $type = "success";
@@ -1255,8 +1266,6 @@ switch ($act) {
 		$namee = ucwords(strtolower(strip_tags(addslashes($_POST['namee']))));
 		$dept = filter_var($_POST['dept']);
 		$designation = ucwords(strtolower(strip_tags(addslashes($_POST['designation']))));
-		$callType = filter_var($_POST['callType']);
-		$hazardType = filter_var($_POST['hazardType']);
 		$grade = filter_var($_POST['grade']);
 		$gradestep = filter_var($_POST['gradestep']);
 		$doe = date('Y-m-d', strtotime(filter_var($_POST['doe'])));
@@ -1264,15 +1273,15 @@ switch ($act) {
 		$bank = filter_var($_POST['bank']);
 		$acct_no = filter_var($_POST['acct_no']);
 		$email = filter_var($_POST['email']);
-		$position = strpos($email, '@oouth.com');
-		
-		if($position == true){
-		    
-		$insertemail = $email;
-		}else{
-		    	$insertemail = $email . '@oouth.com';
+		$position = strpos($email, '@tasce.com');
+		$salary_type = filter_var($_POST['salary_type']);
+		if ($position == true) {
+
+			$insertemail = $email;
+		} else {
+			$insertemail = $email . '@tasce.com';
 		}
-	
+
 		$pfa = filter_var($_POST['pfa']);
 		$rsa_pin = filter_var($_POST['rsa_pin']);
 		$recordtime	= $recordtime = date('Y-m-d H:i:s');
@@ -1282,9 +1291,9 @@ switch ($act) {
 			//check for replication and create period
 
 
-			$query = 'INSERT INTO employee (EMAIL,HARZAD_TYPE,employee.staff_id,employee.`NAME`, employee.EMPDATE, employee.DEPTCD, employee.POST, employee.GRADE, employee.STEP, employee.ACCTNO, employee.BCODE, employee.CALLTYPE, employee.STATUSCD, employee.PFACODE, employee.PFAACCTNO,userID,editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+			$query = 'INSERT INTO employee (salary_type,EMAIL,employee.staff_id,employee.`NAME`, employee.EMPDATE, employee.DEPTCD, employee.POST, employee.GRADE, employee.STEP, employee.ACCTNO, employee.BCODE, employee.STATUSCD, employee.PFACODE, employee.PFAACCTNO,userID,editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 
-			$conn->prepare($query)->execute(array($insertemail, $hazardType, $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep, $acct_no, $bank, $callType, 'A', $pfa, $rsa_pin, $_SESSION['SESS_MEMBER_ID'], $recordtime,));
+			$conn->prepare($query)->execute(array($salary_type, $insertemail,  $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep, $acct_no, $bank,  'A', $pfa, $rsa_pin, $_SESSION['SESS_MEMBER_ID'], $recordtime,));
 			//createEmail
 			createEmail($email);
 

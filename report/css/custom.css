@@ -17,10 +17,10 @@ body {
   background: #004e7a;
 }
 .payslip_background {
-  background-image: url("../img/Oouthlogo.png") !important;
+  background-image: url("../../img/tasce_logo.png") !important;
   opacity: 1;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size:cover;
   -webkit-print-color-adjust: exact !important; /* Chrome, Safari */
   color-adjust: exact !important; /*Firefox*/
 }

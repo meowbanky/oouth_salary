@@ -197,14 +197,14 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
 															tbl_pfa.PFANAME,
 															employee.PFAACCTNO,
 															employee.TAXPD,
-                                             IFNULL(employee.HARZAD_TYPE,-1) AS HARZAD_TYPE,
 															employee.PFACODE,
-															employee.CALLTYPE,employee.STATUSCD
+															employee.STATUSCD,tbl_salaryType.SALARYTYPE,employee.SALARY_TYPE
 															FROM
 															employee
 															LEFT JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD
 															LEFT JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE
-															LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE WHERE staff_id = ?');
+															LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE 
+                                             INNER JOIN tbl_salaryType ON tbl_salaryType.salaryType_id = employee.SALARY_TYPE WHERE staff_id = ?');
                   $query->execute(array($currentemp));
                   if ($row = $query->fetch()) {
                      $empfname = $row['NAME'];
@@ -212,17 +212,15 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                      $empStep = $row['STEP'];
                      $staffID   = $row['staff_id'];
                      $dept = $row['dept'];
-                     $callType =  $row['CALLTYPE'];
-                     $HARZAD_TYPE = $row['HARZAD_TYPE'];
                      $status = $row['STATUSCD'];
+                     $SALARYTYPE = $row['SALARYTYPE'];
+                     $SALARY_TYPE = $row['SALARY_TYPE'];
                   } else {
                      $empfname = '';
                      $empGrade = '';
                      $empStep = '';
                      $staffID   = '';
                      $dept = '';
-                     $callType =  '';
-                     $HARZAD_TYPE = '';
                      $status = '';
                   }
                   ?>
@@ -230,7 +228,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                   <span class="empnumbersize">Grade Level:</span> <span class="empnamesize"> <?php echo $empGrade; ?>/<?php echo $empStep; ?></span>
                   <br><span class="empnumbersize">Dept:</span><span class="empnamesize"> <?php echo $dept; ?></span>
                   <br><span class="empnumbersize">Status:</span><span class="empnamesize"> <?php echo $status;  ?></span>
-
+                  <br><span class="empnumbersize">Pay Type:</span><span class="empnamesize"> <?php echo $SALARYTYPE;  ?></span>
                </div>
 
                <div class="col-md-3 top-spacer-20">
@@ -438,7 +436,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                                       <div class="payslip-header">
                                                          <div class="row header-label">
                                                             <div class="col-md-12 txt-ctr text-uppercase"><b>
-                                                                  OOUTH, SAGAMU
+                                                                  <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?>
                                                                </b></div>
                                                             <div class="col-md-12 txt-ctr text-uppercase">
                                                                <b> PAYSLIP FOR <b> <?php echo $fullPeriod; ?> </b></b>
@@ -505,11 +503,11 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
 
                                                    <div class="payslip-body">
                                                       <div class="row header-label">
-                                                         <div class="col-md-12 col-xs-12"><b>CONSOLIDATED SALARY</b></div>
+                                                         <div class="col-md-12 col-xs-12"><b>BASIC SALARY</b></div>
                                                       </div>
 
                                                       <div class="row header-label">
-                                                         <div class="col-md-6 col-xs-6" style="white-space:nowrap;">CONSOLIDATED SALARY: </div>
+                                                         <div class="col-md-6 col-xs-6" style="white-space:nowrap;">BASIC SALARY: </div>
                                                          <div class="col-md-6 col-xs-6 txt-right">
                                                             <?php
                                                             $consolidated = 0;
@@ -544,7 +542,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                                          <?php
                                                          $totalAllow = 0;
                                                          try {
-                                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and type = ?');
+                                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and tbl_master.type = ?');
                                                             $fin = $query->execute(array('1', $thisemployee, $period, '1'));
                                                             $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                             //print_r($res);
@@ -590,7 +588,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                                          <?php
                                                          $totalDeduction = 0;
                                                          try {
-                                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and type = ?');
+                                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and tbl_master.type = ?');
                                                             $fin = $query->execute(array($thisemployee, $period, '2'));
                                                             $res = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -708,8 +706,8 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                  try {
                                     $query = $conn->prepare('SELECT ifnull(allow_deduc.`value`,0) as `value`,allow_deduc.allow_id,allow_deduc.temp_id,tbl_earning_deduction.edDesc FROM
 																						tbl_earning_deduction right JOIN allow_deduc ON tbl_earning_deduction.ed_id = allow_deduc.allow_id
-																						WHERE transcode = ? and staff_id = ? order by allow_id asc');
-                                    $fin = $query->execute(array(01, $staffID));
+																						WHERE allow_ded = ? and staff_id = ? order by allow_id asc');
+                                    $fin = $query->execute(array(1, $staffID));
                                     $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                     //print_r($res);
 
@@ -807,8 +805,8 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
             try {
                $query = $conn->prepare('SELECT ifnull(allow_deduc.`value`,0) as `value`, allow_deduc.allow_id,allow_deduc.temp_id,tbl_earning_deduction.edDesc FROM
 																						tbl_earning_deduction RIGHT JOIN allow_deduc ON tbl_earning_deduction.ed_id = allow_deduc.allow_id
-																						WHERE transcode = ? and staff_id = ? order by allow_id asc');
-               $fin = $query->execute(array('02', $staffID));;
+																						WHERE allow_ded = ? and staff_id = ? order by allow_id asc');
+               $fin = $query->execute(array('2', $staffID));;
                $res = $query->fetchAll(PDO::FETCH_ASSOC);
                //print_r($res);
 
@@ -955,8 +953,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                     <input type="hidden" name="curremployee" value="<?php echo $staffID; ?>">
                                     <input type="hidden" name="grade_level" value="<?php echo $empGrade; ?>">
                                     <input type="hidden" name="step" value="<?php echo $empStep; ?>">
-                                    <input type="hidden" name="callType" value="<?php echo $callType; ?>">
-                                    <input type="hidden" name="HARZAD_TYPE" value="<?php echo $HARZAD_TYPE; ?>">
+                                    <input type="hidden" name="SALARY_TYPE" value="<?php echo $SALARY_TYPE; ?>">
                                     <div class="form-group">
                                        <label class="col-md-4 control-label">Description</label>
                                        <div class="col-md-7">
@@ -1268,7 +1265,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                                                 try {
                                                    $query = $conn->prepare('SELECT allow_deduc.`value`,allow_deduc.allow_id,allow_deduc.temp_id,tbl_earning_deduction.edDesc FROM
 																						tbl_earning_deduction INNER JOIN allow_deduc ON tbl_earning_deduction.ed_id = allow_deduc.allow_id
-																						WHERE transcode = ? and staff_id = ? order by allow_id asc');
+																						WHERE allow_ded = ? and staff_id = ? order by allow_id asc');
                                                    $fin = $query->execute(array('01', $staffID));;
                                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                    //print_r($res);
@@ -1708,7 +1705,7 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                         $('#runPayslip').attr('disabled', false);
                         $('#runPayslip').html("Run this Employee's Payroll");
                         alert("Employee Payslip Successfully Processed");
-                        window.location.reload(true);
+                       window.location.reload(true);
 
                      }
                   }

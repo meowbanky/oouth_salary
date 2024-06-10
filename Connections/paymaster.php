@@ -3,7 +3,7 @@
 # Type="MYSQL"
 # HTTP="true"
 $hostname_salary = "localhost";
-$database_salary = "oouthsal_salary";
+$database_salary = "emmaggic_tasce";
 $username_salary = "oouthsal_root";
 $password_salary = "Oluwaseyi@7980";
 $salary = mysqli_connect($hostname_salary, $username_salary, $password_salary) or trigger_error(mysqli_error($salary), E_USER_ERROR);
