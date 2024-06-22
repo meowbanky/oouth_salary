@@ -1,0 +1,16 @@
+@media print {
+    body * {
+        visibility: hidden; /* Hide everything in body */
+    }
+    #payslipContent, #payslipContent * {
+        visibility: visible; /* Only payslip content is visible */
+    }
+    #payslipContent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+}
