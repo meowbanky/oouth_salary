@@ -239,7 +239,13 @@ function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
             <td><?php echo htmlspecialchars($employeeDetails['account_number']); ?></td>
         </tr>
         <tr>
-            <td>GRADE LEVEL:</td>
+           <?php if (preg_match('/[a-zA-Z]/', $employeeDetails['grade_level'])) {
+            $salaryType = "CONMESS";
+            } else {
+               $salaryType = "CONHESS";
+            }
+            ?>
+            <td><?php echo $salaryType; ?>:</td>
             <td><?php echo htmlspecialchars($employeeDetails['grade_level']); ?>/<?php echo htmlspecialchars($employeeDetails['STEP']); ?></td>
         </tr>
     </table>
