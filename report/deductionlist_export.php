@@ -158,7 +158,7 @@ function sendEmail($filePath, $deductionText, $periodText, $recipientEmail, $ccE
         $mail->SMTPAuth = true;
         $mail->Username = SMTP_USERNAME;
         $mail->Password = SMTP_PASSWORD;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; //$mail->SMTPSecure = SMTP_SECURE;
+        $mail->SMTPSecure =  SMTP_SECURE; //PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = SMTP_PORT;
         $mail->SMTPDebug = SMT_SMTPDebug;
 

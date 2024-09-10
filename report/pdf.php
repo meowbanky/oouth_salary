@@ -326,6 +326,7 @@ function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
     $mail->Password = SMTP_PASSWORD;
     $mail->SMTPSecure = SMTP_SECURE;
     $mail->Port = SMTP_PORT;
+    $mail->SMTPDebug = SMT_SMTPDebug;
 
     $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
     $mail->addAddress($employeeDetails['EMAIL'], $employeeDetails['employee_name']);
