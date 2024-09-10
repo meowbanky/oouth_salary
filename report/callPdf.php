@@ -49,7 +49,7 @@ try {
 	do {
 		$percent = intval($j / $total * 100) . "%";
 
-		$message = generateAndSendPayslip($row_masterTransaction['staff_id'], $period);
+		echo $message = generateAndSendPayslip($row_masterTransaction['staff_id'], $period);
 
 		//generatePdf($row_masterTransaction['staff_id'], $period);
 		//$message = generatePdf(1140, $period);

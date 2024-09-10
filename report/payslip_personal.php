@@ -668,7 +668,7 @@ if (isset($_GET['period'])) {
                         },
                         success: function(response, message) {
                             if (message == 'success') {
-
+                                console.log(response)
                                 $('#sendmail').attr('disabled', false);
                                 alert("Mail succesfully Processed");
 
