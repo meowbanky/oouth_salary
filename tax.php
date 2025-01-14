@@ -1,5 +1,11 @@
 <?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+?>
 <?php
 //Start session
 session_start();

@@ -44,9 +44,6 @@ unset($_SESSION['currentactiveperiod']);
         width: 334px;
     }
 </style>
-<style>
-    body {}
-</style>
 
 <body>
 

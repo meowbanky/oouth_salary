@@ -1,8 +1,15 @@
-<?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
-//Start session
 session_start();
+
+require_once('Connections/paymaster.php');
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+
+
 
 //Check whether the session variable SESS_MEMBER_ID is present or not
 if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {

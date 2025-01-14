@@ -1,540 +1,1449 @@
-[10-Jan-2024 09:24:47 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[10-Jan-2024 09:24:47 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[10-Jan-2024 09:26:29 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[10-Jan-2024 09:26:29 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[10-Jan-2024 09:37:01 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[10-Jan-2024 09:37:01 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[10-Jan-2024 21:23:36 UTC] PHP Warning:  Undefined array key 1 in /home/oouthsal/public_html/split_name.php on line 7
-[11-Jan-2024 11:45:35 UTC] PHP Deprecated:  Implicit conversion from float 504515.00000000006 to int loses precision in /home/oouthsal/public_html/multiAdjustment.php on line 12
-[13-Jan-2024 20:11:44 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[13-Jan-2024 20:11:44 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[14-Jan-2024 13:44:18 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[14-Jan-2024 13:44:18 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[14-Jan-2024 15:30:39 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:08 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:34:13 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Jan-2024 21:51:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[20-Jan-2024 11:13:58 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[20-Jan-2024 11:13:58 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[24-Jan-2024 14:20:16 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[24-Jan-2024 14:20:16 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[06-Feb-2024 09:00:15 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[06-Feb-2024 09:00:15 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[07-Feb-2024 14:10:10 UTC] PHP Warning:  Undefined array key 1 in /home/oouthsal/public_html/split_name.php on line 7
-[08-Feb-2024 09:19:40 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[08-Feb-2024 09:19:41 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[08-Feb-2024 09:32:54 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[08-Feb-2024 09:32:54 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[08-Feb-2024 12:39:43 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[08-Feb-2024 12:39:43 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[08-Feb-2024 12:40:46 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[08-Feb-2024 12:40:46 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:21 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[13-Feb-2024 16:38:24 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 00:27:25 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
-[14-Feb-2024 00:27:25 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
-[14-Feb-2024 00:28:25 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[14-Feb-2024 00:28:25 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:20:22 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[14-Feb-2024 08:27:57 UTC] PHP Warning:  Undefined variable $dg in /home/oouthsal/public_html/adminer.php on line 868
-[19-Feb-2024 09:25:07 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:25:07 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:26:32 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:26:32 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:27:58 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:27:58 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:29:05 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:29:05 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:30:53 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:30:53 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:31:50 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:31:50 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:32:55 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:32:55 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:33:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:37:54 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:37:54 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:38:19 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:38:19 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:38:43 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:38:43 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:39:35 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:39:35 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:44:02 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:44:02 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:44:33 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:44:33 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:45:07 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:45:07 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:45:29 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:45:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:45:56 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:45:56 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:48:49 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:48:49 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:49:20 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:49:20 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:49:27 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:49:27 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:15 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:15 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:18 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:18 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:21 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:24 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:24 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:36 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:36 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:50:41 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:50:41 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:51:10 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:51:10 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:52:01 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 09:52:01 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 09:53:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:00:32 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:00:32 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:24 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:24 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:29 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:35 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:35 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:39 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:39 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:43 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:43 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:50 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:50 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:01:56 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:01:56 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:02:01 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:02:01 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:02:06 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:02:06 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:02:11 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:02:11 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:06:13 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:06:13 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:06:18 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:06:18 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:06:25 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:06:25 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:07:16 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:31:59 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:31:59 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:07 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:07 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:11 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:11 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:15 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:15 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:19 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:19 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:26 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:26 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:29 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:29 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:38 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:38 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:42 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:42 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:46 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:46 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:48 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:48 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:32:52 UTC] PHP Warning:  Undefined array key "SESS_MEMBER_ID" in /home/oouthsal/public_html/salesAdd.php on line 271
-[19-Feb-2024 10:32:52 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
-[19-Feb-2024 10:36:21 UTC] PHP Deprecated:  mysqli_real_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/salesAdd.php on line 31
+[23-Oct-2024 18:47:23 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[24-Oct-2024 09:40:41 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[24-Oct-2024 09:40:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[24-Oct-2024 09:40:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[28-Oct-2024 08:31:53 UTC] PHP Deprecated:  Implicit conversion from float 126816.00000000001 to int loses precision in /home/oouthsal/public_html/multiAdjustment.php on line 12
+[30-Oct-2024 20:54:53 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[31-Oct-2024 12:48:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[01-Nov-2024 10:22:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[01-Nov-2024 10:58:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[01-Nov-2024 10:58:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[01-Nov-2024 10:58:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[01-Nov-2024 23:59:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[02-Nov-2024 02:54:23 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[03-Nov-2024 07:25:39 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[03-Nov-2024 20:56:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[04-Nov-2024 08:51:49 UTC] PHP Warning:  unlink(backup/backup_2024-11-04_08-51-15.sql.gz): No such file or directory in /home/oouthsal/public_html/backup.php on line 83
+[04-Nov-2024 11:39:44 UTC] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in /home/oouthsal/public_html/index.php on line 7
+[06-Nov-2024 09:59:26 UTC] PHP Deprecated:  Implicit conversion from float 515592.99999999994 to int loses precision in /home/oouthsal/public_html/salesAdd.php on line 13
+[08-Nov-2024 08:30:06 UTC] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in /home/oouthsal/public_html/index.php on line 7
+[08-Nov-2024 09:41:10 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
+[08-Nov-2024 09:41:10 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
+[08-Nov-2024 09:42:50 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 166
+[08-Nov-2024 09:42:50 UTC] PHP Warning:  Undefined array key "deductoncode" in /home/oouthsal/public_html/groupAdjustment.php on line 192
+[08-Nov-2024 09:45:35 UTC] PHP Warning:  Trying to access array offset on value of type null in /home/oouthsal/public_html/getGroup.php on line 151
+[08-Nov-2024 09:45:35 UTC] PHP Deprecated:  mysqli_escape_string(): Passing null to parameter #2 ($string) of type string is deprecated in /home/oouthsal/public_html/getGroup.php on line 11
+[08-Nov-2024 10:13:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'oouthsal_root'@'localhost' to database 'oouthco_salary' in /home/oouthsal/public_html/test.php:8
+Stack trace:
+#0 /home/oouthsal/public_html/test.php(8): mysqli_select_db(Object(mysqli), 'oouthco_salary')
+#1 {main}
+  thrown in /home/oouthsal/public_html/test.php on line 8
+[11-Nov-2024 15:42:50 UTC] PHP Deprecated:  Implicit conversion from float 125682.99999999999 to int loses precision in /home/oouthsal/public_html/salesAdd.php on line 13
+[12-Nov-2024 07:59:09 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Too many connections in /home/oouthsal/public_html/Connections/paymaster.php:9
+Stack trace:
+#0 /home/oouthsal/public_html/Connections/paymaster.php(9): mysqli_connect('localhost', 'oouthsal_root', 'Oluwaseyi@7980')
+#1 /home/oouthsal/public_html/index.php(1): require_once('/home/oouthsal/...')
+#2 {main}
+  thrown in /home/oouthsal/public_html/Connections/paymaster.php on line 9
+[14-Nov-2024 09:43:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:43:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:43:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:38 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:38 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:39 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:39 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:40 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:46 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:46 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:46 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:49 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:50 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:57:50 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:13 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:15 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:17 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:17 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:17 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:18 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:29 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:59 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:59 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:58:59 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:03 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:03 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:07 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:07 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:21 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:23 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:24 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:29 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:36 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:36 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:36 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:46 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:49 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:56 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:57 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:57 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 09:59:57 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:04:05 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:07:40 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:07:47 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:07:47 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:07:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:08:52 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:08:52 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:08:52 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:08:53 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:11 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:11 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:11 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:09:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:04 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:04 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:14:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:57 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:58 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:58 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:17:58 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:20:56 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:21:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:42:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:42:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:42:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:42:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:43:16 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:43:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:43:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:43:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 10:43:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 11:54:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 11:54:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 11:54:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 11:54:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:21 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:21 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:23 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:24 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:47 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:47 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:47 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:48 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:50 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:50 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:52 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:53 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:53 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:54 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:09:55 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:24:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:25:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:26:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:26:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:26:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:01 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:02 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:07 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:08 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:33:10 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:23 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:24 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:42:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:24 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:43:28 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:44:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:44:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:44:20 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:53:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:53:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 12:53:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:28:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:26 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:35 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:35 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:49:53 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[14-Nov-2024 14:50:04 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:41 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:42 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[15-Nov-2024 15:48:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[16-Nov-2024 10:50:58 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[16-Nov-2024 10:51:18 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[16-Nov-2024 10:51:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10
+[16-Nov-2024 10:51:19 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'e.mployee.staff_id' in 'field list' in /home/oouthsal/public_html/searchStaff.php:10
+Stack trace:
+#0 /home/oouthsal/public_html/searchStaff.php(10): mysqli->query('SELECT e.mploye...')
+#1 {main}
+  thrown in /home/oouthsal/public_html/searchStaff.php on line 10

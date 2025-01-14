@@ -191,7 +191,8 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 										<th> Staff No. </th>
 										<th> Name </th>
 										<th> Dept </th>
-										<th> Grade/Step </th>
+										<th> Grade </th>
+                                        <th> Step</th>
 										<th> Acct No. </th>
 										<th> Bank </th>
 										<th> Gross Pay </th>
@@ -244,8 +245,9 @@ WHERE tbl_master.period = ? and master_staff.period = ? GROUP BY tbl_master.staf
 											echo '<td class="stylecaps">' . $link['staff_id'] .  '</td>';
 											echo '<td>' . $link['NAME'] . '</td>';
 											echo '<td>' . $link['dept'] . '</td>';
-											echo '<td>' . $link['GRADE'] . '/' . $link['STEP'] . '</td>';
-											echo '<td>' . $link['ACCTNO'] . '</td>';
+											echo '<td>' . $link['GRADE'] . '</td>';
+											echo '<td>' .  $link['STEP'] . '</td>';
+                                            echo '<td>' . $link['ACCTNO'] . '</td>';
 											echo '<td>' . $link['BNAME'] . '</td>';
 
 											echo '<td align="right">' . number_format($link['allow']) . '</td>';

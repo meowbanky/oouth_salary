@@ -282,7 +282,7 @@ function retrievePayroll($val1, $val2, $val3, $val4)
 
 	try {
 		$query = $conn->prepare('SELECT tbl_master.period,
-															CASE ANY_VALUE(type) 
+															CASE ANY_VALUE(tbl_master.type) 
 															WHEN 1 THEN sum(tbl_master.allow)
 															WHEN 2 THEN sum(tbl_master.deduc)
 															END as amount
@@ -305,6 +305,31 @@ function retrievePayroll($val1, $val2, $val3, $val4)
 	}
 }
 
+function variance($val1, $val2)
+{
+    global $conn;
+
+    try {
+        $query = $conn->prepare('SELECT tbl_master.period,
+       SUM(tbl_master.allow) as amount
+FROM tbl_master
+INNER JOIN employee ON employee.staff_id = tbl_master.staff_id
+RIGHT JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id
+INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD
+INNER JOIN payperiods ON payperiods.periodId = tbl_master.period
+WHERE tbl_master.period = ? 
+AND employee.staff_id = ?
+GROUP BY employee.staff_id');
+        $res = $query->execute(array($val1, $val2));
+        if ($row = $query->fetch()) {
+            return $row['amount'];
+        } else {
+            return '0';
+        }
+    } catch (PDOException $e) {
+        echo $e->getMessage();
+    }
+}
 function retrievegross($val1, $val2)
 {
 	global $conn;

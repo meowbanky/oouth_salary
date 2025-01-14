@@ -1,4 +1,9 @@
 <?php
+
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 ini_set('max_execution_time', '0');
 //$connect = mysqli_connect("localhost", "root", "Oluwaseyi", "salary");
 require_once('../Connections/paymaster.php');
@@ -192,10 +197,10 @@ try { //echo $period ;
 						$row_consolidated = mysqli_fetch_assoc($result_consolidated);
 						$total_rowsConsolidated = mysqli_num_rows($result_consolidated);
 						$output = (($row_numberOfRows['percentage'] * $row_consolidated['value']) / 100);
-						if (isset($ouput)) {
-							$ouput = number_format($ouput, 0, '.', '');
+						if (isset($output)) {
+							$output = number_format($output, 0, '.', '');
 						} else {
-							$ouput = 0;
+							$output = 0;
 							// echo $row_numberOfRows['percentage'] . ' - ' . $row_consolidated['value'] . ' - ' . $row_deduct['allow_id'] . ' - ' . $row['GRADE'] . ' - ' . $row['STEP'] . '<br>';
 						}
 					}
@@ -339,7 +344,7 @@ try { //echo $period ;
 					    parent.document.getElementById("progress").innerHTML="<div style=\"width:' . $percent . ';background:linear-gradient(to bottom, rgba(125,126,125,1) 0%,rgba(14,14,14,1) 100%); text-align:center;color:white;height:35px;display:block;\">' . $percent . '</div>";
 					    parent.document.getElementById("information").innerHTML="<div style=\"text-align:center; font-weight:bold\">Processing ' . $row['staff_id'] . ' ' . $percent . ' is processed.</div>";</script>';
 
-		ob_flush();
+	//	ob_flush();
 		flush();
 	}
 } catch (PDOException $e) {

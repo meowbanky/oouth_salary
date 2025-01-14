@@ -4,6 +4,12 @@ session_start();
 
 include_once('classes/model.php');
 require_once('Connections/paymaster.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+
 if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
     header("location: index.php");
     exit();
