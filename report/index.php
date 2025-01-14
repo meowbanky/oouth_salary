@@ -10,7 +10,6 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
 ?>
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
 <html>
 <?php include('../header1.php'); ?>
 
@@ -141,6 +140,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 							</div>
 							<div class="list-group tax_export hidden">
 								<a class="list-group-item" href="taxexport.php"><i class="fa fa-bar-chart-o"></i> Export for Tax Computation</a>
+								<a class="list-group-item" href="tax_returns.php"><i class="fa fa-bar-chart-o"></i> Annual Tax Return</a>
 
 							</div>
 							<div class="list-group employee hidden">

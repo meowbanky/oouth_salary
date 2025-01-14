@@ -1,6 +1,14 @@
 <?php ini_set('max_execution_time', '300');
 require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
+include_once('classes/model.php');
+
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+
+?>
 <?php
 
 //Start session
@@ -51,8 +59,7 @@ $today = date('Y-m-d');
                 });
             </script>
             <div id="content-header" class="hidden-print">
-                <h1> <i class="icon fa fa-user"></i>
-                    Employee</h1>
+                <h1> <i class="icon fa fa-user"></i> </h1>
 
 
             </div>

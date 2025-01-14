@@ -1,6 +1,12 @@
 <?php ini_set('max_execution_time', '300');
 require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+?>
 <?php
 
 //Start session
@@ -111,260 +117,27 @@ $today = date('Y-m-d');
                             unset($_SESSION['alertcolor']);
                         }
                         ?>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-group pull-right">
-                                    <button type="button" data-target="#responsive" class="btn red" data-toggle="modal"> Add User <i class="fa fa-plus"></i></button>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
-            <div class="row ">
-                <form action="#" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-                    <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-                    <input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Staff Name or Staff No" />
-                    <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-                </form>
-            </div>
-
             <div class="row">
-                <div class="col-md-12">
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon">
-                                <i class="fa fa-th"></i>
-                            </span>
-                            <h5>List of Users</h5>
-                            <span title="" class="label label-info tip-left" data-original-title="total users">Total Users<?php echo '100' ?></span>
-
+                <div id="loadContent">
+                    <div class="flex animate-pulse">
+                        <div class="flex-shrink-0">
+                            <span class="w-12 h-12 block bg-gray-200 rounded-full dark:bg-gray-700"></span>
                         </div>
-                        <!--endbegiing of employee details-->
-                        <div id="datatable_wrapper">
 
-                            <div class="row top-spacer-20">
-
-                                <div class="col-md-12">
-
-                                    <div class="container">
-                                        <nav aria-label="page navigation example" class="hidden-print">
-                                            <ul class="pagination">
-
-                                                <?php
-                                                $results_per_page = 100;
-                                                if (isset($_GET['page'])) {
-                                                    $page = $_GET['page'];
-                                                } else {
-                                                    $page = 1;
-                                                }
-                                                $results_per_page = 100;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM username';
-                                                } else {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM username where staff_id = "' . $_GET['item'] . '"';
-                                                }
-
-                                                $result = $conn->query($sql);
-                                                $row = $result->fetch();
-                                                $total_pages = ceil($row['Total'] / $results_per_page);
-                                                for ($i = 1; $i <= $total_pages; $i++) {
-                                                    //echo "<a href='payslip_all.php?page=".$i."'";
-                                                    //	if($i ==$page){echo " class='curPage'";}
-                                                    //	echo "> ".$i." </a>";
-                                                    echo '<li class="page-item ';
-                                                    if ($i == $page) {
-                                                        echo ' active"';
-                                                    };
-                                                    echo '"><a class="page-link" href="users.php?page=' . $i . '">' . $i . '</a></li>';
-                                                }
-                                                ?>
-                                            </ul>
-                                        </nav>
-                                    </div>
-
-                                    <table class="table table-striped table-bordered table-hover table-checkable order-column tblbtn" id="sample_1">
-                                        <thead>
-                                            <tr>
-                                                <th> </th>
-                                                <th> User Name </th>
-                                                <th> Name </th>
-                                                <th> User Type </th>
-                                                <th> Status </th>
-                                                <th> Actions </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-                                            <!--Begin Data Table-->
-                                            <?php
-                                            //retrieveData('employment_types', 'id', '2', '1');
-                                            $results_per_page = 100;
-                                            if (isset($_GET['page'])) {
-                                                $page = $_GET['page'];
-                                            } else {
-                                                $page = 1;
-                                            }
-
-                                            try {
-                                                $start_from = ($page - 1) * $results_per_page;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT username.staff_id, username.username, username.`password`, username.position, username.role, username.deleted, employee.`NAME` FROM username INNER JOIN employee ON employee.staff_id = username.staff_id ORDER BY username.staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                } else {
-                                                    $sql = 'SELECT username.staff_id, username.username, username.`password`, username.position, username.role, username.deleted, employee.`NAME` FROM username INNER JOIN employee ON employee.staff_id = username.staff_id WHERE username.staff_id = ' . $_GET['item'] . ' ORDER BY username.staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                }
-                                                $query = $conn->prepare($sql);
-                                                $fin = $query->execute();
-                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                //sdsd
-
-                                                foreach ($res as $row => $link) {
-                                            ?><tr class="odd gradeX">
-                                                        <?php
-                                                        $thisemployeealterid = $link['staff_id'];
-                                                        $thisuser = $link['staff_id'];
-                                                        $thisemployeeNum = $link['staff_id'];
-                                                        echo     '<td><input type="checkbox"></td>';
-                                                        echo '<td>' . $link['staff_id'] .  '</td><td class="stylecaps">' . $link['NAME'] . '</td>';
-                                                        echo '<td>';
-                                                        echo $link['role'];
-                                                        echo '</td>';
-                                                        echo '<td>';
-                                                        if ($link['deleted'] == 1) {
-                                                            echo "In-Active";
-                                                        } else {
-                                                            echo "Active";
-                                                        }
-                                                        echo '</td>';
-                                                        echo '<td><button type="button" data-target="#edituser' . $thisuser . '" data-toggle="modal" class="btn btn-xs red"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
-                                                        echo '</tr>';
-                                                        ?>
-
-                                                        <div id="edituser<?php echo $thisuser; ?>" class="modal fade" tabindex="-1" data-width="560">
-                                                            <div class="modal-dialog" role="document">
-                                                                <form class="form-horizontal" method="post" action="classes/controller.php?act=deactivateuser">
-                                                                    <div class="modal-content">
-                                                                        <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
-                                                                            <h4 class="modal-title">Deactivate User</h4>
-                                                                        </div>
-                                                                        <div class="modal-body">
-
-                                                                            <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-body">
-                                                                                        <input type="hidden" name="thisuser" value="<?php echo $thisuser; ?>">
-
-                                                                                        <label class="col-md-12 control-label">Please confirm account deactivation for:</label>
-
-
-                                                                                        <div class="form-group">
-                                                                                            <label class="col-md-4 control-label">Name</label>
-                                                                                            <div class="col-md-7">
-                                                                                                <input type="text" class="form-control" value="<?php echo $link['NAME'] ?>" readonly placeholder="Name">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="form-group">
-                                                                                            <label class="col-md-4 control-label">Username</label>
-                                                                                            <div class="col-md-7">
-                                                                                                <input type="text" required readonly value="<?php echo $link['staff_id']; ?>" class="form-control" name="username" placeholder="username">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                                            <button type="submit" class="btn red">Deactivate User</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                    <?php
-                                                }
-                                            } catch (PDOException $e) {
-                                                echo $e->getMessage();
-                                            }
-                                                    ?>
-                                                    <!--End Data Table-->
-
-
-
-
-
-                                        </tbody>
-                                    </table>
-
-
-
-
-
-
-
-                                </div>
-
-                            </div>
+                        <div class="ms-4 mt-2 w-full">
+                            <h3 class="h-4 bg-gray-200 rounded-md dark:bg-gray-700" style="width: 40%;"></h3>
+                            <ul class="mt-5 space-y-3">
+                                <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
+                                <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
+                                <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
+                                <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
+                            </ul>
                         </div>
                     </div>
-                    <!-- Button trigger modal -->
-                    <div id="responsive" class="modal fade" tabindex="-1" data-width="560">
-                        <div class="modal-dialog" role="document">
-                            <form class="form-horizontal" method="post" action="classes/controller.php?act=adduser">
-                                <div class="modal-content">
-                                    <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                        <h4 class=" modal-title" style="text-transform: uppercase;">Create New Company User</h4>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-
-                                    </div>
-                                    <div class="modal-body">
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-body">
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Name</label>
-                                                        <div class="col-md-7">
-                                                            <input type="text" value="" required class="form-control" name="name" id="name" placeholder="Name">
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" name="staff_id" id="staff_id" value="">
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Email Address</label>
-                                                        <div class="col-md-7">
-                                                            <input type="email" required class="form-control" name="uemail" id="email" placeholder="Email Address">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Password</label>
-                                                        <div class="col-md-7">
-                                                            <input type="password" required class="form-control" name="upass" placeholder="Password">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Repeat Password</label>
-                                                        <div class="col-md-7">
-                                                            <input type="password" required class="form-control" name="upass1" placeholder="Repeat Password">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                        <button type="submit" class="btn red">Create User</button>
-                                    </div>
-                            </form>
-                        </div>
-                    </div>
-
-
-
-
-
                 </div>
             </div>
 
@@ -372,17 +145,9 @@ $today = date('Y-m-d');
 
 
             <script type="text/javascript">
-                COMMON_SUCCESS = "Success";
-                COMMON_ERROR = "Error";
-                $.ajaxSetup({
-                    cache: false,
-                    headers: {
-                        "cache-control": "no-cache"
-                    }
-                });
 
                 $(document).ready(function() {
-
+                    $('#loadContent').load('view/view_users.php');
                     $("#item").autocomplete({
                         source: 'searchStaff.php',
                         type: 'POST',
@@ -393,7 +158,6 @@ $today = date('Y-m-d');
                             event.preventDefault();
                             $("#item").val(ui.item.value);
                             $item = $("#item").val();
-                            //$('#add_item_form').ajaxSubmit({beforeSubmit: salesBeforeSubmit, success: itemScannedSuccess});
                             $('#add_item_form').ajaxSubmit({
                                 beforeSubmit: salesBeforeSubmit,
                                 type: "POST",
@@ -421,135 +185,6 @@ $today = date('Y-m-d');
                         }
                     });
 
-                    $('#item').focus();
-                    var last_focused_id = null;
-                    var submitting = false;
-
-                    function salesBeforeSubmit(formData, jqForm, options) {
-                        if (submitting) {
-                            return false;
-                        }
-                        submitting = true;
-                        $("#ajax-loader").show();
-
-                    }
-
-                    function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-                        if (($('#code').val()) == 1) {
-                            gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-                        } else {
-                            gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-                            //	window.location.reload(true);
-                            $("#ajax-loader").hide();
-
-                        }
-                        setTimeout(function() {
-                            $('#item').focus();
-                        }, 10);
-
-                        setTimeout(function() {
-
-                            $.gritter.removeAll();
-                            return false;
-
-                        }, 1000);
-
-                    }
-
-
-
-                    $('#item').click(function() {
-                        $(this).attr('placeholder', '');
-                    });
-                    //Ajax submit current location
-                    $("#employee_current_location_id").change(function() {
-                        $("#form_set_employee_current_location_id").ajaxSubmit(function() {
-                            window.location.reload(true);
-                        });
-                    });
-
-
-                    $('#employee_form').validate({
-
-                        // Specify the validation rules
-                        rules: {
-
-                            namee: "required",
-                            dept: "required",
-                            acct_no: {
-                                required: {
-                                    depends: function(element) {
-                                        if (($("#bank option:selected").text() != 'CHEQUE/CASH') || $("#bank option:selected").text() != 'CHEQUE/CASH') {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                //"required": false,
-                                minlength: 10,
-                                maxlength: 10,
-                                number: true
-                            },
-
-                            rsa_pin: {
-                                required: {
-                                    depends: function(element) {
-                                        if ($("#pfa option:selected").text() != 'OTHERS') {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                number: true
-                            }
-
-
-                        },
-
-                        // Specify the validation error messages
-                        messages: {
-                            namee: "The name is a required field.",
-
-
-                        },
-
-                        errorClass: "text-danger",
-                        errorElement: "span",
-                        highlight: function(element, errorClass, validClass) {
-                            $(element).parents('.form-group').removeClass('has-success').addClass('has-error');
-                        },
-                        unhighlight: function(element, errorClass, validClass) {
-                            $(element).parents('.form-group').removeClass('has-error').addClass('has-success');
-                        },
-
-                        submitHandler: function(form) {
-
-                            //form.submit();
-                            doEmployeeSubmit(form);
-                        }
-                    });
-
-                    document.getElementById('item').focus();
-
-                    //						$('#sample_1').Tabledit({
-                    //			      url:'action.php',
-                    //			      columns:{
-                    //			       identifier:[0, "StaffNo"],
-                    //			       editable:[[5, 'PFAPIN']
-                    //			      },
-                    //			      restoreButton:false,
-                    //			      onSuccess:function(data, textStatus, jqXHR)
-                    //			      {
-                    //			       if(data.action == 'delete')
-                    //			       {
-                    //			        $('#'+data.id).remove();
-                    //			       }
-                    //			      }
-                    //			     });
 
 
                 });

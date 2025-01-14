@@ -289,10 +289,10 @@ WHERE master_staff.period = ? GROUP BY master_staff.staff_id ORDER BY master_sta
 												echo '<td class="stylecaps">' . $link['staff_id'] .  '</td>';
 												echo '<td class="stylecaps"">' . $link['NAME'] . '</td>';
 
-												$j = retrievegross($periodFrom, $link['staff_id']);
+												$j = variance($periodFrom, $link['staff_id']);
 												$sumCurrent = $j + $sumCurrent;
 												echo '<td align="right">' . number_format($j) . '</td>';
-												$k = retrievegross($periodTo, $link['staff_id']);
+												$k = variance($periodTo, $link['staff_id']);
 												$sumPrevious = $k + $sumPrevious;
 												echo '<td align="right">' . number_format($k) . '</td>';
 												echo '<td align="right">' .  number_format($j - $k) . '</td>';

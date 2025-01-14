@@ -8,7 +8,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 	exit();
 }
 
-
+$bankId = $_POST['bank'] ?? -1;
 
 ?>
 <!DOCTYPE html>
@@ -168,9 +168,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 										<div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
 											<div class="input-group">
 												<span class="input-group-addon"><i class="fa fa-location-arrow hidden-print"></i></span>
-												<select name="bank" id="bank" class="form-control hidden-print" required="required">
+                                                <select name="bank" id="bank" class="form-control hidden-print" required="required">
 													<option value="-1">Select Bank</option>
-													<option value="All">All Banks</option>
+													<option <?php if ($bankId == 'All' ) { echo 'selected' ;} ?> value="All">All Banks</option>
 													<?php
 													global $conn;
 
@@ -181,7 +181,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
 														while ($row = array_shift($out)) {
 															echo '<option value="' . $row['BCODE'] . '"';
-															if ($row['BCODE'] == $bank) {
+															if ($row['BCODE'] == $bankId) {
 																echo 'selected = "selected"';
 															};
 															echo ' >' . $row['BNAME'] . '</option>';
@@ -202,17 +202,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 								</form>
 							</div>
 						</div>
-						<div class="top-panel pull-right hidden-print">
+						<div class="top-panel hidden-print">
 							<div class="btn-group">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php echo $bankName . ' ' . $month; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php echo $bankName . ' ' . $month; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php echo $bankName . ' ' . $month; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
+                                <a href="#" class="btn btn-primary download-excel">Download Excel</a>
 							</div>
 						</div>
 						<div class="widget-content nopadding">
@@ -316,6 +308,12 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 		$(document).ready(function() {
 			//'sales_report.php');
 
+            $('.download-excel').on('click', function(e) {
+                e.preventDefault();
+                const period = $('#period').val();
+                const bankCode = $('#bank').val();
+                window.location.href = `download_excel.php?period=${period}&bank=${bankCode}`;
+            });
 
 			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
 				$("#complex_radio").prop('checked', true);

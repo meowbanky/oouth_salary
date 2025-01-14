@@ -1,6 +1,12 @@
 <?php ini_set('max_execution_time', '300');
 require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+?>
 <?php
 
 //Start session

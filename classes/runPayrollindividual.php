@@ -1,4 +1,8 @@
 <?php
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 ini_set('max_execution_time', '0');
 //$connect = mysqli_connect("localhost", "root", "Oluwaseyi", "salary");
 require_once('../Connections/paymaster.php');
@@ -10,8 +14,7 @@ session_start();
 $j = 0;
 $percent;
 
-// echo '<div id="progress" style="width:500px;border:1px solid #ccc;"></div> ';
-// echo '<div id="information" style="width" ><p align="center"></p> </div> ';
+
 
 
 $period = $_SESSION['currentactiveperiod'];
@@ -185,7 +188,7 @@ if (!$existtrans) {
 							$row_consolidated = mysqli_fetch_assoc($result_consolidated);
 							$total_rowsConsolidated = mysqli_num_rows($result_consolidated);
 							$output = (($row_numberOfRows['percentage'] * $row_consolidated['value']) / 100);
-							$ouput = number_format($ouput, 0, '.', '');
+							$output = number_format($output, 0, '.', '');
 						}
 						// if deduction is found in the table
 					} else if ($total_rows > 1) {

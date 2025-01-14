@@ -3,6 +3,14 @@ ob_start();
 
 session_start();
 
+ini_set('max_execution_time', 300); // 300 seconds = 5 minutes
+ini_set('memory_limit', '256M');    // Increase memory limit
+set_time_limit(300);                // Another way to set timeout
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
 require_once('../../config.php');

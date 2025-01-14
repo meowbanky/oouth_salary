@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OOUTH Mobile App Download</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<h1>OOUTH Mobile App</h1>
+<p>Your download will begin automatically...</p>
+<a href="https://oouthsalary.com.ng/download/oouth_mobile.apk" class="button" id="downloadButton">
+    Click here if download doesn't start
+</a>
+<script>
+    window.onload = function() {
+        setTimeout(function() {
+            window.location.href = 'https://oouthsalary.com.ng/download/oouth_mobile.apk';
+        }, 2000);
+    };
+</script>
+<script>
+    window.onload = function() {
+        // Function to detect iOS devices (iPhone, iPad, iPod)
+        function isIOS() {
+            return [
+                    'iPad Simulator',
+                    'iPhone Simulator',
+                    'iPod Simulator',
+                    'iPad',
+                    'iPhone',
+                    'iPod'
+                ].includes(navigator.platform)
+                // iOS 13+ detection
+                || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+        }
+
+        setTimeout(function() {
+            if (isIOS()) {
+                // If it's an iOS device, redirect to web app
+                window.location.href = 'https://oouth-e2a0e.web.app/';
+            } else {
+                // If it's not iOS, download the APK
+                window.location.href = 'https://oouthsalary.com.ng/download/oouth_mobile.apk';
+            }
+        }, 2000);
+    };
+</script>
+</body>
+</html>

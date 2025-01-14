@@ -1,8 +1,12 @@
-<?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); 
-session_start();
-	
-	
+<?php session_start();
+require_once('Connections/paymaster.php');
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+
 	if(!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
 		header("location: index.php");
 		exit();
@@ -143,5 +147,7 @@ setTimeout(function(){$('#item').focus();}, 10);
 </div><!--end #wrapper-->
 
 
-<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul><ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-2" tabindex="0" style="display: none;"></ul></body></html>
+<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul><ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-2" tabindex="0" style="display: none;"></ul>
+</body>
+</html>
 	

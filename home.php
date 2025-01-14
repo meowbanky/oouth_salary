@@ -111,7 +111,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 						</li>
 					<?php  } ?>
 					<li>
-						<a class="padding-top" href="report/index.php"> <i class="text-info fa fa-bar-chart-o left fa-3x "></i><br> Reports</a>
+						<a class="padding-top" href="report/index.php"> <i class="text-info fas fa-file-lines left fa-3x "></i><br> Reports</a>
 					</li>
 
 					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
@@ -142,7 +142,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 						</li> <?php  } ?>
 
 					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="call_backup.php" id="backupButton"> <i class=" text-info fa fa-hdd-o left fa-3x "></i><br> Backup</a>
+							<a class="padding-top" href="call_backup.php" id="backupButton"> <i class=" text-info fas fa-database left fa-3x "></i><br> Backup</a>
 						</li> <?php  } ?>
 
 					<?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'pfa') { ?> <li>

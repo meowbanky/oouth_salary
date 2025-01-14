@@ -197,7 +197,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 									</div>
 
 								</form>
-
+                                <div id="export-loading" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Generating Excel file...
+                                </div>
 							</div>
 						</div>
 						<?php if ($deductionName != '') { ?><div class="top-panel pull-right hidden-print">
@@ -329,54 +331,71 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 				$('#deduction_form').submit();
 			})
 
-			function isBase64(str) {
-				// Base64 regular expression pattern
-				const base64Pattern = /^[A-Za-z0-9+/]+[=]{0,2}$/;
+            function isBase64(str) {
+                try {
+                    if (typeof str !== 'string') return false;
+                    str = str.trim();
+                    return btoa(atob(str)) === str;
+                } catch (e) {
+                    return false;
+                }
+            }
 
-				// Test the string against the pattern
-				return base64Pattern.test(str);
-			}
+            $('#send_mail').click(function(e) {
+                e.preventDefault();
 
-			$('#send_mail').click(function(e) {
-				e.preventDefault();
-				var code = $('#deduction').find(':selected').data('code')
-				var period = $('#period').val()
-				var period_text = $('#period option:selected').text()
-				var deduction = $('#deduction').val()
-				var deduction_text = $('#deduction option:selected').text()
-				$.ajax({
-					type: "post",
-					url: "deductionlist_export.php",
-					data: {
-						period: period,
-						deduction: deduction,
-						deduction_text: deduction_text,
-						period_text: period_text,
-						code: code
-					},
-					success: function(response) {
-						if (isBase64(response)) {
-							console.log('The string is a valid base64-encoded string.');
-						} else {
-							console.log('The string is not a valid base64-encoded string.');
-						}
-						var downloadLink = document.createElement('a');
-						var container = document.getElementById('download');
-						downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
-						downloadLink.download = 'excel_file.xlsx';
-						downloadLink.innerText = 'Download Here';
-						// document.body.appendChild(downloadLink);
-						container.appendChild(downloadLink);
-						downloadLink.click();
-						// document.body.removeChild(downloadLink);
-					},
-					error: function() {
-						// Handle errors here
-						console.log('Error downloading Excel file');
-					}
-				});
-			});
+                // Show loading indicator
+                $('#export-loading').show();
+                $('#send_mail').prop('disabled', true);
 
+                $.ajax({
+                    type: "POST",
+                    url: "deductionlist_export.php",
+                    data: {
+                        period: $('#period').val(),
+                        deduction: $('#deduction').val(),
+                        deduction_text: $('#deduction option:selected').text(),
+                        period_text: $('#period option:selected').text(),
+                        code: $('#deduction').find(':selected').data('code')
+                    },
+                    timeout: 300000, // 5 minutes timeout
+                    success: function(response) {
+                        $('#export-loading').hide();
+                        $('#send_mail').prop('disabled', false);
+
+                        try {
+                            if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+                                console.error('Received HTML error page instead of data');
+                                alert('Server error occurred. Please try again or contact administrator.');
+                                return;
+                            }
+
+                            var downloadLink = document.createElement('a');
+                            downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                            downloadLink.download = 'deduction_report.xlsx';
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                        } catch (e) {
+                            console.error('Error processing response:', e);
+                            alert('Error generating Excel file. Please try again.');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#export-loading').hide();
+                        $('#send_mail').prop('disabled', false);
+
+                        console.error('AJAX Error:', status, error);
+                        console.error('Response:', xhr.responseText);
+
+                        if (status === 'timeout') {
+                            alert('Request timed out. The report may be too large. Please try with fewer records or contact administrator.');
+                        } else {
+                            alert('Error downloading Excel file. Please try again.');
+                        }
+                    }
+                });
+            });
 
 			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
 				$("#complex_radio").prop('checked', true);

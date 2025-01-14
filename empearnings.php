@@ -1,5 +1,12 @@
 <?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
+include_once('classes/model.php');
+
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+?>
 <?php
 //Start session
 session_start();
@@ -1704,11 +1711,12 @@ $queryString_employee = sprintf("&totalRows_employee=%d%s", $totalRows_employee,
                      staff_id: staff_id
                   },
                   success: function(response, message) {
+                      
                      if (message == 'success') {
                         $('#runPayslip').attr('disabled', false);
                         $('#runPayslip').html("Run this Employee's Payroll");
                         alert("Employee Payslip Successfully Processed");
-                        window.location.reload(true);
+                       window.location.reload(true);
 
                      }
                   }
