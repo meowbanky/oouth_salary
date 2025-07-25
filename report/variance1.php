@@ -272,13 +272,10 @@ if (!function_exists("GetSQLValueString")) {
 
 										try {
 
-//											$query = $conn->prepare('SELECT master_staff.staff_id, ANY_VALUE(master_staff.`NAME`) AS `NAME`, ANY_VALUE(tbl_dept.dept) AS dept,ANY_VALUE(concat(payperiods.description," ",payperiods.periodYear)) as period FROM master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN payperiods ON payperiods.periodId = master_staff.period
-//                                            WHERE master_staff.period = ? GROUP BY master_staff.staff_id ORDER BY master_staff.staff_id');
-
-                                            $query = $conn->prepare('SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ?
-                                                                        UNION SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ?
-                                                                        ORDER BY staff_id;');
-                                            $fin = $query->execute(array($periodTo,$periodFrom));
+											$query = $conn->prepare("SELECT employee.staff_id, ANY_VALUE(employee.`NAME`) AS `NAME`, ANY_VALUE(tbl_dept.dept) AS dept FROM employee 
+INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD 
+WHERE employee.STATUSCD = 'A' GROUP BY employee.staff_id ORDER BY employee.staff_id");
+											$fin = $query->execute();
 											$res = $query->fetchAll(PDO::FETCH_ASSOC);
 											$numberofstaff = count($res);
 											$counter = 1;
