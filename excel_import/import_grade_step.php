@@ -1,55 +1,98 @@
 <?php
-ini_set('max_execution_time', '0');
-require_once('../Connections/paymaster.php');
-require_once('../classes/fn_runUpdateGrade.php');
-$recordtime = date('Y-m-d H:i:s');
-session_start();
-require 'vendor/autoload.php'; // Load Composer autoloader
+ini_set('max_execution_time', 0);
+require_once '../Connections/paymaster.php';
+require_once '../classes/fn_runUpdateGrade.php';
+require_once 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-$excelFile = $_FILES["file"]["tmp_name"];
-if (isset($_POST['hasHeaders'])) {
+header('Content-Type: application/json');
 
-    $i = $_POST['hasHeaders'] == 0 ? 0 : 1;
+session_start();
+
+// Validate session
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized access. Please log in.']);
+    exit;
 }
 
-$spreadsheet = IOFactory::load($excelFile);
-$worksheet = $spreadsheet->getActiveSheet();
-$data = $worksheet->toArray();
+// Validate file upload
+if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['status' => 'error', 'message' => 'File upload failed. Please try again.']);
+    exit;
+}
 
-// Assuming the Excel data starts from the second row (index 1)
-for ($i; $i < count($data); $i++) {
-    $id = $data[$i][0]; // Assuming ID is in the first column
-    $value = $data[$i][2]; // Assuming Value is in the second column
-    $splited = explode('/', $value);
-    mysqli_select_db($salary, $database_salary);
-    $sqlStaff_id = "select staff_id from employee where staff_id ='" . $id . "'";
-    $Staff_id = mysqli_query($salary, $sqlStaff_id) or die(mysqli_error($salary));
-    $row_Staff_id = mysqli_fetch_assoc($Staff_id);
-    $total_Staff_id = mysqli_num_rows($Staff_id);
-    echo $splited[0] . ' - ' . $splited[1] . '<br>';
-    if ($total_Staff_id > 0) {
-        $Staff_id = $row_Staff_id['staff_id'];
-        $sql = "UPDATE employee SET GRADE = '{$splited[0]}',STEP = '{$splited[1]}',editTime = '{$recordtime}', userID = '{$_SESSION['SESS_MEMBER_ID']}' where staff_id = '" .  $Staff_id . "'";
-        //we are using mysql_query function. it returns a resource on true else False on error
+// Validate file type
+$allowedExtensions = ['csv', 'xlsx', 'xls'];
+$extension = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+if (!in_array($extension, $allowedExtensions)) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid file format. Please upload a CSV, XLS, or XLSX file.']);
+    exit;
+}
 
-        mysqli_select_db($salary, $database_salary);
-        $result = mysqli_query($salary, $sql) or die(mysqli_error($salary));
-        //update allow_deduction
-        runGrade_Step($splited[1], $splited[0], $Staff_id);
-        if (!$result) {
-            echo "<script type=\"text/javascript\">
-    							alert(\"Invalid File:Please Upload CSV File.\");
-    							window.location = \"index.php\"
-    						</script>";
-        }
+$recordtime = date('Y-m-d H:i:s');
+
+try {
+    // Load spreadsheet
+    $excelFile = $_FILES['file']['tmp_name'];
+    $spreadsheet = IOFactory::load($excelFile);
+    $worksheet = $spreadsheet->getActiveSheet();
+    $data = $worksheet->toArray();
+
+    // Determine starting row based on headers
+    $startRow = (isset($_POST['hasHeaders']) && $_POST['hasHeaders'] == 1) ? 1 : 0;
+
+    if (count($data) <= $startRow) {
+        throw new Exception('File is empty or contains only headers.');
     }
-}
-echo "<script type=\"text/javascript\">
-    						alert(\"CSV File has been successfully Imported.\");
-    						window.location = \"index.php\"
-    					</script>";
 
-//close of connection
-mysqli_close($salary);
+    $conn->beginTransaction();
+    $successCount = 0;
+
+    for ($i = $startRow; $i < count($data); $i++) {
+        $staff_id = trim($data[$i][0] ?? null);
+        $gradeStep = trim($data[$i][2] ?? null);
+
+        // Validate data
+        if (empty($staff_id) || empty($gradeStep)) {
+            continue; // Skip if staff_id or empty is gradeStep
+        }
+
+        // Validate format of grade/step (e.g., 5/3)
+        $splited = explode('/', $gradeStep);
+        if (count($splited) !== 2 || !is_numeric($splited[0]) || !is_numeric($splited[1]) || $splited[0] < 1 || $splited[1] < 1) {
+            continue; // Skip invalid format grade/step
+        }
+        $grade = $splited[0];
+        $step = $splited[1];
+
+        // Check if staff_id exists
+        $stmt = $conn->prepare("SELECT staff_id FROM employee WHERE staff_id = ?");
+        $stmt->execute([$staff_id]);
+        if (!$stmt->fetch()) {
+            continue; // Skip invalid staff_id
+        }
+
+        // Update employee grade and step
+        $stmt = $conn->prepare("UPDATE employee SET GRADE = ?, STEP = ?, editTime = ?, userID = ? WHERE staff_id = ?");
+        $stmt->execute([$grade, $step, $recordtime, $_SESSION['SESS_MEMBER_ID'], $staff_id]);
+
+        // Update related deductions
+        runGrade_Step($step, $grade, $staff_id);
+
+        $successCount++;
+    }
+
+    $conn->commit();
+
+    if ($successCount === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'No valid records were processed. Check staff IDs and grade/step format (e.g., 5/3).']);
+    } else {
+        echo json_encode(['status' => 'success', 'message' => "$successCount record(s) successfully imported."]);
+    }
+} catch (Exception $e) {
+    $conn->rollBack();
+    error_log("Import error: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Failed to process file: ' . $e->getMessage()]);
+}
+?>

@@ -1,307 +1,216 @@
-<?php require_once('Connections/paymaster.php');
-include_once('classes/model.php');
-include_once('backup.php');
+<?php
 session_start();
-if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
+require_once 'Connections/paymaster.php';
+require_once 'libs/App.php';
+require_once 'libs/middleware.php';
 
-		global $salary;
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($salary, $theValue) : mysqli_escape_string($salary, $theValue);
+$app = new App();
+$app->checkAuthentication();
+checkPermission();
 
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
-}
-
-$query = $conn->prepare('SELECT periodId, description, periodYear FROM payperiods WHERE active = ? ORDER BY periodId ASC LIMIT 1');
-$res = $query->execute(array(1));
-$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-while ($row = array_shift($out)) {
-	$_SESSION['currentactiveperiod'] = $row['periodId'];
-	$_SESSION['activeperiodDescription'] = $row['description'] . " " . $row['periodYear'];
-}
-
-//Start session
-
-
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: index.php");
-	exit();
+// Fetch active payroll period
+try {
+    $query = $conn->prepare('SELECT periodId, description, periodYear FROM payperiods WHERE active = ? ORDER BY periodId ASC LIMIT 1');
+    $query->execute([1]);
+    $row = $query->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $_SESSION['currentactiveperiod'] = $row['periodId'];
+        $_SESSION['activeperiodDescription'] = $row['description'] . ' ' . $row['periodYear'];
+    } else {
+        $_SESSION['currentactiveperiod'] = null;
+        $_SESSION['activeperiodDescription'] = 'No Active Period';
+    }
+} catch (PDOException $e) {
+    error_log("Error fetching payroll period: " . $e->getMessage());
+    $_SESSION['currentactiveperiod'] = null;
+    $_SESSION['activeperiodDescription'] = 'Error';
 }
 ?>
 
 <!DOCTYPE html>
-<!-- saved from url=(0050)http://www.optimumlinkup.com.ng/pos/index.php/home -->
-<html>
-<?php include('header1.php'); ?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; }
+        .overlay-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border-radius: 8px; text-align: center; }
+        .quick-action { transition: transform 0.2s; }
+        .quick-action:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Backup Overlay -->
+    <div id="backupOverlay" class="overlay">
+        <div class="overlay-content">
+            <i class="fa fa-spinner fa-spin fa-3x fa-fw text-blue-600"></i>
+            <p class="mt-4 text-lg">Backing up the database, please wait...</p>
+        </div>
+    </div>
 
-<body data-color="grey" class="flat" style="zoom: 1;">
-	<!-- Overlay -->
-	<div id="backupOverlay" class="overlay" style="display:none;">
-		<div class="overlay-content">
-			<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i> <!-- Include your spinner image -->
-			<p>Backing up the database, please wait...</p>
-		</div>
-	</div>
+    <!-- Header -->
+    <?php include 'header.php'; ?>
 
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <?php include 'sidebar.php'; ?>
 
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <!-- Breadcrumb -->
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                </nav>
 
+                <!-- Alerts -->
+                <?php if (isset($_SESSION['msg'])): ?>
+                    <div class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                        <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                        <button onclick="this.parentElement.remove()" class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
 
+                <!-- Dashboard Header -->
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-dashboard mr-2"></i> Dashboard
+                </h1>
+                <h3 class="text-xl font-semibold text-blue-600 mb-8 text-center">Welcome to Salary Management System</h3>
 
-		<?php include('header.php'); ?>
-		<?php include('sidebar.php'); ?>
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <?php
+                    $actions = [
+                        ['href' => 'multiAdjustment.php', 'icon' => 'fa-shopping-cart', 'label' => 'Periodic Data'],
+                        ['href' => 'report/index.php', 'icon' => 'fa-file-lines', 'label' => 'Reports'],
+                        ['href' => 'tax.php', 'icon' => 'fa-upload', 'label' => 'Update Tax'],
+                        ['href' => 'upload_grade_step.php', 'icon' => 'fa-upload', 'label' => 'Bulk Grade/Step'],
+                        ['href' => 'edit_email.php', 'icon' => 'fa-envelope', 'label' => 'Update Email'],
+                        ['href' => 'payperiods.php', 'icon' => 'fa-calendar', 'label' => 'Pay Periods'],
+                        ['href' => 'empearnings.php', 'icon' => 'fa-credit-card', 'label' => 'Emp Earnings/Deductions'],
+                        ['href' => 'edit_conhess_conmess.php', 'icon' => 'fa-table', 'label' => 'Salary Table'],
+                        ['href' => 'edit_deduction_table.php', 'icon' => 'fa-table', 'label' => 'Deduction Table'],
+                        ['href' => 'call_backup.php', 'icon' => 'fa-database', 'label' => 'Backup', 'id' => 'backupButton'],
+                        ['href' => 'pfa.php', 'icon' => 'fa-download', 'label' => 'Pension Fund Update'],
+                        ['href' => 'earningsdeductions.php', 'icon' => 'fa-money-bill', 'label' => 'Create New Deduction/Allowance'],
+                        ['href' => 'users.php', 'icon' => 'fa-users', 'label' => 'Users'],
+                        ['href' => 'employee.php', 'icon' => 'fa-user', 'label' => 'Employees'],
+                        ['href' => 'email_deduction.php', 'icon' => 'fa-envelope', 'label' => 'Email Deduction List'],
+                        ['href' => 'payprocess.php', 'icon' => 'fa-cog', 'label' => 'Process Payroll', 'accesskey' => '2'],
+                    ];
+                    if ($_SESSION['role'] === 'Admin') {
+                        $actions[] = ['href' => '#', 'icon' => 'fa-cloud-download', 'label' => 'Delete Transaction', 'id' => 'link_deletetransaction'];
+                    }
+                    foreach ($actions as $action):
+                    ?>
+                        <a href="<?php echo $action['href']; ?>" <?php echo isset($action['id']) ? 'id="' . $action['id'] . '"' : ''; ?>
+                            <?php echo isset($action['accesskey']) ? 'accesskey="' . $action['accesskey'] . '"' : ''; ?>
+                            class="quick-action bg-white p-6 rounded-lg shadow-md hover:bg-blue-50 text-center">
+                            <i class="fas <?php echo $action['icon']; ?> text-blue-600 text-3xl mb-4"></i>
+                            <p class="text-gray-700 font-medium"><?php echo $action['label']; ?></p>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Delete Transaction Modal -->
+    <div id="deleteTransactionModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <form id="deleteTransactionForm" method="POST" action="classes/controller.php?act=deletecurrentperiod">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Delete Current Payroll Transaction</h2>
+                    <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Active Payroll Period</label>
+                    <input type="text" class="w-full border border-gray-300 rounded-md p-2 bg-gray-100" value="<?php echo htmlspecialchars($_SESSION['activeperiodDescription']); ?>" disabled>
+                    <input type="hidden" name="activeperiodID" id="activeperiodID" value="<?php echo $_SESSION['currentactiveperiod']; ?>">
+                    <input type="hidden" name="activeperiodName" id="activeperiodName" value="<?php echo htmlspecialchars($_SESSION['activeperiodDescription']); ?>">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Cancel</button>
+                    <button type="submit" id="deleteTransactionButton" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <script>
+        function closeModal() {
+            document.getElementById('deleteTransactionModal').classList.add('hidden');
+        }
 
-		<div id="content" class="clearfix sales_content_minibar">
+        document.getElementById('backupButton')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('backupOverlay').style.display = 'flex';
+            fetch('call_backup.php', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('backupOverlay').style.display = 'none';
+                    Swal.fire({
+                        icon: data.status === 'success' ? 'success' : 'error',
+                        title: data.status === 'success' ? 'Success' : 'Error',
+                        text: data.message || 'Backup completed.',
+                    });
+                })
+                .catch(() => {
+                    document.getElementById('backupOverlay').style.display = 'none';
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Backup failed.' });
+                });
+        });
 
-			<div id="content-header" class="hidden-print">
-				<h1><i class="icon fa fa-dashboard"></i> Dashboard </h1>
-			</div>
-			<div id="breadcrumb" class="hidden-print">
-				<a href="home.php"><i class="fa fa-home"></i> Dashboard</a>
-			</div>
-			<div class="clear"></div>
-			<div class="text-center">
-				<?php
-				if (isset($_SESSION['msg'])) {
-					echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-					unset($_SESSION['msg']);
-					unset($_SESSION['alertcolor']);
-				}
-				?>
-				<h3><strong style="font-size: 15px; color: #31708f;">WELCOME TO SALARY MANAGEMENT SYSTEM</strong></h3>
-				<ul class="quick-actions">
+        document.getElementById('link_deletetransaction')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('deleteTransactionModal').classList.remove('hidden');
+        });
 
-					<?php if (($_SESSION['role'] == 'Admin') || ($_SESSION['role'] == 'user')) { ?> <li>
-							<a class="padding-top" href="multiAdjustment.php"> <i class="text-info fa fa-shopping-cart left fa-3x "></i><br>
-								Periodic Data</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?>
-						<li>
-							<a class="padding-top" id="link_deletetransaction"> <i class="text-info fa fa-cloud-download left fa-3x "></i><br><br><?php if (($_SESSION['role'] == 'Admin')) { ?> Delete Transaction <?php } ?></a>
-						</li>
-					<?php  } ?>
-					<li>
-						<a class="padding-top" href="report/index.php"> <i class="text-info fas fa-file-lines left fa-3x "></i><br> Reports</a>
-					</li>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="tax.php"> <i class="text-info fa fa-upload left fa-3x "></i><br> Update Tax</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="upload_grade_step.php"> <i class="text-info fa fa-upload left fa-3x "></i><br> Bulk Grade/Step</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="edit_email.php"> <i class="text-info fa fa-envelope left fa-3x "></i><br> Update Email</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="payperiods.php"> <i class="text-info fa fa-calendar left fa-3x "></i><br> Pay Periods</a>
-						</li> <?php  } ?>
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="empearnings.php"> <i class="text-info fa fa-credit-card left fa-3x "></i><br> Emp Earnings/Deductions</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="edit_conhess_conmess.php"> <i class="text-info fa fa-table left fa-3x "></i><br> Salary Table</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="edit_deduction_table.php"> <i class="text-info fa fa-table left fa-3x "></i><br> Deduction Table</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="call_backup.php" id="backupButton"> <i class=" text-info fas fa-database left fa-3x "></i><br> Backup</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'pfa') { ?> <li>
-							<a class=" padding-top" href="pfa.php"> <i class="text-info fa fa-download left fa-3x "></i><br> Pension Fund Update</a>
-						</li> <?php  } ?>
-
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="earningsdeductions.php"> <i class="text-info fa fa-money left fa-3x "></i><br> Create New Deduction/<br>Allownance</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="users.php"> <i class="text-info fa fa-group left fa-3x "></i><br> Users</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="employee.php"> <i class="text-info fa fa-user left fa-3x "></i><br> Employees</a>
-						</li> <?php  } ?>
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="email_deduction.php"> <i class="text-info fa fa-envelope left fa-3x "></i><br> email Deduction List</a>
-						</li> <?php  } ?>
-
-
-					<?php if ($_SESSION['role'] == 'Admin') { ?> <li>
-							<a class="padding-top" href="payprocess.php" accesskey="2"> <i class="text-info fa fa-cog left fa-3x "></i><br> Process Payroll</a>
-						</li> <?php  } ?>
-
-				</ul>
-
-			</div>
-
-
-		</div><!--end #content-->
-	</div><!--end #wrapper-->
-	<div class="modal fade" id="deletetransaction" tabindex="-1" role="dialog" aria-labelledby="creatededuction" aria-hidden="true">
-		<div class="modal-dialog" role="document">
-			<form class="form-horizontal" method="post" action="classes/controller.php?act=deletecurrentperiod">
-				<div class="modal-content">
-					<div class="modal-header modal-title" style="background: #6e7dc7;">
-						<h5 class=" modal-title" id="newemployeeearning">Delete current payroll Transaction</h5>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="modal-body">
-						<form class="form-horizontal" name="form_newedeductioncode" id="form_delete" method="post" action="classes/controller.php?act=addallowance_deduction">
-							<div class="row">
-								<div class="col-md-12">
-									<div class="form-group">
-										<label class="col-md-4 control-label"><b>Current Active Payroll Period</b></label>
-										<div class="col-md-4">
-
-											<input type="hidden" name="activeperiodID" id="activeperiodID" value="<?php echo $_SESSION['currentactiveperiod']; ?>">
-											<input type="hidden" name="activeperiodName" id="activeperiodName" value="<?php echo $_SESSION['activeperiodDescription']; ?>">
-
-
-											<?php
-											/*$query = $conn->prepare('SELECT description FROM payperiods WHERE companyId = ? AND active =?');
-                                                                            $query->execute([$_SESSION['companyid'], '1']);
-                                                                            $ftres = $query->fetchAll(PDO::FETCH_COLUMN);
-                                                                            //print_r($ftres);
-                                                                            $closingperiodname = $ftres[0];*/
-											?>
-
-											<input type="text" required class="form-control" name="activeperiod" value="<?php echo $_SESSION['activeperiodDescription']; ?>" disabled>
-
-										</div>
-									</div>
-
-
-
-
-								</div>
-							</div>
-
-					</div>
-					<div class="modal-footer">
-						<button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-						<button type="submit" id="addDeductionButton" class="btn red">Delete</button>
-			</form>
-		</div>
-	</div>
-	</div>
-	</div>
-
-	<script type="text/javascript">
-		$(document).ready(function() {
-
-			$("#backupButton").click(function() { // Assume you have a button to trigger backup
-				//event.preventDefault();
-				$("#backupOverlay").show(); // Show the overlay
-
-				// Perform the AJAX request for backup
-				$.ajax({
-					url: 'call_backup.php', // Your backup script
-					type: 'POST',
-					data: {}, // Any data you need to pass to your script
-					success: function(response) {
-						// Backup complete
-						$("#backupOverlay").hide(); // Hide the overlay
-						// You might want to show a success message or handle errors
-					},
-					error: function() {
-						// Handle AJAX error
-						$("#backupOverlay").hide(); // Ensure overlay is hidden on error
-						// Show error message
-					}
-				});
-			});
-
-			$('#link_deletetransaction').click(function() {
-				$('#deletetransaction').modal('show');
-			});
-
-			$('#addDeductionButton').click(function() {
-				event.preventDefault();
-				var activeperiodID = $('#activeperiodID').val();
-				if (confirm('Are you sure you want to delete ' + $('#activeperiodName').val() + ' Transactions')) {
-					$('#addDeductionButton').ajaxSubmit({
-						formData: {
-							activeperiodID: activeperiodID
-						},
-						url: 'classes/controller.php?act=deletecurrentperiod&activeperiodID=' + activeperiodID,
-						success: function(response, message) {
-
-
-							submitting = false;
-
-							if (message == 'success') {
-								if (response == 0) {
-
-									alert("Payroll for the month has not been run");
-									location.reload(true);
-									gritter("Error", message, 'gritter-item-error', false, false);
-								} else {
-									alert("Payroll for the month succesfully deleted");
-									//location.reload(true);
-								}
-
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					})
-				}
-
-
-
-			})
-
-		})
-	</script>
+        document.getElementById('deleteTransactionForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const periodName = document.getElementById('activeperiodName').value;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You are about to delete transactions for ${periodName}.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData(e.target);
+                    fetch(e.target.action, { method: 'POST', body: formData })
+                        .then(response => response.json())
+                        .then(data => {
+                            closeModal();
+                            Swal.fire({
+                                icon: data.status === 'success' ? 'success' : 'error',
+                                title: data.status === 'success' ? 'Success' : 'Error',
+                                text: data.message || (data.status === 'success' ? 'Payroll transactions deleted.' : 'No payroll data found.'),
+                            }).then(() => {
+                                if (data.status === 'success' || data.status === 'error') {
+                                    location.reload();
+                                }
+                            });
+                        })
+                        .catch(() => {
+                            closeModal();
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to delete transactions.' });
+                        });
+                }
+            });
+        });
+    </script>
 </body>
-
 </html>
-<?php
-
-?>

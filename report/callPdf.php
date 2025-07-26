@@ -30,7 +30,7 @@ if (isset($_POST['staff_no'])) {
 try {
 	mysqli_select_db($salary, $database_salary);
 	if ($All == 0) {
-		$query_masterTransaction = "SELECT * FROM employee WHERE ISNULL(EMAIL) = FALSE AND STATUSCD = 'A' AND staff_id = {$item}";
+		$query_masterTransaction = "SELECT * FROM employee WHERE ISNULL(EMAIL) = FALSE AND staff_id = {$item}";
 	} elseif ($All == 1) {
 		$query_masterTransaction = 'SELECT * FROM employee WHERE ISNULL(EMAIL) = FALSE AND STATUSCD = "A"';
 	} elseif ($All == 2) {
@@ -42,7 +42,7 @@ try {
 	$total = $totalRows_masterTransaction;
 
 	$j = 1;
-	$percent;
+	$percent = 0;
 
 
 	//$message = '';

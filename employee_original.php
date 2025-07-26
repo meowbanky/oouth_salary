@@ -6,7 +6,7 @@ require_once 'libs/App.php';
 $App = new App();
 $App->checkAuthentication();
 require_once 'libs/middleware.php';
-checkPermission();
+//checkPermission();
 
 ?>
 <?php
@@ -230,7 +230,7 @@ $today = date('Y-m-d');
                                                         } elseif ($link['STATUSCD'] == 'S') {
                                                             echo 'SUSPENSION';
                                                         }
-                                                        //echo  $link['status'] ;   
+                                                        //echo  $link['status'] ;
                                                         echo '</td><td>';
                                                         echo $link['dept'];
                                                         echo '</td><td>';

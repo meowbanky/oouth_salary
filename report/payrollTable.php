@@ -312,7 +312,6 @@ $periodToDesc = getPeriodDescription($conn, $periodTo);
     </div>
 </div>
 
-<!-- JavaScript Section -->
 <script type="text/javascript">
     function toggleEmailField() {
         const emailField = document.getElementById('email_field');
@@ -321,6 +320,8 @@ $periodToDesc = getPeriodDescription($conn, $periodTo);
     }
 
     document.getElementById('payrollForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
         let isValid = true;
 
         // Reset error messages
@@ -351,13 +352,78 @@ $periodToDesc = getPeriodDescription($conn, $periodTo);
         }
 
         if (!isValid) {
-            e.preventDefault();
             return false;
         }
 
         // Show loading indicator
         document.getElementById('ajax-loader').style.display = 'block';
         document.getElementById('submitButton').disabled = true;
+
+        // If send_email is checked, use AJAX for JSON response
+        if (emailCheckbox.checked) {
+            const form = this;
+            const formData = new FormData(form);
+            const url = form.action;
+            const queryString = new URLSearchParams(formData).toString();
+
+            fetch(url + '?' + queryString, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => response.text()) // Get response as text to handle any Content-Type
+                .then(text => {
+                    try {
+                        // Attempt to parse as JSON
+                        const data = JSON.parse(text);
+                        // Hide loading indicator
+                        document.getElementById('ajax-loader').style.display = 'none';
+                        document.getElementById('submitButton').disabled = false;
+
+                        // Display the message in an alert
+                        alert(data.message);
+
+                        // Create and append a Back button
+                        const formSection = document.querySelector('.form-section');
+                        const backButton = document.createElement('button');
+                        backButton.type = 'button';
+                        backButton.className = 'btn btn-secondary';
+                        backButton.innerText = 'Back';
+                        backButton.onclick = function() {
+                            window.history.back();
+                        };
+                        formSection.appendChild(backButton);
+                    } catch (e) {
+                        // If JSON parsing fails, show a generic success message
+                        document.getElementById('ajax-loader').style.display = 'none';
+                        document.getElementById('submitButton').disabled = false;
+                        alert('Report has been sent successfully to ' + emailInput.value);
+
+                        // Append Back button
+                        const formSection = document.querySelector('.form-section');
+                        const backButton = document.createElement('button');
+                        backButton.type = 'button';
+                        backButton.className = 'btn btn-secondary';
+                        backButton.innerText = 'Back';
+                        backButton.onclick = function() {
+                            window.history.back();
+                        };
+                        // formSection.appendChild(backButton);
+                    }
+                })
+                .catch(error => {
+                    // Handle network or other errors
+                    document.getElementById('ajax-loader').style.display = 'none';
+                    document.getElementById('submitButton').disabled = false;
+                    alert('An error occurred, but the report may have been sent. Please check your email.');
+                });
+        } else {
+            // For download, submit the form traditionally
+            document.getElementById('ajax-loader').style.display = 'none';
+            document.getElementById('submitButton').disabled = false;
+            this.submit();
+        }
     });
 </script>
 </body>

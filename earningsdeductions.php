@@ -1,8 +1,12 @@
 <?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
-<?php
-//Start session
-session_start();
+include_once('classes/model.php'); 
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
+
+global $conn;
 
 //Check whether the session variable SESS_MEMBER_ID is present or not
 if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
@@ -15,7 +19,7 @@ if (!function_exists("GetSQLValueString")) {
     {
         global $conn;
 
-        $theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($theValue, $conn) : mysqli_escape_string($theValue, $conn);
+        $theValue = is_object($conn) && method_exists($conn, 'quote') ? $conn->quote($theValue) : addslashes($theValue);
 
         switch ($theType) {
             case "text":

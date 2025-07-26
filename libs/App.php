@@ -509,23 +509,21 @@ FROM
             return $this->selectAll($query, $params);
 
     }
-public function create_user($staff_id, $username, $password, $role_id, $deleted=0 )
-{
-
-    $query = "INSERT INTO username (staff_id, username, password, role_id, deleted) 
-          VALUES (?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE 
-          username = VALUES(username),
-          role_id = VALUES(role_id),
-          deleted = VALUES(deleted)";
-    $params = [$staff_id, $username, $password, $role_id, $deleted];
-    $result = $this->executeNonSelect($query, $params);
-
-//    $this->log('INSERT','USERNAME',$params,$_SESSION['SESS_MEMBER_ID']);
-
-    return $result;
-
-}
+public function create_user($staff_id, $username, $password, $role_id, $deleted = 0) {
+        try {
+             $query = "INSERT INTO username (staff_id, username, password, role_id, deleted) 
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                username = VALUES(username),
+                role_id = VALUES(role_id),
+                deleted = VALUES(deleted)";
+            $params = [$staff_id, $username, $password, $role_id, $deleted];
+            return $this->executeNonSelect($query, $params);
+        } catch (Exception $e) {
+            error_log("Error in create_user: " . $e->getMessage());
+            throw $e; // Let add_user.php handle the error
+        }
+    }
 
     public function create_bank($bankcode, $bankname)
     {
@@ -1198,6 +1196,14 @@ public function updateGradeStep($grade,$step,$staff_id)
         return $stmt->execute($array);  // Returns true on success or false on failure
     }
 
+  public function getRoles() {
+    $query = "SELECT role_id, role_name FROM roles";
+    $stmt = $this->link->prepare($query);
+    $stmt->execute();
+    $roles = $stmt->fetchAll(PDO::FETCH_ASSOC); // Use PDO fetchAll
+    return $roles;
+}
+
     public function insertWithLastInsertID($query, $array = []) {
         $stmt = $this->link->prepare($query);
         $result = $stmt->execute($array);
@@ -1300,7 +1306,7 @@ public function updateGradeStep($grade,$step,$staff_id)
         } catch (PDOException $e) {
             echo $e->getMessage();
         }
-        return json_encode($data);
+        return json_encode([]);
 
     }
 
@@ -1471,7 +1477,7 @@ public function updateGradeStep($grade,$step,$staff_id)
         } catch (PDOException $e) {
             echo $e->getMessage();
         }
-        return json_encode($data);
+        return json_encode([]);
 
     }
 }

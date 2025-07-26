@@ -40,11 +40,11 @@ $query = $conn->prepare('SELECT allow_deduc.`value`,allow_deduc.allow_id,allow_d
                                                 }
                                                 
                                                 try{
-$query = $conn->prepare('SELECT prorate_allow_deduc.`value`,prorate_allow_deduc.allow_id,prorate_allow_deduc.temp_id,tbl_earning_deduction.edDesc FROM
-																						tbl_earning_deduction INNER JOIN prorate_allow_deduc ON tbl_earning_deduction.ed_id = prorate_allow_deduc.allow_id
-																						WHERE transcode = ? and staff_id = ? order by allow_id asc' );
-                                           $fin = $query->execute(array('01', $staffID ));
-                                           $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                                $query = $conn->prepare('SELECT prorate_allow_deduc.`value`,prorate_allow_deduc.allow_id,prorate_allow_deduc.temp_id,tbl_earning_deduction.edDesc FROM
+                                                tbl_earning_deduction INNER JOIN prorate_allow_deduc ON tbl_earning_deduction.ed_id = prorate_allow_deduc.allow_id
+                                                WHERE transcode = ? and staff_id = ? order by allow_id asc' );
+                                              $fin = $query->execute(array('01', $staffID ));
+                                              $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                            //print_r($res);
                                        
                                       echo ' <table class="table table-bordered table-hover">';

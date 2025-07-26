@@ -1,24 +1,44 @@
 <?php
-require_once('Connections/paymaster.php');
-//connect with the database
-$return_arr = array();
+require_once 'Connections/paymaster.php';
 
-//get search term
-$searchTerm = $_GET['term'];
-mysqli_select_db($salary, $database_salary);
-$query = $salary->query("SELECT employee.staff_id,concat(employee.staff_id,' - ', employee.NAME) as details,employee.EMAIL , IFNULL(employee.POST,'') AS POST FROM employee
-WHERE  (staff_id like '%" . $searchTerm . "%' or NAME like '%" . $searchTerm . "%') ORDER BY staff_id ASC");
-while ($row = $query->fetch_assoc()) {
-	$data['id'] = $row['staff_id'];
-	if ($row['POST'] == '') {
-		$row['POST'] = '';
-	} else {
-		$row['POST'] = ' - ' . $row['POST'];
-	}
-	$data['label'] = $row['details'] . $row['POST'];
-	$data['value'] = $row['staff_id'];
-	$data['EMAIL'] = $row['EMAIL'];
-	array_push($return_arr, $data);
+header('Content-Type: application/json');
+
+try {
+    // Sanitize the search term
+    $searchTerm = isset($_GET['term']) ? filter_var($_GET['term'], FILTER_SANITIZE_FULL_SPECIAL_CHARS) : '';
+    if (empty($searchTerm)) {
+        echo json_encode([]);
+        exit;
+    }
+
+    // Prepare the SQL query with parameter binding to prevent SQL injection
+    $query = "SELECT staff_id, CONCAT(staff_id, ' - ', NAME) AS details, EMAIL, POST 
+              FROM employee 
+              WHERE staff_id LIKE :searchTerm OR NAME LIKE :searchTerm 
+              ORDER BY staff_id ASC LIMIT 20"; // Limit results for performance
+
+    $stmt = $conn->prepare($query);
+    $stmt->execute(['searchTerm' => "%$searchTerm%"]);
+
+    $results = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $post = $row['POST'] ? ' - ' . $row['POST'] : '';
+        $results[] = [
+            'id' => $row['staff_id'],
+            'label' => $row['details'] . $post,
+            'value' => $row['staff_id'],
+            'EMAIL' => $row['EMAIL']
+        ];
+    }
+
+    echo json_encode($results);
+} catch (PDOException $e) {
+    error_log("Database Error in searchStaff.php: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'An error occurred while fetching staff data.']);
+} catch (Exception $e) {
+    error_log("General Error in searchStaff.php: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'An unexpected error occurred.']);
 }
-//return json data
-echo json_encode($return_arr);
+exit;
