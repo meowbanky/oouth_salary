@@ -537,8 +537,8 @@ $today = date('Y-m-d');
 						dblclick: true,
 						keyboard: true,
 						restoreButton: false,
-						onSuccess: function(data, textStatus, jqXHR) {
-							if (data.action == 'delete') {
+						onSuccess: function(data, textStatus, response, jqXHR) {
+						if (data.action == 'delete') {
 								$('#' + data.id).remove();
 							}
 						}

@@ -74,15 +74,17 @@ try {
 mysqli_select_db($salary, $database_salary);
 
 // Fetch all employees and required details in one query
-$queryemployee = "
-    SELECT master_staff.staff_id, master_staff.NAME, master_staff.ACCTNO, tbl_bank.BNAME, tbl_dept.dept, master_staff.STEP, master_staff.GRADE, employee.EMAIL 
-    FROM master_staff 
-    JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD 
-    JOIN tbl_bank ON tbl_bank.BCODE = master_staff.BCODE 
-    JOIN employee ON master_staff.staff_id = employee.staff_id 
-    WHERE period = $period AND (master_staff.DEPTCD != 40 AND master_staff.DEPTCD != 43)
-    ORDER BY staff_id ASC
-";
+$queryemployee = "SELECT master_staff.staff_id, master_staff.NAME, master_staff.ACCTNO, 
+       tbl_bank.BNAME, tbl_dept.dept, master_staff.STEP, master_staff.GRADE, 
+       employee.EMAIL 
+FROM master_staff 
+JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD 
+JOIN tbl_bank ON tbl_bank.BCODE = master_staff.BCODE 
+JOIN employee ON master_staff.staff_id = employee.staff_id 
+WHERE period = $period
+  AND master_staff.DEPTCD NOT IN (40, 43) 
+  AND master_staff.GRADE NOT LIKE '0_C'  -- Excludes grades like 01C, 02C, ..., 09C
+ORDER BY staff_id ASC";
 
 $result_employee = mysqli_query($salary, $queryemployee);
 $employees = mysqli_fetch_all($result_employee, MYSQLI_ASSOC);

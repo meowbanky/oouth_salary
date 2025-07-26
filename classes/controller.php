@@ -1,15 +1,17 @@
 <?php
+global $conn;
 session_start();
 ini_set('max_execution_time', '0');
 include_once('functions.php');
 include_once('../Connections/paymaster.php');
 include_once('../passwordHash.php');
-//include_once('create_email.php');
 include_once('../backup.php');
 $act = strip_tags(addslashes($_GET['act']));
 $act = filter_var($_GET['act']);
 $source = $_SERVER['HTTP_REFERER'];
 include_once(__DIR__ .'/../auth_api/onesignal/save_notification.php');
+require_once __DIR__ . '/../vendor/autoload.php';
+use Dotenv\Dotenv;
 $comp = '1';
 
 global $salary;
@@ -163,157 +165,157 @@ switch ($act) {
 
         break;
 
-    case 'createcompanyaccount':
-        //create new company
-        $title = "New Payroll Account";
-        $companyname = filter_var($_POST['fullname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $contactemail = filter_var((filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
-        $contactphone = filter_var($_POST['phone'], FILTER_VALIDATE_INT);
-        $companyaddress = filter_var($_POST['address'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $compcity = filter_var($_POST['city'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        $useremail = filter_var((filter_var($_POST['username'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
-        $userfname = filter_var($_POST['ufname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $userlname = filter_var($_POST['ulname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $userpass1 = filter_var($_POST['password'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $userpass = password_hash($userpass1, PASSWORD_DEFAULT);
-
-        try {
-            $query = $conn->prepare('SELECT * FROM users WHERE emailAddress = ? AND active = ? ');
-            $res = $query->execute(array($useremail, '1'));
-            $existtrans = $query->fetch();
-
-            if ($existtrans) {
-                //same transaction for current employee, current period posted
-                $_SESSION['msg'] = "A user account associated with the supplied email exists.";
-                $_SESSION['alertcolor'] = "danger";
-                $source = $_SERVER['HTTP_REFERER'];
-                header('Location: ' . $source);
-            } else {
-
-                $query = 'INSERT INTO company (companyName, city, companyAddress, companyEmail, contactTelephone) VALUES (?,?,?,?,?)';
-                $conn->prepare($query)->execute(array($companyname, $compcity, $companyaddress, $contactemail, $contactphone));
-                $last_id = $conn->lastInsertId();
-
-                $query = 'INSERT INTO users (emailAddress, password, userTypeId, firstName, lastName, companyId, active) VALUES (?,?,?,?,?,?,?)';
-                $conn->prepare($query)->execute(array($useremail, $userpass, '1', $userfname, $userlname, $last_id, '0'));
-                $latestuserinsert = $conn->lastInsertId();
-
-                //user account becomes active after validating emailed link
-                //Send email validation
-                //Generate update token
-                $reset_token = bin2hex(openssl_random_pseudo_bytes(32));
-
-                //write token to token table and assign validity state, creation timestamp
-                $tokenrecordtime = date('Y-m-d H:i:s');
-
-
-                //check for any previous tokens and invalidate
-                $tokquery = $conn->prepare('SELECT * FROM reset_token WHERE userEmail = ? AND valid = ? AND type = ?');
-                $fin = $tokquery->execute(array($useremail, '1', '2'));
-
-                if ($row = $tokquery->fetch()) {
-                    $upquery = 'UPDATE reset_token SET valid = ? WHERE userEmail = ? AND valid = ?';
-                    $conn->prepare($upquery)->execute(array('0', $useremail, '1'));
-                }
-
-                $tokenquery = 'INSERT INTO reset_token (userEmail, token, creationTime, valid, type) VALUES (?,?,?,?,?)';
-                $conn->prepare($tokenquery)->execute(array($useremail, $reset_token, $tokenrecordtime, '1', '2'));
-
-                //exit($resetemail . " " . $reset_token);
-
-                $sendmessage = "You've recently created a new Red Payroll account linked to the email address: " . $useremail . "<br /><br />To activate your account, click the link below:<br /><br /> " . $sysurl . 'validate.php?act=auth&jam=' . $latestuserinsert . '&queue=' . $last_id . '&token=' . $reset_token;
-                //generate reset cdde and append to email submitted
-
-                require 'phpmailer/PHPMailerAutoload.php';
-
-                $mail = new PHPMailer;
-
-                $mail->SMTPDebug = 3;                               // Enable verbose debug output
-
-                $mail->isSMTP();                                      // Set mailer to use SMTP
-                $mail->Host = 'smtp.zoho.com';  // Specify main and backup SMTP servers
-                $mail->SMTPAuth = true;                               // Enable SMTP authentication
-                $mail->Username = 'noreply@redsphere.co.ke';                 // SMTP username
-                $mail->Password = 'redsphere_2017***';                           // SMTP password
-                $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-                $mail->Port = 587;                                    // TCP port to connect to
-
-                $mail->setFrom('noreply@redsphere.co.ke', 'Red Payroll');
-                $mail->addAddress($useremail, 'Redsphere Payroll');     // Add a recipient
-                //$mail->addAddress('ellen@example.com');               // Name is optional
-                $mail->addReplyTo('noreply@redsphere.co.ke', 'Red Payroll');
-                //$mail->addCC('fgesora@gmail.com');
-                $mail->addBCC('fgesora@gmail.com');
-
-                //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
-                //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
-                $mail->isHTML(true);                                  // Set email format to HTML
-
-                $mail->Subject = $title;
-                $mail->Body    = $sendmessage;
-                $mail->AltBody = $sendmessage;
-
-                if (!$mail->send()) {
-                    //exit($mail->ErrorInfo);
-                    echo 'Mailer Error: ' . $mail->ErrorInfo;
-                    //  $_SESSION('msg') = "Failed. Error sending email.";
-                    $_SESSION['alertcolor'] = "danger";
-                    header("Location: " . $source);
-                } else {
-                    $status = "Success";
-                    $_SESSION['msg'] = "An activation link has been sent to the provided email address. Please activate your account in order to log in.";
-                    $_SESSION['alertcolor'] = "success";
-                    header("Location: " . $source);
-                }
-            }
-
-            /*
-                    ********
-                    ********
-                    Check if user account exists
-                    ********
-                    ********
-                    */
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        //exit($companyname . ', ' . $contactemail . ', ' . $last_id);
-        break;
-
-
-    case 'addcostcenter':
-        $ccname = filter_var($_POST['cctrname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        try {
-            $query = 'INSERT INTO company_costcenters (companyId, costCenterName, active) VALUES (?,?,?)';
-            $conn->prepare($query)->execute(array($_SESSION['companyid'], $ccname, '1'));
-            $_SESSION['msg'] = $msg = 'Cost Center successfully Created';
-            $_SESSION['alertcolor'] = $type = 'success';
-            $source = $_SERVER['HTTP_REFERER'];
-            header('Location: ' . $source);
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        break;
-
-    case 'earningchange':
-        $ccname = filter_var($_POST['cctrname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        try {
-            $query = 'INSERT INTO company_costcenters (companyId, costCenterName, active) VALUES (?,?,?)';
-            $conn->prepare($query)->execute(array($_SESSION['companyid'], $ccname, '1'));
-            $_SESSION['msg'] = $msg = 'Cost Center successfully Created';
-            $_SESSION['alertcolor'] = $type = 'success';
-            $source = $_SERVER['HTTP_REFERER'];
-            header('Location: ' . $source);
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        break;
+//    case 'createcompanyaccount':
+//        //create new company
+//        $title = "New Payroll Account";
+//        $companyname = filter_var($_POST['fullname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $contactemail = filter_var((filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
+//        $contactphone = filter_var($_POST['phone'], FILTER_VALIDATE_INT);
+//        $companyaddress = filter_var($_POST['address'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $compcity = filter_var($_POST['city'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//
+//        $useremail = filter_var((filter_var($_POST['username'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
+//        $userfname = filter_var($_POST['ufname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $userlname = filter_var($_POST['ulname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $userpass1 = filter_var($_POST['password'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $userpass = password_hash($userpass1, PASSWORD_DEFAULT);
+//
+//        try {
+//            $query = $conn->prepare('SELECT * FROM users WHERE emailAddress = ? AND active = ? ');
+//            $res = $query->execute(array($useremail, '1'));
+//            $existtrans = $query->fetch();
+//
+//            if ($existtrans) {
+//                //same transaction for current employee, current period posted
+//                $_SESSION['msg'] = "A user account associated with the supplied email exists.";
+//                $_SESSION['alertcolor'] = "danger";
+//                $source = $_SERVER['HTTP_REFERER'];
+//                header('Location: ' . $source);
+//            } else {
+//
+//                $query = 'INSERT INTO company (companyName, city, companyAddress, companyEmail, contactTelephone) VALUES (?,?,?,?,?)';
+//                $conn->prepare($query)->execute(array($companyname, $compcity, $companyaddress, $contactemail, $contactphone));
+//                $last_id = $conn->lastInsertId();
+//
+//                $query = 'INSERT INTO users (emailAddress, password, userTypeId, firstName, lastName, companyId, active) VALUES (?,?,?,?,?,?,?)';
+//                $conn->prepare($query)->execute(array($useremail, $userpass, '1', $userfname, $userlname, $last_id, '0'));
+//                $latestuserinsert = $conn->lastInsertId();
+//
+//                //user account becomes active after validating emailed link
+//                //Send email validation
+//                //Generate update token
+//                $reset_token = bin2hex(openssl_random_pseudo_bytes(32));
+//
+//                //write token to token table and assign validity state, creation timestamp
+//                $tokenrecordtime = date('Y-m-d H:i:s');
+//
+//
+//                //check for any previous tokens and invalidate
+//                $tokquery = $conn->prepare('SELECT * FROM reset_token WHERE userEmail = ? AND valid = ? AND type = ?');
+//                $fin = $tokquery->execute(array($useremail, '1', '2'));
+//
+//                if ($row = $tokquery->fetch()) {
+//                    $upquery = 'UPDATE reset_token SET valid = ? WHERE userEmail = ? AND valid = ?';
+//                    $conn->prepare($upquery)->execute(array('0', $useremail, '1'));
+//                }
+//
+//                $tokenquery = 'INSERT INTO reset_token (userEmail, token, creationTime, valid, type) VALUES (?,?,?,?,?)';
+//                $conn->prepare($tokenquery)->execute(array($useremail, $reset_token, $tokenrecordtime, '1', '2'));
+//
+//                //exit($resetemail . " " . $reset_token);
+//
+//                $sendmessage = "You've recently created a new Red Payroll account linked to the email address: " . $useremail . "<br /><br />To activate your account, click the link below:<br /><br /> " . $sysurl . 'validate.php?act=auth&jam=' . $latestuserinsert . '&queue=' . $last_id . '&token=' . $reset_token;
+//                //generate reset cdde and append to email submitted
+//
+//                require 'phpmailer/PHPMailerAutoload.php';
+//
+//                $mail = new PHPMailer;
+//
+//                $mail->SMTPDebug = 3;                               // Enable verbose debug output
+//
+//                $mail->isSMTP();                                      // Set mailer to use SMTP
+//                $mail->Host = 'smtp.zoho.com';  // Specify main and backup SMTP servers
+//                $mail->SMTPAuth = true;                               // Enable SMTP authentication
+//                $mail->Username = 'noreply@redsphere.co.ke';                 // SMTP username
+//                $mail->Password = 'redsphere_2017***';                           // SMTP password
+//                $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+//                $mail->Port = 587;                                    // TCP port to connect to
+//
+//                $mail->setFrom('noreply@redsphere.co.ke', 'Red Payroll');
+//                $mail->addAddress($useremail, 'Redsphere Payroll');     // Add a recipient
+//                //$mail->addAddress('ellen@example.com');               // Name is optional
+//                $mail->addReplyTo('noreply@redsphere.co.ke', 'Red Payroll');
+//                //$mail->addCC('fgesora@gmail.com');
+//                $mail->addBCC('fgesora@gmail.com');
+//
+//                //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+//                //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+//                $mail->isHTML(true);                                  // Set email format to HTML
+//
+//                $mail->Subject = $title;
+//                $mail->Body    = $sendmessage;
+//                $mail->AltBody = $sendmessage;
+//
+//                if (!$mail->send()) {
+//                    //exit($mail->ErrorInfo);
+//                    echo 'Mailer Error: ' . $mail->ErrorInfo;
+//                    //  $_SESSION('msg') = "Failed. Error sending email.";
+//                    $_SESSION['alertcolor'] = "danger";
+//                    header("Location: " . $source);
+//                } else {
+//                    $status = "Success";
+//                    $_SESSION['msg'] = "An activation link has been sent to the provided email address. Please activate your account in order to log in.";
+//                    $_SESSION['alertcolor'] = "success";
+//                    header("Location: " . $source);
+//                }
+//            }
+//
+//            /*
+//                    ********
+//                    ********
+//                    Check if user account exists
+//                    ********
+//                    ********
+//                    */
+//        } catch (PDOException $e) {
+//            echo $e->getMessage();
+//        }
+//
+//        //exit($companyname . ', ' . $contactemail . ', ' . $last_id);
+//        break;
+//
+//
+//    case 'addcostcenter':
+//        $ccname = filter_var($_POST['cctrname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//
+//        try {
+//            $query = 'INSERT INTO company_costcenters (companyId, costCenterName, active) VALUES (?,?,?)';
+//            $conn->prepare($query)->execute(array($_SESSION['companyid'], $ccname, '1'));
+//            $_SESSION['msg'] = $msg = 'Cost Center successfully Created';
+//            $_SESSION['alertcolor'] = $type = 'success';
+//            $source = $_SERVER['HTTP_REFERER'];
+//            header('Location: ' . $source);
+//        } catch (PDOException $e) {
+//            echo $e->getMessage();
+//        }
+//
+//        break;
+//
+//    case 'earningchange':
+//        $ccname = filter_var($_POST['cctrname'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//
+//        try {
+//            $query = 'INSERT INTO company_costcenters (companyId, costCenterName, active) VALUES (?,?,?)';
+//            $conn->prepare($query)->execute(array($_SESSION['companyid'], $ccname, '1'));
+//            $_SESSION['msg'] = $msg = 'Cost Center successfully Created';
+//            $_SESSION['alertcolor'] = $type = 'success';
+//            $source = $_SERVER['HTTP_REFERER'];
+//            header('Location: ' . $source);
+//        } catch (PDOException $e) {
+//            echo $e->getMessage();
+//        }
+//
+//        break;
 
 
     case 'adddepartment':
@@ -1274,119 +1276,159 @@ switch ($act) {
         break;
 
 
-    case 'addNewEmp':
-        //check for existing same employee number
+        case 'addNewEmp':
+            header('Content-Type: application/json; charset=utf-8');
+            // Gather/clean inputs
+            $emp_no = filter_var($_POST['emp_no']);
+            $namee = ucwords(strtolower(strip_tags(addslashes($_POST['namee']))));
+            $dept = filter_var($_POST['dept']);
+            $designation = ucwords(strtolower(strip_tags(addslashes($_POST['designation']))));
+            $grade = filter_var($_POST['grade']);
+            $gradestep = filter_var($_POST['gradestep']);
+            $doe = date('Y-m-d', strtotime(filter_var($_POST['doe'])));
+            $bank = filter_var($_POST['bank']);
+            $acct_no = filter_var($_POST['acct_no']);
+            $email = filter_var($_POST['email']);
+            $position = strpos($email, '@oouth.com');
+            $salary_type = isset($_POST['salary_type']) ? filter_var($_POST['salary_type']) : '';
+            $pfa = filter_var($_POST['pfa']);
+            $rsa_pin = filter_var($_POST['rsa_pin']);
+            $recordtime = date('Y-m-d H:i:s');
+            $userID = $_SESSION['SESS_MEMBER_ID'] ?? null;
+        
+            // Always ensure email ends with @oouth.com
+            $insertemail = $position !== false ? $email : $email . '@oouth.com';
+        
+            // (Optional) Check for required fields here and return JSON error if missing
+            if (!$emp_no || !$namee || !$dept || !$designation || !$grade || !$gradestep || !$doe || !$bank || !$acct_no || !$insertemail) {
+                echo json_encode(['success' => false, 'error' => 'Missing required fields.']);
+                exit;
+            }
+        
+            // (Optional) Check for duplicate staff_id
+            $exists = $conn->prepare('SELECT 1 FROM employee WHERE staff_id = ? LIMIT 1');
+            $exists->execute([$emp_no]);
+            if ($exists->fetchColumn()) {
+                echo json_encode(['success' => false, 'error' => 'Employee with this Staff No already exists.']);
+                exit;
+            }
+        
+            try {
+                // Insert into DB
+                $query = 'INSERT INTO employee (salary_type, EMAIL, staff_id, `NAME`, EMPDATE, DEPTCD, POST, GRADE, STEP, ACCTNO, BCODE, STATUSCD, PFACODE, PFAACCTNO, userID, editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+                $conn->prepare($query)->execute([
+                    $salary_type, $insertemail, $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep,
+                    $acct_no, $bank, 'A', $pfa, $rsa_pin, $userID, $recordtime
+                ]);
+        
+                // Call the email creation API
+                $apiUrl = 'https://oouth.com/admin_mail/create-email-api.php';
+                $apiKey = '72f67ed857732bcb9c675cd8eb0ce8a4';
+                $payload = json_encode(['email' => $insertemail]);
+        
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $apiUrl);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $apiKey
+                ]);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+        
+                $apiResult = json_decode($response, true);
+                if ($httpCode !== 200 || !isset($apiResult['status']) || ($apiResult['status'] !== 'created' && $apiResult['status'] !== 'exists')) {
+                    // Don't block creation if email fails; just notify
+                    echo json_encode(['success' => true, 'warning' => 'Employee added, but email creation failed.']);
+                    exit;
+                }
+                // All OK
+                echo json_encode(['success' => true]);
+                exit;
+            } catch (PDOException $e) {
+                echo json_encode(['success' => false, 'error' => 'Error adding employee: ' . $e->getMessage()]);
+                exit;
+            }
+            break;
+        
 
 
-        $emp_no = filter_var($_POST['emp_no']);
-        $namee = ucwords(strtolower(strip_tags(addslashes($_POST['namee']))));
-        $dept = filter_var($_POST['dept']);
-        $designation = ucwords(strtolower(strip_tags(addslashes($_POST['designation']))));
-        $grade = filter_var($_POST['grade']);
-        $gradestep = filter_var($_POST['gradestep']);
-        $doe = date('Y-m-d', strtotime(filter_var($_POST['doe'])));
-        //$dob = date('Y-m-d', strtotime(filter_var($_POST['dob'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $bank = filter_var($_POST['bank']);
-        $acct_no = filter_var($_POST['acct_no']);
-        $email = filter_var($_POST['email']);
-        $position = strpos($email, '@tasce.com');
-        $salary_type = filter_var($_POST['salary_type']);
-        if ($position == true) {
-
-            $insertemail = $email;
-        } else {
-            $insertemail = $email . '@tasce.com';
-        }
-
-        $pfa = filter_var($_POST['pfa']);
-        $rsa_pin = filter_var($_POST['rsa_pin']);
-        $recordtime	= $recordtime = date('Y-m-d H:i:s');
-        //validate for empty mandatory fields
-
-        try {
-            //check for replication and create period
-
-
-            $query = 'INSERT INTO employee (salary_type,EMAIL,employee.staff_id,employee.`NAME`, employee.EMPDATE, employee.DEPTCD, employee.POST, employee.GRADE, employee.STEP, employee.ACCTNO, employee.BCODE, employee.STATUSCD, employee.PFACODE, employee.PFAACCTNO,userID,editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-
-            $conn->prepare($query)->execute(array($salary_type, $insertemail,  $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep, $acct_no, $bank,  'A', $pfa, $rsa_pin, $_SESSION['SESS_MEMBER_ID'], $recordtime,));
-            //createEmail
-            createEmail($email);
-
-            $_SESSION['msg'] = $msg = "Employee Successfully added.";
-            $_SESSION['alertcolor'] = 'success';
-            header('Location: ' . $source);
-            //redirect($msg,$type,$source);
-
-
-
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        break;
-
-
-    case 'updateEmp':
-        //check for existing same employee number
-
-
-        $emp_no = filter_var($_POST['emp_no'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $namee = ucwords(strtolower(strip_tags(addslashes($_POST['namee']))));
-        $dept = filter_var($_POST['dept'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $post = ucwords(strtolower(strip_tags(addslashes($_POST['post']))));
-        $callType = filter_var($_POST['callType'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $hazardType = filter_var($_POST['hazardType']);
-        $grade = filter_var($_POST['grade'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $gradestep = filter_var($_POST['gradestep'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $doe = date('Y-m-d', strtotime(filter_var($_POST['doe'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $dob = date('Y-m-d', strtotime(filter_var($_POST['dob'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $bank = filter_var($_POST['bank'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $acct_no = filter_var($_POST['acct_no'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $pfa = filter_var($_POST['pfa'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $rsa_pin = filter_var($_POST['rsa_pin'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        //					$citizenship = filter_var($_POST['citizenship'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //
-        //					$emppin = filter_var($_POST['emppin'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //					$empnssf = filter_var($_POST['empnssf'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //					$empnhif = filter_var($_POST['empnhif'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //					$empbank = ucwords(strtolower(strip_tags(addslashes($_POST['empbank']))));
-        //					$empbankbranch = ucwords(strtolower(strip_tags(addslashes($_POST['empbankbranch']))));
-        //
-        //					$empacctnum = ucwords(strtolower(strip_tags(addslashes($_POST['empacctnum']))));
-        //					$empdept = ucwords(strtolower(strip_tags(addslashes($_POST['empdept']))));
-        //					$empcompbranch = ucwords(strtolower(strip_tags(addslashes($_POST['empcompbranch']))));
-        //					$emptype = ucwords(strtolower(strip_tags(addslashes($_POST['emptype']))));
-        //					$empnumber = filter_var($_POST['empnumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //					$employdate = date('Y-m-d', strtotime(filter_var($_POST['employdate'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        //					$empposition = ucwords(strtolower(strip_tags(addslashes($_POST['empposition']))));
-
-        //validate for empty mandatory fields
-
-        try {
-            //check for replication and create period
-
-
-
-            $query = 'UPDATE employee SET HARZAD_TYPE = ?,employee.`NAME` = ? ,employee.POST = ?, employee.DEPTCD = ?, employee.CALLTYPE = ?, employee.GRADE = ?, employee.STEP = ?, employee.EMPDATE = ?, employee.BCODE = ?, employee.ACCTNO = ?, employee.PFACODE = ?, employee.PFAACCTNO = ? WHERE staff_id = ?';
-            //$query = 'INSERT INTO employees (empNumber, fName, lName, gender, idNumber, companyId, companyDept, companyBranch, empType, dob, citizenship, empTaxPin, empNssf, empNhif, empEmplDate, empPosition, active) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
-
-            $conn->prepare($query)->execute(array($hazardType, $namee, $post, $dept,  $callType, $grade, $gradestep, $doe, $bank, $acct_no, $pfa, $rsa_pin, $emp_no));
-
-
-            $_SESSION['msg'] = $msg = "Employee Successfully updated.";
-            $_SESSION['alertcolor'] = 'success';
-            header('Location: ' . $source);
-            //redirect($msg,$type,$source);
-
-
-
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        break;
+            case 'updateEmp':
+                header('Content-Type: application/json; charset=utf-8');
+            
+                // Utility: Simple response helper
+                function respond($data) {
+                    echo json_encode($data);
+                    exit;
+                }
+            
+                // Required fields
+                $required = [
+                    'emp_no', 'namee', 'doe', 'dept', 'designation', 'grade', 'gradestep',
+                    'acct_no', 'bank', 'pfa', 'rsa_pin', 'email'
+                ];
+                foreach ($required as $field) {
+                    if (empty($_POST[$field])) {
+                        respond(['success' => false, 'error' => "Missing required field: $field"]);
+                    }
+                }
+            
+                // Sanitize
+                $emp_no      = filter_var($_POST['emp_no'],      FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $namee       = ucwords(strtolower(trim(strip_tags($_POST['namee']))));
+                $doe         = $_POST['doe'];
+                $dept        = filter_var($_POST['dept'],        FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $designation = ucwords(strtolower(trim(strip_tags($_POST['designation']))));
+                $grade       = filter_var($_POST['grade'],       FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $gradestep   = filter_var($_POST['gradestep'],   FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $acct_no     = preg_replace('/\D/', '', $_POST['acct_no']); // numbers only
+                $bank        = filter_var($_POST['bank'],        FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $pfa         = filter_var($_POST['pfa'],         FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                $rsa_pin     = strip_tags($_POST['rsa_pin']);
+                $email       = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+            
+                // Validate date (YYYY-MM-DD)
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $doe)) {
+                    respond(['success'=>false, 'error'=>'Invalid employment date']);
+                }
+                // Validate email
+                if (!$email) {
+                    respond(['success'=>false, 'error'=>'Invalid email address']);
+                }
+                // Validate account number (example: 10 digits)
+                if (!preg_match('/^\d{10}$/', $acct_no)) {
+                    respond(['success'=>false, 'error'=>'Account number must be 10 digits']);
+                }
+            
+                // Optional: Validate/limit field lengths here (not shown for brevity)
+            
+                try {
+                    $query = "UPDATE employee SET 
+                            EMAIL=?, `NAME`=?, EMPDATE=?, DEPTCD=?, POST=?, 
+                            GRADE=?, STEP=?, ACCTNO=?, BCODE=?, PFACODE=?, 
+                            PFAACCTNO=?, editTime=NOW() 
+                        WHERE staff_id=?";
+            
+                    $stmt = $conn->prepare($query);
+                    $stmt->execute([
+                        $email, $namee, $doe, $dept, $designation, $grade, $gradestep,
+                        $acct_no, $bank, $pfa, $rsa_pin, $emp_no
+                    ]);
+                    // Check affected rows (optional)
+                    if ($stmt->rowCount() > 0) {
+                        respond(['success' => true]);
+                    } else {
+                        respond(['success' => false, 'error' => 'No changes made or staff ID not found.']);
+                    }
+                } catch(PDOException $e) {
+                    respond(['success'=>false, 'error'=>$e->getMessage()]);
+                }
+                // exit; // handled by respond()
+                break;            
 
     case 'getPreviousEmployee':
 
@@ -1452,280 +1494,280 @@ switch ($act) {
         break;
 
 
-    case 'runCurrentEmployeePayroll':
-
-        define('TAX_RELIEF', '1280');
-
-        $thisemployee = filter_var($_POST['thisemployee'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        //check if employee has basic salary, if not return error & exit
-        $query = $conn->prepare('SELECT earningDeductionCode FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ? ');
-        $rerun = $query->execute(array($thisemployee, $_SESSION['companyid'], '200', $_SESSION['currentactiveperiod'], '1'));
-
-        if (!$row = $query->fetch()) {
-            $_SESSION['msg'] = $msg = "This employee has no basic salary. Please assign basic salary in order to process employee's earnings.";
-            $_SESSION['alertcolor'] = 'danger';
-            header('Location: ' . $source);
-        } else {
-
-            //check if employee rerun
-            try {
-                $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ? ');
-                $rerun = $query->execute(array($thisemployee, $_SESSION['companyid'], '601', $_SESSION['currentactiveperiod'], '1'));
-
-                if ($row = $query->fetch()) {
-
-                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
-                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Earning', $_SESSION['currentactiveperiod'], '1'));
-                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                    $thisemployeeearnings = 0;
-
-                    foreach ($res as $row => $link) {
-                        $thisemployeeearnings = $thisemployeeearnings + $link['amount'];
-                    }
-
-                    $recordtime = date('Y-m-d H:i:s');
-                    //Run with an update query
-                    $grossquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($grossquery)->execute(array($thisemployeeearnings, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '601',  $_SESSION['currentactiveperiod'], '1'));
-
-                    //NHIF Bands
-                    if ($thisemployeeearnings > 0 && $thisemployeeearnings < 5999) {
-                        $thisEmpNhif = 150;
-                    } elseif ($thisemployeeearnings > 5999 && $thisemployeeearnings <= 7999) {
-                        $thisEmpNhif = 300;
-                    } elseif ($thisemployeeearnings > 7999 && $thisemployeeearnings <= 11999) {
-                        $thisEmpNhif = 400;
-                    } elseif ($thisemployeeearnings > 11999 && $thisemployeeearnings <= 14999) {
-                        $thisEmpNhif = 500;
-                    } elseif ($thisemployeeearnings > 14999 && $thisemployeeearnings <= 19999) {
-                        $thisEmpNhif = 600;
-                    } elseif ($thisemployeeearnings > 19999 && $thisemployeeearnings <= 24999) {
-                        $thisEmpNhif = 750;
-                    } elseif ($thisemployeeearnings > 24999 && $thisemployeeearnings <= 29999) {
-                        $thisEmpNhif = 850;
-                    } elseif ($thisemployeeearnings > 29999 && $thisemployeeearnings <= 34999) {
-                        $thisEmpNhif = 900;
-                    } elseif ($thisemployeeearnings > 34999 && $thisemployeeearnings <= 39999) {
-                        $thisEmpNhif = 950;
-                    } elseif ($thisemployeeearnings > 39999 && $thisemployeeearnings <= 44999) {
-                        $thisEmpNhif = 1000;
-                    } elseif ($thisemployeeearnings > 44999 && $thisemployeeearnings <= 49999) {
-                        $thisEmpNhif = 1100;
-                    } elseif ($thisemployeeearnings > 49999 && $thisemployeeearnings <= 59999) {
-                        $thisEmpNhif = 1200;
-                    } elseif ($thisemployeeearnings > 59999 && $thisemployeeearnings <= 69999) {
-                        $thisEmpNhif = 1300;
-                    } elseif ($thisemployeeearnings > 69999 && $thisemployeeearnings <= 79999) {
-                        $thisEmpNhif = 1400;
-                    } elseif ($thisemployeeearnings > 79999 && $thisemployeeearnings <= 89999) {
-                        $thisEmpNhif = 1500;
-                    } elseif ($thisemployeeearnings > 89999 && $thisemployeeearnings <= 99999) {
-                        $thisEmpNhif = 1600;
-                    } elseif ($thisemployeeearnings > 99999) {
-                        $thisEmpNhif = 1700;
-                    }
-
-                    $nhifquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($nhifquery)->execute(array($thisEmpNhif, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '481',  $_SESSION['currentactiveperiod'], '1'));
-
-                    //NSSF is standard. No recalculation
-                    $thisemployeeNssfBand1 = 200;
-                    //Compute Taxable Income
-                    $thisEmpTaxablePay = $thisemployeeearnings - $thisemployeeNssfBand1;
-                    $taxpayquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($taxpayquery)->execute(array($thisEmpTaxablePay, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '400',  $_SESSION['currentactiveperiod'], '1'));
-
-                    //Compute PAYE
-                    $employeepayee = 0;
-                    $taxpay = $thisEmpTaxablePay;
-                    if ($taxpay > 0 && $taxpay <= 11180) {
-                        $employeepayee = $taxpay * 0.1;
-                    } elseif ($taxpay > 11180 && $taxpay <= 21714) {
-                        $employeepayee = (11180 * 0.1) + (($taxpay - 11180) * 0.15);
-                    } elseif ($taxpay > 21714 && $taxpay <= 32248) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (($taxpay - 11181 - 10533) * 0.2);
-                    } elseif ($taxpay > 32248 && $taxpay <= 42782) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (($taxpay - 11181 - 10533 - 10534) * 0.25);
-                    } elseif ($taxpay > 42782) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (10534 * 0.25) + (($taxpay - 11181 - 10533 - 10534 - 10534) * 0.3);
-                    }
-
-                    $taxcharged = $employeepayee;
-                    $taxchargequery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($taxchargequery)->execute(array($taxcharged, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '399',  $_SESSION['currentactiveperiod'], '1'));
-
-
-                    $finalEmployeePayee = $employeepayee - TAX_RELIEF;
-
-                    if ($finalEmployeePayee  <= 0) {
-                        $finalEmployeePayee = 0;
-                    }
-
-                    $taxpayequery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($taxpayequery)->execute(array($finalEmployeePayee, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '550',  $_SESSION['currentactiveperiod'], '1'));
-
-
-                    //Fetch and populate all deductions and write total
-                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
-                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', $_SESSION['currentactiveperiod'], '1'));
-                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                    $thisemployeeearnings = 0;
-
-                    foreach ($res as $row => $link) {
-                        $thisemployeedeductions = $thisemployeedeductions + $link['amount'];
-                    }
-
-                    $recordtime = date('Y-m-d H:i:s');
-                    $deductionsquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($deductionsquery)->execute(array($thisemployeedeductions, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '603',  $_SESSION['currentactiveperiod'], '1'));
-
-                    //Calculate Net Salary
-                    $thisemployeeNet = $thisEmpTaxablePay - $thisemployeedeductions;
-
-                    $netquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
-                    $conn->prepare($netquery)->execute(array($thisemployeeNet, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '600',  $_SESSION['currentactiveperiod'], '1'));
-
-
-                    $_SESSION['msg'] = 'Employee payroll re-run successful';
-                    $_SESSION['alertcolor'] = 'success';
-                    //echo $thisemployeeearnings;
-                    //exit("Re run");
-                    header('Location: ' . $source);
-                } else {
-                    //new; insert records
-                    //Fetch and populate all taxable earnings and write total
-                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
-                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Earning', $_SESSION['currentactiveperiod'], '1'));
-                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                    $thisemployeeearnings = 0;
-
-                    foreach ($res as $row => $link) {
-                        $thisemployeeearnings = $thisemployeeearnings + $link['amount'];
-                    }
-
-                    $recordtime = date('Y-m-d H:i:s');
-                    $grossquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($grossquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '601', $thisemployeeearnings, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    //Get initial statutories - NHIF, NSSF, Tax relief
-                    //NHIF Bands
-                    if ($thisemployeeearnings > 0 && $thisemployeeearnings < 5999) {
-                        $thisEmpNhif = 150;
-                    } elseif ($thisemployeeearnings > 5999 && $thisemployeeearnings <= 7999) {
-                        $thisEmpNhif = 300;
-                    } elseif ($thisemployeeearnings > 7999 && $thisemployeeearnings <= 11999) {
-                        $thisEmpNhif = 400;
-                    } elseif ($thisemployeeearnings > 11999 && $thisemployeeearnings <= 14999) {
-                        $thisEmpNhif = 500;
-                    } elseif ($thisemployeeearnings > 14999 && $thisemployeeearnings <= 19999) {
-                        $thisEmpNhif = 600;
-                    } elseif ($thisemployeeearnings > 19999 && $thisemployeeearnings <= 24999) {
-                        $thisEmpNhif = 750;
-                    } elseif ($thisemployeeearnings > 24999 && $thisemployeeearnings <= 29999) {
-                        $thisEmpNhif = 850;
-                    } elseif ($thisemployeeearnings > 29999 && $thisemployeeearnings <= 34999) {
-                        $thisEmpNhif = 900;
-                    } elseif ($thisemployeeearnings > 34999 && $thisemployeeearnings <= 39999) {
-                        $thisEmpNhif = 950;
-                    } elseif ($thisemployeeearnings > 39999 && $thisemployeeearnings <= 44999) {
-                        $thisEmpNhif = 1000;
-                    } elseif ($thisemployeeearnings > 44999 && $thisemployeeearnings <= 49999) {
-                        $thisEmpNhif = 1100;
-                    } elseif ($thisemployeeearnings > 49999 && $thisemployeeearnings <= 59999) {
-                        $thisEmpNhif = 1200;
-                    } elseif ($thisemployeeearnings > 59999 && $thisemployeeearnings <= 69999) {
-                        $thisEmpNhif = 1300;
-                    } elseif ($thisemployeeearnings > 69999 && $thisemployeeearnings <= 79999) {
-                        $thisEmpNhif = 1400;
-                    } elseif ($thisemployeeearnings > 79999 && $thisemployeeearnings <= 89999) {
-                        $thisEmpNhif = 1500;
-                    } elseif ($thisemployeeearnings > 89999 && $thisemployeeearnings <= 99999) {
-                        $thisEmpNhif = 1600;
-                    } elseif ($thisemployeeearnings > 99999) {
-                        $thisEmpNhif = 1700;
-                    }
-
-                    $nhifquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($nhifquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '481', $thisEmpNhif, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    //NSSF Band Calculation
-                    $thisemployeeNssfBand1 = 200;
-
-                    /*$thisemployeeNssfBand1 = $thisemployeeearnings * 0.06;
-                            if ($thisemployeeNssfBand1 > 360) {
-                                $thisemployeeNssfBand1 = 360;
-                            }*/
-                    $nssfquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($nssfquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '482', $thisemployeeNssfBand1, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    //Compute Taxable Income
-                    $thisEmpTaxablePay = $thisemployeeearnings - $thisemployeeNssfBand1;
-                    $taxpayquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($taxpayquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '400', $thisEmpTaxablePay, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-
-                    //Compute PAYE
-                    $employeepayee = 0;
-                    $taxpay = $thisEmpTaxablePay;
-                    if ($taxpay > 0 && $taxpay <= 11180) {
-                        $employeepayee = $taxpay * 0.1;
-                    } elseif ($taxpay > 11180 && $taxpay <= 21714) {
-                        $employeepayee = (11180 * 0.1) + (($taxpay - 11180) * 0.15);
-                    } elseif ($taxpay > 21714 && $taxpay <= 32248) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (($taxpay - 11181 - 10533) * 0.2);
-                    } elseif ($taxpay > 32248 && $taxpay <= 42782) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (($taxpay - 11181 - 10533 - 10534) * 0.25);
-                    } elseif ($taxpay > 42782) {
-                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (10534 * 0.25) + (($taxpay - 11181 - 10533 - 10534 - 10534) * 0.3);
-                    }
-
-                    $taxcharged = $employeepayee;
-                    $taxchargequery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($taxchargequery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '399', $taxcharged, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    $finalEmployeePayee = $employeepayee - TAX_RELIEF;
-
-                    if ($finalEmployeePayee  <= 0) {
-                        $finalEmployeePayee = 0;
-                    }
-
-                    $taxpayequery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($taxpayequery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '550', $finalEmployeePayee, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-
-                    //Fetch and populate all deductions and write total
-                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
-                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', $_SESSION['currentactiveperiod'], '1'));
-                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                    $thisemployeedeductions = 0;
-
-                    foreach ($res as $row => $link) {
-                        $thisemployeedeductions = $thisemployeedeductions + $link['amount'];
-                    }
-
-                    $recordtime = date('Y-m-d H:i:s');
-                    $deductionsquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($deductionsquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '603', $thisemployeedeductions, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    //Calculate Net Salary
-                    $thisemployeeNet = $thisEmpTaxablePay - $thisemployeedeductions;
-
-                    $netquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
-                    $conn->prepare($netquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '600', $thisemployeeNet, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
-
-                    $_SESSION['msg'] = 'Employee payroll run successful';
-                    $_SESSION['alertcolor'] = 'success';
-                    header('Location: ' . $source);
-                }
-            } catch (PDOException $e) {
-                echo $e->getMessage();
-            }
-        }
-
-
-
-        break;
+//    case 'runCurrentEmployeePayroll':
+//
+//        define('TAX_RELIEF', '1280');
+//
+//        $thisemployee = filter_var($_POST['thisemployee'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//
+//        //check if employee has basic salary, if not return error & exit
+//        $query = $conn->prepare('SELECT earningDeductionCode FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ? ');
+//        $rerun = $query->execute(array($thisemployee, $_SESSION['companyid'], '200', $_SESSION['currentactiveperiod'], '1'));
+//
+//        if (!$row = $query->fetch()) {
+//            $_SESSION['msg'] = $msg = "This employee has no basic salary. Please assign basic salary in order to process employee's earnings.";
+//            $_SESSION['alertcolor'] = 'danger';
+//            header('Location: ' . $source);
+//        } else {
+//
+//            //check if employee rerun
+//            try {
+//                $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ? ');
+//                $rerun = $query->execute(array($thisemployee, $_SESSION['companyid'], '601', $_SESSION['currentactiveperiod'], '1'));
+//
+//                if ($row = $query->fetch()) {
+//
+//                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
+//                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Earning', $_SESSION['currentactiveperiod'], '1'));
+//                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+//                    $thisemployeeearnings = 0;
+//
+//                    foreach ($res as $row => $link) {
+//                        $thisemployeeearnings = $thisemployeeearnings + $link['amount'];
+//                    }
+//
+//                    $recordtime = date('Y-m-d H:i:s');
+//                    //Run with an update query
+//                    $grossquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($grossquery)->execute(array($thisemployeeearnings, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '601',  $_SESSION['currentactiveperiod'], '1'));
+//
+//                    //NHIF Bands
+//                    if ($thisemployeeearnings > 0 && $thisemployeeearnings < 5999) {
+//                        $thisEmpNhif = 150;
+//                    } elseif ($thisemployeeearnings > 5999 && $thisemployeeearnings <= 7999) {
+//                        $thisEmpNhif = 300;
+//                    } elseif ($thisemployeeearnings > 7999 && $thisemployeeearnings <= 11999) {
+//                        $thisEmpNhif = 400;
+//                    } elseif ($thisemployeeearnings > 11999 && $thisemployeeearnings <= 14999) {
+//                        $thisEmpNhif = 500;
+//                    } elseif ($thisemployeeearnings > 14999 && $thisemployeeearnings <= 19999) {
+//                        $thisEmpNhif = 600;
+//                    } elseif ($thisemployeeearnings > 19999 && $thisemployeeearnings <= 24999) {
+//                        $thisEmpNhif = 750;
+//                    } elseif ($thisemployeeearnings > 24999 && $thisemployeeearnings <= 29999) {
+//                        $thisEmpNhif = 850;
+//                    } elseif ($thisemployeeearnings > 29999 && $thisemployeeearnings <= 34999) {
+//                        $thisEmpNhif = 900;
+//                    } elseif ($thisemployeeearnings > 34999 && $thisemployeeearnings <= 39999) {
+//                        $thisEmpNhif = 950;
+//                    } elseif ($thisemployeeearnings > 39999 && $thisemployeeearnings <= 44999) {
+//                        $thisEmpNhif = 1000;
+//                    } elseif ($thisemployeeearnings > 44999 && $thisemployeeearnings <= 49999) {
+//                        $thisEmpNhif = 1100;
+//                    } elseif ($thisemployeeearnings > 49999 && $thisemployeeearnings <= 59999) {
+//                        $thisEmpNhif = 1200;
+//                    } elseif ($thisemployeeearnings > 59999 && $thisemployeeearnings <= 69999) {
+//                        $thisEmpNhif = 1300;
+//                    } elseif ($thisemployeeearnings > 69999 && $thisemployeeearnings <= 79999) {
+//                        $thisEmpNhif = 1400;
+//                    } elseif ($thisemployeeearnings > 79999 && $thisemployeeearnings <= 89999) {
+//                        $thisEmpNhif = 1500;
+//                    } elseif ($thisemployeeearnings > 89999 && $thisemployeeearnings <= 99999) {
+//                        $thisEmpNhif = 1600;
+//                    } elseif ($thisemployeeearnings > 99999) {
+//                        $thisEmpNhif = 1700;
+//                    }
+//
+//                    $nhifquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($nhifquery)->execute(array($thisEmpNhif, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '481',  $_SESSION['currentactiveperiod'], '1'));
+//
+//                    //NSSF is standard. No recalculation
+//                    $thisemployeeNssfBand1 = 200;
+//                    //Compute Taxable Income
+//                    $thisEmpTaxablePay = $thisemployeeearnings - $thisemployeeNssfBand1;
+//                    $taxpayquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($taxpayquery)->execute(array($thisEmpTaxablePay, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '400',  $_SESSION['currentactiveperiod'], '1'));
+//
+//                    //Compute PAYE
+//                    $employeepayee = 0;
+//                    $taxpay = $thisEmpTaxablePay;
+//                    if ($taxpay > 0 && $taxpay <= 11180) {
+//                        $employeepayee = $taxpay * 0.1;
+//                    } elseif ($taxpay > 11180 && $taxpay <= 21714) {
+//                        $employeepayee = (11180 * 0.1) + (($taxpay - 11180) * 0.15);
+//                    } elseif ($taxpay > 21714 && $taxpay <= 32248) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (($taxpay - 11181 - 10533) * 0.2);
+//                    } elseif ($taxpay > 32248 && $taxpay <= 42782) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (($taxpay - 11181 - 10533 - 10534) * 0.25);
+//                    } elseif ($taxpay > 42782) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (10534 * 0.25) + (($taxpay - 11181 - 10533 - 10534 - 10534) * 0.3);
+//                    }
+//
+//                    $taxcharged = $employeepayee;
+//                    $taxchargequery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($taxchargequery)->execute(array($taxcharged, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '399',  $_SESSION['currentactiveperiod'], '1'));
+//
+//
+//                    $finalEmployeePayee = $employeepayee - TAX_RELIEF;
+//
+//                    if ($finalEmployeePayee  <= 0) {
+//                        $finalEmployeePayee = 0;
+//                    }
+//
+//                    $taxpayequery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($taxpayequery)->execute(array($finalEmployeePayee, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '550',  $_SESSION['currentactiveperiod'], '1'));
+//
+//
+//                    //Fetch and populate all deductions and write total
+//                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
+//                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', $_SESSION['currentactiveperiod'], '1'));
+//                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+//                    $thisemployeeearnings = 0;
+//
+//                    foreach ($res as $row => $link) {
+//                        $thisemployeedeductions = $thisemployeedeductions + $link['amount'];
+//                    }
+//
+//                    $recordtime = date('Y-m-d H:i:s');
+//                    $deductionsquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($deductionsquery)->execute(array($thisemployeedeductions, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '603',  $_SESSION['currentactiveperiod'], '1'));
+//
+//                    //Calculate Net Salary
+//                    $thisemployeeNet = $thisEmpTaxablePay - $thisemployeedeductions;
+//
+//                    $netquery = 'UPDATE employee_earnings_deductions SET amount = ?, editTime = ?, userId = ? WHERE employeeId = ? AND companyId = ? AND earningDeductionCode = ? AND payPeriod = ? AND active = ?';
+//                    $conn->prepare($netquery)->execute(array($thisemployeeNet, $recordtime, $_SESSION['user'], $thisemployee, $_SESSION['companyid'], '600',  $_SESSION['currentactiveperiod'], '1'));
+//
+//
+//                    $_SESSION['msg'] = 'Employee payroll re-run successful';
+//                    $_SESSION['alertcolor'] = 'success';
+//                    //echo $thisemployeeearnings;
+//                    //exit("Re run");
+//                    header('Location: ' . $source);
+//                } else {
+//                    //new; insert records
+//                    //Fetch and populate all taxable earnings and write total
+//                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
+//                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Earning', $_SESSION['currentactiveperiod'], '1'));
+//                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+//                    $thisemployeeearnings = 0;
+//
+//                    foreach ($res as $row => $link) {
+//                        $thisemployeeearnings = $thisemployeeearnings + $link['amount'];
+//                    }
+//
+//                    $recordtime = date('Y-m-d H:i:s');
+//                    $grossquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($grossquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '601', $thisemployeeearnings, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    //Get initial statutories - NHIF, NSSF, Tax relief
+//                    //NHIF Bands
+//                    if ($thisemployeeearnings > 0 && $thisemployeeearnings < 5999) {
+//                        $thisEmpNhif = 150;
+//                    } elseif ($thisemployeeearnings > 5999 && $thisemployeeearnings <= 7999) {
+//                        $thisEmpNhif = 300;
+//                    } elseif ($thisemployeeearnings > 7999 && $thisemployeeearnings <= 11999) {
+//                        $thisEmpNhif = 400;
+//                    } elseif ($thisemployeeearnings > 11999 && $thisemployeeearnings <= 14999) {
+//                        $thisEmpNhif = 500;
+//                    } elseif ($thisemployeeearnings > 14999 && $thisemployeeearnings <= 19999) {
+//                        $thisEmpNhif = 600;
+//                    } elseif ($thisemployeeearnings > 19999 && $thisemployeeearnings <= 24999) {
+//                        $thisEmpNhif = 750;
+//                    } elseif ($thisemployeeearnings > 24999 && $thisemployeeearnings <= 29999) {
+//                        $thisEmpNhif = 850;
+//                    } elseif ($thisemployeeearnings > 29999 && $thisemployeeearnings <= 34999) {
+//                        $thisEmpNhif = 900;
+//                    } elseif ($thisemployeeearnings > 34999 && $thisemployeeearnings <= 39999) {
+//                        $thisEmpNhif = 950;
+//                    } elseif ($thisemployeeearnings > 39999 && $thisemployeeearnings <= 44999) {
+//                        $thisEmpNhif = 1000;
+//                    } elseif ($thisemployeeearnings > 44999 && $thisemployeeearnings <= 49999) {
+//                        $thisEmpNhif = 1100;
+//                    } elseif ($thisemployeeearnings > 49999 && $thisemployeeearnings <= 59999) {
+//                        $thisEmpNhif = 1200;
+//                    } elseif ($thisemployeeearnings > 59999 && $thisemployeeearnings <= 69999) {
+//                        $thisEmpNhif = 1300;
+//                    } elseif ($thisemployeeearnings > 69999 && $thisemployeeearnings <= 79999) {
+//                        $thisEmpNhif = 1400;
+//                    } elseif ($thisemployeeearnings > 79999 && $thisemployeeearnings <= 89999) {
+//                        $thisEmpNhif = 1500;
+//                    } elseif ($thisemployeeearnings > 89999 && $thisemployeeearnings <= 99999) {
+//                        $thisEmpNhif = 1600;
+//                    } elseif ($thisemployeeearnings > 99999) {
+//                        $thisEmpNhif = 1700;
+//                    }
+//
+//                    $nhifquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($nhifquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '481', $thisEmpNhif, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    //NSSF Band Calculation
+//                    $thisemployeeNssfBand1 = 200;
+//
+//                    /*$thisemployeeNssfBand1 = $thisemployeeearnings * 0.06;
+//                            if ($thisemployeeNssfBand1 > 360) {
+//                                $thisemployeeNssfBand1 = 360;
+//                            }*/
+//                    $nssfquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($nssfquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '482', $thisemployeeNssfBand1, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    //Compute Taxable Income
+//                    $thisEmpTaxablePay = $thisemployeeearnings - $thisemployeeNssfBand1;
+//                    $taxpayquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($taxpayquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '400', $thisEmpTaxablePay, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//
+//                    //Compute PAYE
+//                    $employeepayee = 0;
+//                    $taxpay = $thisEmpTaxablePay;
+//                    if ($taxpay > 0 && $taxpay <= 11180) {
+//                        $employeepayee = $taxpay * 0.1;
+//                    } elseif ($taxpay > 11180 && $taxpay <= 21714) {
+//                        $employeepayee = (11180 * 0.1) + (($taxpay - 11180) * 0.15);
+//                    } elseif ($taxpay > 21714 && $taxpay <= 32248) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (($taxpay - 11181 - 10533) * 0.2);
+//                    } elseif ($taxpay > 32248 && $taxpay <= 42782) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (($taxpay - 11181 - 10533 - 10534) * 0.25);
+//                    } elseif ($taxpay > 42782) {
+//                        $employeepayee = (11180 * 0.1) + (10534 * 0.15) + (10534 * 0.2) + (10534 * 0.25) + (($taxpay - 11181 - 10533 - 10534 - 10534) * 0.3);
+//                    }
+//
+//                    $taxcharged = $employeepayee;
+//                    $taxchargequery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($taxchargequery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '399', $taxcharged, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    $finalEmployeePayee = $employeepayee - TAX_RELIEF;
+//
+//                    if ($finalEmployeePayee  <= 0) {
+//                        $finalEmployeePayee = 0;
+//                    }
+//
+//                    $taxpayequery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($taxpayequery)->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', '550', $finalEmployeePayee, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//
+//                    //Fetch and populate all deductions and write total
+//                    $query = $conn->prepare('SELECT * FROM employee_earnings_deductions WHERE employeeId = ? AND companyId = ? AND transactionType = ? AND payPeriod = ? AND active = ? ');
+//                    $fin = $query->execute(array($thisemployee, $_SESSION['companyid'], 'Deduction', $_SESSION['currentactiveperiod'], '1'));
+//                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+//                    $thisemployeedeductions = 0;
+//
+//                    foreach ($res as $row => $link) {
+//                        $thisemployeedeductions = $thisemployeedeductions + $link['amount'];
+//                    }
+//
+//                    $recordtime = date('Y-m-d H:i:s');
+//                    $deductionsquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($deductionsquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '603', $thisemployeedeductions, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    //Calculate Net Salary
+//                    $thisemployeeNet = $thisEmpTaxablePay - $thisemployeedeductions;
+//
+//                    $netquery = 'INSERT INTO employee_earnings_deductions (employeeId, companyId, transactionType, earningDeductionCode, amount, payPeriod, standardRecurrent, active, editTime, userId) VALUES (?,?,?,?,?,?,?,?,?,?)';
+//                    $conn->prepare($netquery)->execute(array($thisemployee, $_SESSION['companyid'], 'Calc', '600', $thisemployeeNet, $_SESSION['currentactiveperiod'], '0', '1', $recordtime, $_SESSION['user']));
+//
+//                    $_SESSION['msg'] = 'Employee payroll run successful';
+//                    $_SESSION['alertcolor'] = 'success';
+//                    header('Location: ' . $source);
+//                }
+//            } catch (PDOException $e) {
+//                echo $e->getMessage();
+//            }
+//        }
+//
+//
+//
+//        break;
 
 
     case 'runGlobalPayroll':
@@ -2013,85 +2055,147 @@ switch ($act) {
         break;
 
 
-    case 'addNewLeave':
-        //check for existing same employee number
-
-        $empnumber = filter_var($_POST['empnumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $leavetype = filter_var($_POST['leavetype'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $startleave = date('Y-m-d', strtotime(filter_var($_POST['startleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $day1 = strtotime(filter_var($_POST['startleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-        $endleave = date('Y-m-d', strtotime(filter_var($_POST['endleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $day2 = strtotime(filter_var($_POST['endleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-
-        $days_diff = $day2 - $day1;
-        $numofdays = date('d', $days_diff);
-
-        $currdate = date('Y-m-d');
-        //validate for empty mandatory fields
-
-        try {
-            //check for same leave request for same staffer
-            $leavequery = $conn->prepare('SELECT * FROM hr_leave_requests WHERE employeeNumber = ? AND leaveType = ? AND status = ? OR status = ? AND active = ?');
-            $res = $leavequery->execute(array($empnumber, $leavetype, '1', '2', '1'));
-
-            if ($row = $leavequery->fetch()) {
-                $_SESSION['msg'] = $msg = "Active / Pending similar leave type for this employee. Please review all approved or pending leave requests.";
-                $_SESSION['alertcolor'] = 'danger';
-                header('Location: ' . $source);
-            } else {
-                $query = 'INSERT INTO hr_leave_requests (employeeNumber, leaveType, fromDate, toDate, applicationDate, numberOfDays, status) VALUES (?,?,?,?,?,?,?)';
-
-                $conn->prepare($query)->execute(array($empnumber, $leavetype, $startleave, $endleave, $currdate, $numofdays, '2'));
-
-                $_SESSION['msg'] = $msg = "New Leave Successfully added.";
-                $_SESSION['alertcolor'] = 'success';
-                header('Location: ' . $source);
-            }
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-
-        break;
-
-
-    case 'manageLeave':
-
-        $empalternumber = filter_var($_POST['empalternumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $empalterid = filter_var($_POST['empalterid'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $leaveaction = filter_var($_POST['leaveaction'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //exit($empalternumber . ",". $empalterid. "," .$leaveaction);
-
-        try {
-
-            $query = ('UPDATE hr_leave_requests SET status = ? WHERE id = ? AND employeeNumber = ?');
-            $conn->prepare($query)->execute(array($leaveaction, $empalterid, $empalternumber));
-
-            $_SESSION['msg'] = $msg = "Leave status successfully amended";
-            $_SESSION['alertcolor'] = 'success';
-            header('Location: ' . $source);
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
+//    case 'addNewLeave':
+//        //check for existing same employee number
+//
+//        $empnumber = filter_var($_POST['empnumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $leavetype = filter_var($_POST['leavetype'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $startleave = date('Y-m-d', strtotime(filter_var($_POST['startleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
+//        $day1 = strtotime(filter_var($_POST['startleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+//        $endleave = date('Y-m-d', strtotime(filter_var($_POST['endleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
+//        $day2 = strtotime(filter_var($_POST['endleave'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+//
+//        $days_diff = $day2 - $day1;
+//        $numofdays = date('d', $days_diff);
+//
+//        $currdate = date('Y-m-d');
+//        //validate for empty mandatory fields
+//
+//        try {
+//            //check for same leave request for same staffer
+//            $leavequery = $conn->prepare('SELECT * FROM hr_leave_requests WHERE employeeNumber = ? AND leaveType = ? AND status = ? OR status = ? AND active = ?');
+//            $res = $leavequery->execute(array($empnumber, $leavetype, '1', '2', '1'));
+//
+//            if ($row = $leavequery->fetch()) {
+//                $_SESSION['msg'] = $msg = "Active / Pending similar leave type for this employee. Please review all approved or pending leave requests.";
+//                $_SESSION['alertcolor'] = 'danger';
+//                header('Location: ' . $source);
+//            } else {
+//                $query = 'INSERT INTO hr_leave_requests (employeeNumber, leaveType, fromDate, toDate, applicationDate, numberOfDays, status) VALUES (?,?,?,?,?,?,?)';
+//
+//                $conn->prepare($query)->execute(array($empnumber, $leavetype, $startleave, $endleave, $currdate, $numofdays, '2'));
+//
+//                $_SESSION['msg'] = $msg = "New Leave Successfully added.";
+//                $_SESSION['alertcolor'] = 'success';
+//                header('Location: ' . $source);
+//            }
+//        } catch (PDOException $e) {
+//            echo $e->getMessage();
+//        }
 
         break;
+
+
+//    case 'manageLeave':
+//
+//        $empalternumber = filter_var($_POST['empalternumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $empalterid = filter_var($_POST['empalterid'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        $leaveaction = filter_var($_POST['leaveaction'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+//        //exit($empalternumber . ",". $empalterid. "," .$leaveaction);
+//
+//        try {
+//
+//            $query = ('UPDATE hr_leave_requests SET status = ? WHERE id = ? AND employeeNumber = ?');
+//            $conn->prepare($query)->execute(array($leaveaction, $empalterid, $empalternumber));
+//
+//            $_SESSION['msg'] = $msg = "Leave status successfully amended";
+//            $_SESSION['alertcolor'] = 'success';
+//            header('Location: ' . $source);
+//        } catch (PDOException $e) {
+//            echo $e->getMessage();
+//        }
+
+//        break;
 
 
     case 'deactivateEmployee':
+
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
+
+        // Validate API_KEY
+        if (empty($_ENV['API_KEY'])) {
+            error_log("DeactivateEmployee: Missing API_KEY in .env");
+        }
+
         $empalterid = filter_var($_POST['empalterid'], FILTER_VALIDATE_INT);
-        $empalternumber = filter_var($_POST['empalternumber'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        //$exitdate = date('Y-m-d', strtotime(filter_var($_POST['exitdate'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS)));
-        $deactivate = filter_var($_POST['deactivate'],  FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $empalternumber = filter_var($_POST['empalternumber'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $deactivate = filter_var($_POST['deactivate'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $editDate = date('Y-m-d H:i:s');
 
-        //exit($empalternumber . ", " . $empalterid . ", " . $exitdate . ", " . $exitreason);
-        $query = 'UPDATE employee SET STATUSCD = ? WHERE staff_id = ?';
-        $conn->prepare($query)->execute(array($deactivate, $empalterid));
+        // Get the employee's email
+        $email = null;
+        try {
+            $query = 'SELECT EMAIL FROM employee WHERE staff_id = ?';
+            $stmt = $conn->prepare($query);
+            $stmt->execute([$empalterid]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $email = $result['EMAIL'] ?? null;
+        } catch (PDOException $e) {
+            error_log("DeactivateEmployee: Failed to fetch email for staff_id $empalterid: " . $e->getMessage());
+        }
 
-        //	$deactivatequery = 'INSERT INTO hr_exited_employees (employeeId, exitDate, exitReason, editTime, userEditorId) VALUES (?,?,?,?,?)';
-        //	$conn->prepare($deactivatequery)->execute (array($empalternumber, $exitdate, $exitreason, $editDate, $_SESSION['user']));
+        // Make API call to delete email if email exists and API_KEY is set
+        if (in_array($deactivate, ['A', 'S'])) {
+            error_log("DeactivateEmployee: Skipped email deletion for staff_id $empalterid, email $email, status $deactivate (ACTIVE or SUSPENSION)");
+        } elseif ($email && !empty($_ENV['API_KEY'])) {
+            $apiUrl = 'https://oouth.com/admin_mail/delete-email-api.php'; // Replace with actual domain
+            $apiKey = $_ENV['API_KEY'];
+            $payload = json_encode(['email' => $email]);
 
-        $_SESSION['msg'] = $msg = "Employee successfully deactivated.";
-        $_SESSION['alertcolor'] = 'success';
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer $apiKey",
+                "Content-Type: application/json"
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                error_log("DeactivateEmployee: cURL error for email $email: " . curl_error($ch));
+            } elseif ($httpCode !== 200) {
+                error_log("DeactivateEmployee: HTTP $httpCode for email $email: $response");
+            } else {
+                $data = json_decode($response, true);
+                if (isset($data['results']['success'][0])) {
+                    error_log("DeactivateEmployee: Successfully deleted email $email");
+                } else {
+                    $reason = $data['results']['failure'][0]['reason'] ?? $data['results']['skipped'][0]['reason'] ?? 'Unknown error';
+                    error_log("DeactivateEmployee: Failed to delete email $email: $reason");
+                }
+            }
+            curl_close($ch);
+        } elseif (!$email) {
+            error_log("DeactivateEmployee: No email found for staff_id $empalterid");
+        }
+
+        // Update employee status
+        try {
+            $query = 'UPDATE employee SET STATUSCD = ? WHERE staff_id = ?';
+            $conn->prepare($query)->execute([$deactivate, $empalterid]);
+            $_SESSION['msg'] = "Employee successfully deactivated.";
+            $_SESSION['alertcolor'] = 'success';
+        } catch (PDOException $e) {
+            error_log("DeactivateEmployee: Failed to update status for staff_id $empalterid: " . $e->getMessage());
+            $_SESSION['msg'] = "Failed to deactivate employee.";
+            $_SESSION['alertcolor'] = 'danger';
+        }
+
         header('Location: ' . $source);
         break;
 
@@ -2178,90 +2282,90 @@ switch ($act) {
         break;
 
 
-    case 'resetpass':
-        //exit('reset');
-
-        $title = "Password Reset";
-        $resetemail = filter_var((filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
-
-        //check if account exists with emailaddress
-        $query = $conn->prepare('SELECT emailAddress FROM users WHERE emailAddress = ? AND active = ?');
-        $fin = $query->execute(array($resetemail, '1'));
-
-        if ($row = $query->fetch()) {
-
-            //Generate update token
-            $reset_token = bin2hex(openssl_random_pseudo_bytes(32));
-
-            //write token to token table and assign validity state, creation timestamp
-            $tokenrecordtime = date('Y-m-d H:i:s');
-
-            //check for any previous tokens and invalidate
-            $tokquery = $conn->prepare('SELECT * FROM reset_token WHERE userEmail = ? AND valid = ? AND type = ?');
-            $fin = $tokquery->execute(array($resetemail, '1', '1'));
-
-            if ($row = $tokquery->fetch()) {
-                $upquery = 'UPDATE reset_token SET valid = ? WHERE userEmail = ? AND valid = ?';
-                $conn->prepare($upquery)->execute(array('0', $resetemail, '1'));
-            }
-
-            $tokenquery = 'INSERT INTO reset_token (userEmail, token, creationTime, valid, type) VALUES (?,?,?,?,?)';
-            $conn->prepare($tokenquery)->execute(array($resetemail, $reset_token, $tokenrecordtime, '1', '1'));
-
-            //exit($resetemail . " " . $reset_token);
-
-            $sendmessage = "You've recently asked to reset the password for this Redsphere Payroll account: " . $resetemail . "<br /><br />To update your password, click the link below:<br /><br /> " . $sysurl . 'password_reset.php?token=' . $reset_token;
-            //generate reset cdde and append to email submitted
-
-            require 'phpmailer/PHPMailerAutoload.php';
-
-            $mail = new PHPMailer;
-
-            $mail->SMTPDebug = 3;                               // Enable verbose debug output
-
-            $mail->isSMTP();                                      // Set mailer to use SMTP
-            $mail->Host = 'smtp.zoho.com';  // Specify main and backup SMTP servers
-            $mail->SMTPAuth = true;                               // Enable SMTP authentication
-            $mail->Username = 'noreply@redsphere.co.ke';                 // SMTP username
-            $mail->Password = 'redsphere_2017***';                           // SMTP password
-            $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-            $mail->Port = 587;                                    // TCP port to connect to
-
-            $mail->setFrom('noreply@redsphere.co.ke', 'Redsphere Payroll');
-            $mail->addAddress($resetemail, 'Redsphere Payroll');     // Add a recipient
-            //$mail->addAddress('ellen@example.com');               // Name is optional
-            $mail->addReplyTo('info@example.com', 'Information');
-            $mail->addCC('fgesora@gmail.com');
-            //$mail->addBCC('bcc@example.com');
-
-            //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
-            //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
-            $mail->isHTML(true);                                  // Set email format to HTML
-
-            $mail->Subject = $title;
-            $mail->Body    = $sendmessage;
-            $mail->AltBody = $sendmessage;
-
-            if (!$mail->send()) {
-                //exit($mail->ErrorInfo);
-                echo 'Mailer Error: ' . $mail->ErrorInfo;
-                $_SESSION['msg'] = "Failed. Error sending email.";
-                $_SESSION['alertcolor'] = "danger";
-                header("Location: " . $source);
-            } else {
-                $status = "Success";
-                $_SESSION['msg'] = "If there is an account associated with this email address, an email has been sent to reset your password.";
-                $_SESSION['alertcolor'] = "success";
-                header("Location: " . $source);
-            }
-        } else {
-
-            $_SESSION['msg'] = "If there is an account associated with this email address, an email has been sent to reset your password.";
-            $_SESSION['alertcolor'] = "success";
-            header("Location: " . $source);
-        }
-
-        break;
+//    case 'resetpass':
+//        //exit('reset');
+//
+//        $title = "Password Reset";
+//        $resetemail = filter_var((filter_var($_POST['email'], FILTER_SANITIZE_EMAIL)), FILTER_VALIDATE_EMAIL);
+//
+//        //check if account exists with emailaddress
+//        $query = $conn->prepare('SELECT emailAddress FROM users WHERE emailAddress = ? AND active = ?');
+//        $fin = $query->execute(array($resetemail, '1'));
+//
+//        if ($row = $query->fetch()) {
+//
+//            //Generate update token
+//            $reset_token = bin2hex(openssl_random_pseudo_bytes(32));
+//
+//            //write token to token table and assign validity state, creation timestamp
+//            $tokenrecordtime = date('Y-m-d H:i:s');
+//
+//            //check for any previous tokens and invalidate
+//            $tokquery = $conn->prepare('SELECT * FROM reset_token WHERE userEmail = ? AND valid = ? AND type = ?');
+//            $fin = $tokquery->execute(array($resetemail, '1', '1'));
+//
+//            if ($row = $tokquery->fetch()) {
+//                $upquery = 'UPDATE reset_token SET valid = ? WHERE userEmail = ? AND valid = ?';
+//                $conn->prepare($upquery)->execute(array('0', $resetemail, '1'));
+//            }
+//
+//            $tokenquery = 'INSERT INTO reset_token (userEmail, token, creationTime, valid, type) VALUES (?,?,?,?,?)';
+//            $conn->prepare($tokenquery)->execute(array($resetemail, $reset_token, $tokenrecordtime, '1', '1'));
+//
+//            //exit($resetemail . " " . $reset_token);
+//
+//            $sendmessage = "You've recently asked to reset the password for this Redsphere Payroll account: " . $resetemail . "<br /><br />To update your password, click the link below:<br /><br /> " . $sysurl . 'password_reset.php?token=' . $reset_token;
+//            //generate reset cdde and append to email submitted
+//
+//            require 'phpmailer/PHPMailerAutoload.php';
+//
+//            $mail = new PHPMailer;
+//
+//            $mail->SMTPDebug = 3;                               // Enable verbose debug output
+//
+//            $mail->isSMTP();                                      // Set mailer to use SMTP
+//            $mail->Host = 'smtp.zoho.com';  // Specify main and backup SMTP servers
+//            $mail->SMTPAuth = true;                               // Enable SMTP authentication
+//            $mail->Username = 'noreply@redsphere.co.ke';                 // SMTP username
+//            $mail->Password = 'redsphere_2017***';                           // SMTP password
+//            $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+//            $mail->Port = 587;                                    // TCP port to connect to
+//
+//            $mail->setFrom('noreply@redsphere.co.ke', 'Redsphere Payroll');
+//            $mail->addAddress($resetemail, 'Redsphere Payroll');     // Add a recipient
+//            //$mail->addAddress('ellen@example.com');               // Name is optional
+//            $mail->addReplyTo('info@example.com', 'Information');
+//            $mail->addCC('fgesora@gmail.com');
+//            //$mail->addBCC('bcc@example.com');
+//
+//            //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+//            //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+//            $mail->isHTML(true);                                  // Set email format to HTML
+//
+//            $mail->Subject = $title;
+//            $mail->Body    = $sendmessage;
+//            $mail->AltBody = $sendmessage;
+//
+//            if (!$mail->send()) {
+//                //exit($mail->ErrorInfo);
+//                echo 'Mailer Error: ' . $mail->ErrorInfo;
+//                $_SESSION['msg'] = "Failed. Error sending email.";
+//                $_SESSION['alertcolor'] = "danger";
+//                header("Location: " . $source);
+//            } else {
+//                $status = "Success";
+//                $_SESSION['msg'] = "If there is an account associated with this email address, an email has been sent to reset your password.";
+//                $_SESSION['alertcolor'] = "success";
+//                header("Location: " . $source);
+//            }
+//        } else {
+//
+//            $_SESSION['msg'] = "If there is an account associated with this email address, an email has been sent to reset your password.";
+//            $_SESSION['alertcolor'] = "success";
+//            header("Location: " . $source);
+//        }
+//
+//        break;
 
 
 

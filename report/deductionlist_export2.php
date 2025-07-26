@@ -1,13 +1,15 @@
 <?php
 session_start();
 
+require __DIR__.'/../vendor/autoload.php';
+
 include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
 if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) === '')) {
     header("location: ../index.php");
     exit;
 }
-require 'office_vendor/autoload.php';
+//require 'office_vendor/autoload.php';
 
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -15,11 +17,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
-
-require 'vendor/autoload.php';
-
-
-
 
 
 if (!function_exists("GetSQLValueString")) {
@@ -207,7 +204,7 @@ if ($existtrans) {
     $mail->SMTPAuth = true;
 
     //Username to use for SMTP authentication - use full email address for gmail
-    $mail->Username = "salary@oouthsalary.com.ng";
+    $mail->Username = "report@oouthsalary.com.ng";
 
     //Password to use for SMTP authentication
     $mail->Password = "b07NwW3_5WNr";
@@ -216,11 +213,11 @@ if ($existtrans) {
     //Note that with gmail you can only use your account address (same as `Username`)
     //or predefined aliases that you have configured within your account.
     //Do not use user-submitted addresses in here
-    $mail->setFrom("no-reply@oouth.com", "OOUTHSALARY");
+    $mail->setFrom("report@oouthsalary.com.ng", "OOUTHSALARY");
 
     //Set an alternative reply-to address
     //This is a good place to put user-submitted addresses
-    $mail->addReplyTo("no-reply@oouth.com", "OOUTHSALARY");
+    $mail->addReplyTo("report@oouthsalary.com.ng", "OOUTHSALARY");
 
     //Set who the message is to be sent to
     $mail->addAddress($email_register, $first_name);

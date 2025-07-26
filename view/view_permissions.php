@@ -53,10 +53,12 @@ $pages = $App->getPages();
             <div class="mb-4">
                 <label for="roles_id" class="block text-sm font-medium text-gray-700">Roles</label>
                 <select id="roles_id" name="roles_id" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="">Select Role</option>
-                    <option value="1">Admin</option>
-                    <option value="2">Editor</option>
-                    <option value="3">Viewer</option>
+                <option value="">Select Role</option>
+                    <?php foreach ($App->getRoles() as $role): ?>
+                        <option value="<?php echo htmlspecialchars($role['role_id']); ?>">
+                            <?php echo htmlspecialchars($role['role_name']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div class="mb-4">

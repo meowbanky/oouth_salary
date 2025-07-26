@@ -32,6 +32,16 @@ try {
     $stmt = $db->prepare($query);
     $stmt->execute([$email, $otp]);
 
+
+
+    $query = "SELECT alternate_email FROM employee WHERE email = :email";
+    $stmt1 = $db->prepare($query);
+    $stmt1->bindParam(':email', $email);
+    $stmt1->execute();
+    
+    $user = $stmt1->fetch();
+    $cc_email = $user['alternate_email'] ?? null;
+
     // Send email
     $mail = new PHPMailer(true);
     $mail->isSMTP();
@@ -44,6 +54,9 @@ try {
 
     $mail->setFrom(EmailConfig::SMTP_FROM, 'OOUTH Password Reset');
     $mail->addAddress($email);
+    if ($cc_email) {
+        $mail->addCC($cc_email);
+    }
     $mail->isHTML(true);
     $mail->Subject = 'Password Reset OTP';
     $mail->Body = "

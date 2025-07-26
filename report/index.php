@@ -65,48 +65,48 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 					<div class="panel">
 						<div class="panel-body">
 							<div class="list-group parent-list">
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
 									<a href="#" class="list-group-item" id="sales"><i class="fa fa-shopping-cart"></i> Payroll</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 
 									<a href="#" class="list-group-item" id="tax_export"><i class="fa fa-shopping-cart"></i> Export Tax Computation</a>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 
 									<a href="#" class="list-group-item" id="employee"><i class="fa fa-shopping-cart"></i> Employee Report</a>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="transfer"><i class="fa fa-exchange"></i> Bank Summary</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="inventory"><i class="fa fa-table"></i> Deduction List</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="gross"><i class="fa fa-table"></i> Gross Amount</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="expiry-report">
-									<?php  } ?>
-									<?php if ($_SESSION['role'] == 'Admin') { ?>
+									 
+									 
 
 										<i class="fa fa-search"></i>Net to Bank</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="customers"><i class="fa fa-group"></i> Payslip</a>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'pfa') { ?>
+								 
+								
 									<a href="#" class="list-group-item" id="deleted-sales"><i class="fa fa-trash-o"></i> Pension Fund Admin</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="discounts"><i class="fa fa-magic"></i> Variance</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+								 
+								 
 									<a href="#" class="list-group-item" id="log"><i class="fa fa-history fa-fw"></i> Audit Log</a>
-								<?php  } ?>
+								 
 							</div>
 						</div>
 					</div> <!-- /panel -->

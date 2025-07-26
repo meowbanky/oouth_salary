@@ -1,9 +1,13 @@
 <?php
-// Assuming 'config.php' contains database and SMTP configuration settings
+set_time_limit(300);
 require_once('../../config.php');
 //require_once 'tcpdf/tcpdf.php';
-require 'vendor/autoload.php';
-define('K_PATH_IMAGES', '/report/');
+require __DIR__.'/../vendor/tecnickcom/tcpdf/tcpdf.php';
+require __DIR__.'/../vendor/autoload.php';
+
+if (!defined('K_PATH_IMAGES')) {
+    define('K_PATH_IMAGES', '/report/');
+}
 
 try {
     $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
@@ -326,7 +330,8 @@ function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
     $mail->Password = SMTP_PASSWORD;
     $mail->SMTPSecure = SMTP_SECURE;
     $mail->Port = SMTP_PORT;
-    $mail->SMTPDebug = SMT_SMTPDebug;
+//    $mail->SMTPDebug = SMT_SMTPDebug;
+    $mail->SMTPDebug = 3;
 
     $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
     $mail->addAddress($employeeDetails['EMAIL'], $employeeDetails['employee_name']);

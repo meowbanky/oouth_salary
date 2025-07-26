@@ -4,7 +4,7 @@
 // error_reporting(E_ALL);
 
 ini_set('max_execution_time', '0');
-//$connect = mysqli_connect("localhost", "root", "Oluwaseyi", "salary");
+
 require_once('../Connections/paymaster.php');
 mysqli_select_db($salary, $database_salary);
 
@@ -48,68 +48,115 @@ if (!$existtrans) {
 			$master = $queryMaster->execute(array($row['staff_id'], $row['NAME'], $row['DEPTCD'], $row['BCODE'], $row['ACCTNO'], $row['GRADE'], $row['STEP'], $period, $row['PFACODE'], $row['PFAACCTNO']));
 
 			//echo 'staff id'.' '.$row['staff_id'].'<br>';
-			$query_allow = $conn->prepare('SELECT allow_deduc.temp_id, allow_deduc.staff_id, allow_deduc.allow_id, allow_deduc.`value`, allow_deduc.transcode, allow_deduc.counter,  allow_deduc.running_counter, allow_deduc.inserted_by, allow_deduc.date_insert,tbl_earning_deduction.edDesc FROM allow_deduc
- 																				INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id WHERE staff_id = ? and transcode = ? order by allow_deduc.allow_id asc');
-			$res_allow = $query_allow->execute(array($row['staff_id'], '1'));
-			$out_allow = $query_allow->fetchAll(PDO::FETCH_ASSOC);
-			while ($row_allow = array_shift($out_allow)) {
+            $query_allow = $conn->prepare('SELECT allow_deduc.temp_id, allow_deduc.staff_id, allow_deduc.allow_id, allow_deduc.`value`, allow_deduc.transcode, allow_deduc.counter, allow_deduc.running_counter, allow_deduc.inserted_by, allow_deduc.date_insert, tbl_earning_deduction.edDesc 
+                               FROM allow_deduc
+                               INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id 
+                               WHERE staff_id = ? AND transcode = ? 
+                               ORDER BY allow_deduc.allow_id ASC');
+            $query_allow->execute([$row['staff_id'], '1']);
+            $out_allow = $query_allow->fetchAll(PDO::FETCH_ASSOC);
+
+            $total_rows = count($out_allow);
+            error_log("Total Rows: " . $total_rows);
+            error_log("Fetched Data: " . print_r($out_allow, true));
+
+            $counter = 1;
+
+            foreach ($out_allow as $row_allow) {
+                error_log("Processing Allow_id: {$row_allow['allow_id']} - Counter: $counter"); // Debug
+
+                if ($row_allow['allow_id'] == '21') {
+                    try {
+                        error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+                        $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
+                                       WHERE allowancetable.grade = ? AND allowancetable.step = ? 
+                                       AND allowcode = ? AND category = ?');
+                        $query_value->execute([$row['GRADE'], $row['STEP'], $row_allow['allow_id'], $row['CALLTYPE']]);
+                    } catch (PDOException $e) {
+                        error_log( $e->getMessage());
+                    }
+                } elseif ($row_allow['allow_id'] == '5') {
+                    error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+
+                    try {
+                        $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
+                                       WHERE allowancetable.grade = ? AND allowancetable.step = ? 
+                                       AND allowcode = ? AND category = ?');
+                        $query_value->execute([$row['GRADE'], $row['STEP'], $row_allow['allow_id'], $row['HARZAD_TYPE']]);
+                    } catch (PDOException $e) {
+                        error_log( $e->getMessage());
+                    }
+                    } else {
+                    error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+
+                    try {
+                    $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
+                                       WHERE allowancetable.grade = ? AND allowancetable.step = ? 
+                                       AND allowcode = ?');
+                    $query_value->execute([$row['GRADE'], $row['STEP'], $row_allow['allow_id']]);
+                    } catch (PDOException $e) {
+                        error_log( $e->getMessage());
+                    }
+                }
+
+                if ($row_value = $query_value->fetch()) {
+                    $output = $row_value['value'];
+                    error_log("Counter: $counter Output 1 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
+                } else {
+                    $output = number_format($row_allow['value'], 0, '.', '');
+                    error_log("Counter: $counter Output 2 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
+                }
+
+                try {
+                    try {
+                        $recordtime = date('Y-m-d H:i:s');
+                        $query = 'INSERT INTO tbl_master (staff_id, allow_id, allow, type, period, editTime, userID) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)';
+                        $conn->prepare($query)->execute([$row['staff_id'], $row_allow['allow_id'], $output, '1', $period, $recordtime, $_SESSION['SESS_MEMBER_ID']]);
+                    } catch (PDOException $e) {
+                        error_log("Error: " . $e->getMessage());
+                    }
+                    try {
+                        $queryUpdate = 'UPDATE allow_deduc SET value = ? WHERE allow_id = ? AND staff_id = ?';
+                    $conn->prepare($queryUpdate)->execute([$output, $row_allow['allow_id'], $row['staff_id']]);
+                    } catch (PDOException $e) {
+                    error_log("Error: " . $e->getMessage());
+                    }
+                } catch (PDOException $e) {
+                    error_log("Error: " . $e->getMessage());
+                }
+
+                if (intval($row_allow['counter']) > 0) {
+                    $running_counter = intval($row_allow['running_counter']) + 1;
+                    if ($running_counter == intval($row_allow['counter'])) {
+                        try {
+                            $query = 'INSERT INTO completedloan (staff_id, allow_id, period, value, type) 
+                      		VALUES (?, ?, ?, ?, ?)';
+                            $conn->prepare($query)->execute([$row['staff_id'], $row_allow['allow_id'], $period, $output, '1']);
+
+                            $sqlDelete = "DELETE FROM allow_deduc WHERE temp_id = ?";
+                            $conn->prepare($sqlDelete)->execute([$row_allow['temp_id']]);
+                        } catch (PDOException $e) {
+                            error_log("Error: " . $e->getMessage());
+                        }
+                    } else {
+                        try{
+                        $sqlUpdate = "UPDATE allow_deduc SET running_counter = ? WHERE temp_id = ?";
+                        $conn->prepare($sqlUpdate)->execute([$running_counter, $row_allow['temp_id']]);
+                        } catch (PDOException $e) {
+                            error_log("Error: " . $e->getMessage());
+                        }
+                    }
+                }
+
+                $counter++;
+            }
 
 
-				if ($row_allow['allow_id'] == '21') {
-
-					$query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable WHERE allowancetable.grade = ? AND allowancetable.step = ? AND allowcode = ? AND category = ?');
-					$rerun_value = $query_value->execute(array($row['GRADE'], $row['STEP'], $row_allow['allow_id'], $row['CALLTYPE']));
-				} elseif ($row_allow['allow_id'] == '5') {
-
-					$query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable WHERE allowancetable.grade = ? AND allowancetable.step = ? AND allowcode = ? AND category = ?');
-					$rerun_value = $query_value->execute(array($row['GRADE'], $row['STEP'], $row_allow['allow_id'], $row['HARZAD_TYPE']));
-				} else {
-
-					$query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable WHERE allowancetable.grade = ? AND allowancetable.step = ? AND allowcode = ?');
-					$rerun_value = $query_value->execute(array($row['GRADE'], $row['STEP'], $row_allow['allow_id']));
-				}
 
 
-				if ($row_value = $query_value->fetch()) {
-					$output = $row_value['value'];
-				} else {
 
-					$output = number_format($row_allow['value'], 0, '.', '');
-				}
-
-
-				// echo $row_allow['allow_id'].' '.$row_allow['edDesc'].' '.number_format($output).'<br>';
-				try {
-					$recordtime = date('Y-m-d H:i:s');
-					$query = 'INSERT INTO tbl_master (staff_id, allow_id, allow, type, period,editTime,userID) VALUES (?,?,?,?,?,?,?)';
-					$conn->prepare($query)->execute(array($row['staff_id'], $row_allow['allow_id'], $output, '1',  $period, $recordtime, $_SESSION['SESS_MEMBER_ID']));
-
-					$queryUdate = 'UPDATE allow_deduc SET value = ? WHERE allow_id = ? AND staff_id = ? ';
-					$conn->prepare($queryUdate)->execute(array($output, $row_allow['allow_id'], $row['staff_id']));
-				} catch (PDOException $e) {
-					echo $e->getMessage();
-				}
-				if (intval($row_allow['counter']) > 0) {
-					//echo 'allowance deduction counter check';
-					$running_counter = intval($row_allow['running_counter']);
-					$running_counter = $running_counter + 1;
-					if (($running_counter) == intval($row_allow['counter'])) {
-
-						$query = 'INSERT INTO completedLoan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
-						$conn->prepare($query)->execute(array($row['staff_id'], $row_allow['allow_id'], $period, $output, '1'));
-
-						//delete allow once cycle is complete
-						$sqlDelete = "DELETE FROM allow_deduc WHERE temp_id = '" . $row_allow['temp_id'] . "'";
-						$conn->exec($sqlDelete);
-					} else {
-						$sqlUpdate = "update allow_deduc set running_counter = '" . $running_counter . "' WHERE temp_id = '" . $row_allow['temp_id'] . "'";
-						$conn->exec($sqlUpdate);
-					}
-				}
-			}
-
-
-			// deduction process
+            // deduction process
 
 
 			$total_rows = '';
@@ -160,7 +207,7 @@ if (!$existtrans) {
 							$running_counter = intval($row_deduct['running_counter']) + 1;
 							if (($running_counter) == intval($row_deduct['counter'])) {
 								//	echo 'normal deduction counter check';
-								$query = 'INSERT INTO completedLoan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
+								$query = 'INSERT INTO completedloan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
 								$conn->prepare($query)->execute(array($row['staff_id'], $row_deduct['allow_id'], $period, $output, '2'));
 								//delete allow once cycle is complete
 								$sqlDelete = "DELETE FROM allow_deduc WHERE temp_id = '" . $row_deduct['temp_id'] . "'";
@@ -231,7 +278,7 @@ if (!$existtrans) {
 							$running_counter = intval($row_deduct['running_counter']) + 1;
 							if (($running_counter) == intval($row_deduct['counter'])) {
 								//delete allow once cycle is complete
-								$query = 'INSERT INTO completedLoan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
+								$query = 'INSERT INTO completedloan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
 								$conn->prepare($query)->execute(array($row['staff_id'], $row_deduct['allow_id'], $period, $output, '2'));
 
 								$sqlDelete = "DELETE FROM allow_deduc WHERE temp_id = '" . $row_deduct['temp_id'] . "'";
@@ -287,7 +334,7 @@ if (!$existtrans) {
 								//	echo 'loan deduction counter check';
 								$recordtime = date('Y-m-d H:i:s');
 
-								$query = 'INSERT INTO completedLoan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
+								$query = 'INSERT INTO completedloan (staff_id,allow_id,period,value,type)VALUES (?,?,?,?,?)';
 								$conn->prepare($query)->execute(array($row['staff_id'], $row_deduct['allow_id'], $period, $output, '2'));
 
 								$query_repayment = 'INSERT INTO tbl_repayment (staff_id, allow_id, value,  period,userID,editTime) VALUES (?,?,?,?,?,?)';
@@ -300,7 +347,6 @@ if (!$existtrans) {
 							}
 						}
 					}
-					//echo $row_deduct['allow_id'].' '.$row_deduct['edDesc'].' '.number_format($output).'<br>';
 					try {
 
 

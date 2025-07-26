@@ -225,10 +225,133 @@ class PayrollExporter {
         if ($this->sendEmail && $this->recipientEmail) {
             $this->exportToExcel($reportData, $this->recipientEmail);
         } else {
-            $period_text = $this->period_text;
-            $exporter = $this;
-            include 'report_template.php';
+            $this->exportToExcelForDownload($reportData);
         }
+    }
+
+    public function exportToExcelForDownload($reportData) {
+        ini_set('memory_limit', '512M');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $headers = [
+            'STAFF NO', 'NAME', 'PAY PERIOD', 'DEPT'
+        ];
+
+        // Add earnings headers
+        foreach ($this->earnings as $earning) {
+            $headers[] = $earning;
+        }
+
+        // Add total allowance header
+        $headers[] = 'TOTAL ALLOW';
+
+        // Add deductions headers
+        foreach ($this->deductions as $deduction) {
+            $headers[] = $deduction;
+        }
+
+        // Add final totals headers
+        $headers[] = 'TOTAL DEDUC';
+        $headers[] = 'NET PAY';
+
+        $sheet->fromArray([$headers], NULL, 'A1');
+
+        // Format data rows
+        $rowCount = 2;
+        foreach ($reportData as $staff) {
+            $row = [
+                $staff['staff_id'],
+                $staff['name'],
+                $this->period_text,
+                $staff['dept']
+            ];
+
+            foreach ($this->earnings as $earning) {
+                $row[] = $staff['earnings'][$earning] ?? 0;
+            }
+
+            $row[] = $staff['total_allow'];
+
+            foreach ($this->deductions as $deduction) {
+                $row[] = $staff['deductions'][$deduction] ?? 0;
+            }
+
+            $row[] = $staff['total_deduc'];
+            $row[] = $staff['net_pay'];
+
+            $sheet->fromArray([$row], NULL, 'A' . $rowCount);
+            $rowCount++;
+        }
+
+        $lastColumn = $sheet->getHighestColumn();
+        $lastRow = $sheet->getHighestRow();
+
+        foreach (range('A', $lastColumn) as $col) {
+            if ($col === 'B') {
+                $width = 30;
+            } elseif ($col === 'D') {
+                $width = 25;
+            } else {
+                $width = 15;
+            }
+            $sheet->getColumnDimension($col)->setWidth($width);
+        }
+
+        // Format numbers
+        $sheet->getStyle('E2:' . $lastColumn . $lastRow)->getNumberFormat()
+            ->setFormatCode('#,##0.00');
+
+        // Add borders and alignment
+        $sheet->getStyle('A1:' . $lastColumn . $lastRow)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                ]
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT
+            ]
+        ]);
+
+        // Left align text columns
+        $sheet->getStyle('A1:D' . $lastRow)->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+
+        // Format headers
+        $sheet->getStyle('A1:' . $lastColumn . '1')->applyFromArray([
+            'font' => ['bold' => true],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+            ]
+        ]);
+
+        $sheet->freezePane('A2');
+
+        // Save to temporary file
+        $filename = "payroll_summary_{$this->period_text}.xlsx";
+        $tempFile = tempnam(sys_get_temp_dir(), 'payroll_');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        // Send headers for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        header('Content-Length: ' . filesize($tempFile));
+
+        // Output the file
+        readfile($tempFile);
+
+        // Clean up
+        unlink($tempFile);
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+        gc_collect_cycles();
+
+        exit; // Ensure no further output
     }
 
     public function getPeriod() {
@@ -352,8 +475,17 @@ class PayrollExporter {
 
     private function sendEmail($spreadsheet, $recipientEmail) {
         if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Invalid email address provided");
+            ob_clean();
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => "Invalid email address provided"
+            ]);
+            exit();
         }
+
+        // Start output buffering
+        ob_start();
 
         $filename = "payroll_summary_{$this->period_text}.xlsx";
         $tempFile = tempnam(sys_get_temp_dir(), 'payroll_');
@@ -371,7 +503,7 @@ class PayrollExporter {
             $mail->Password = SMTP_PASSWORD;
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port = SMTP_PORT;
-            $mail->SMTPDebug = SMT_SMTPDebug;
+            $mail->SMTPDebug = 0; // Disable debug output
 
             $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
             $mail->addReplyTo(SMTP_REPLYTO_EMAIL, SMTP_REPLYTO_NAME);
@@ -384,12 +516,18 @@ class PayrollExporter {
             $mail->addAttachment($tempFile, $filename);
 
             $mail->send();
+            // Clear output buffer and send JSON
+            ob_clean();
+            header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
                 'message' => 'Report has been generated and sent successfully to ' . $recipientEmail
             ]);
         } catch (Exception $e) {
             error_log("Email sending failed: " . $e->getMessage());
+            // Clear output buffer and send JSON
+            ob_clean();
+            header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
                 'message' => "Email could not be sent. Please check the error logs."
@@ -400,5 +538,9 @@ class PayrollExporter {
         $spreadsheet->disconnectWorksheets();
         unset($spreadsheet);
         gc_collect_cycles();
+
+        ob_end_clean();
+        exit();
     }
 }
+?>

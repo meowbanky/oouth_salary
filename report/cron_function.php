@@ -1,5 +1,6 @@
 <?php
 // Set memory limit to 256 megabytes
+global $conn;
 ini_set('memory_limit', '20M');
 ob_start();
 
@@ -9,10 +10,7 @@ session_start();
 include_once('/home/oouthsal/public_html/classes/model.php');
 require_once('/home/oouthsal/public_html/Connections/paymaster.php');
 require_once('/home/oouthsal/config.php');
-
-
-require 'office_vendor/autoload.php';
-
+require '/.../vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;

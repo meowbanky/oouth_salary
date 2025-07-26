@@ -1,117 +1,97 @@
 <?php
-function generateStrongPassword($length = 6)
+require_once __DIR__ . '/../vendor/autoload.php'; // Adjust if needed
+
+use Dotenv\Dotenv;
+
+// Load .env
+$dotenv = Dotenv::createImmutable(__DIR__.'/../');
+$dotenv->load();
+
+function generateStrongPassword($length = 10)
 {
-    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?';
-    $password = '';
-
-    for ($i = 0; $i < $length; $i++) {
-        $index = rand(0, strlen($characters) - 1);
-        $password .= $characters[$index];
-    }
-
-    return $password;
+    $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+    return substr(str_shuffle(str_repeat($characters, $length)), 0, $length);
 }
 
-function checkEmailExists($email, $domain, $cpanelUsername, $apiToken)
+function emailExists($user, $domain, $cpanelHost, $cpanelUser, $cpanelPassword)
 {
-    $apiUrl = "https://{$domain}:2083/execute/Email/list_pops";
-
-    $headers = [
-        "Authorization: cpanel {$cpanelUsername}:{$apiToken}",
-    ];
+    $url = "https://{$cpanelHost}:2083/execute/Email/list_pops?api.version=1";
+    $api_url = "https://{$cpanel_host}:2083/execute/Email/add_pop";
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_USERPWD, "{$cpanelUser}:{$cpanelPassword}");
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 
     $response = curl_exec($ch);
-
     if (curl_errno($ch)) {
-        echo 'cURL Error: ' . curl_error($ch);
+        echo "❌ cURL Error (checking existence): " . curl_error($ch) . PHP_EOL;
+        curl_close($ch);
         return false;
     }
 
+    $data = json_decode($response, true);
     curl_close($ch);
 
-    $decodedResponse = json_decode($response, true);
-
-    if (isset($decodedResponse['status']) && $decodedResponse['status'] === 1) {
-        $existingEmails = array_column($decodedResponse['data'], 'email');
-        return in_array($email, $existingEmails);
-    } else {
-        echo 'Failed to retrieve email list. Response: ' . $response . PHP_EOL;
+    if (!isset($data['data'])) {
+        echo "❌ Failed to get email list\n";
         return false;
     }
-}
 
-function createEmail($postEmail)
-{
-    // Generate a strong password
-    $password = generateStrongPassword(10);
-
-    // Configuration (replace with secure environment variables or configuration)
-    $apiToken = getenv('CPANEL_API_TOKEN') ?: '7IJBJPYHKF15Z41YTPKPOBEN9BNHP7JL';
-    $cpanelUsername = getenv('CPANEL_USERNAME') ?: 'oouthco';
-    $domain = 'oouth.com';
-    $quota = 250; // Mailbox size in MB
-
-    // Determine email address
-    $email = strpos($postEmail, '@' . $domain) !== false ? $postEmail : $postEmail . '@' . $domain;
-
-    // Check if the email already exists
-    if (checkEmailExists($email, $domain, $cpanelUsername, $apiToken)) {
-        echo 'Email already exists: ' . $email . PHP_EOL;
-        return;
-    }
-
-    // API endpoint for email creation
-    $apiUrl = "https://{$domain}:2083/execute/Email/add_pop";
-
-    // Data to be sent in the POST request
-    $data = [
-        'domain' => $domain,
-        'email' => $email,
-        'password' => $password,
-        'quota' => $quota,
-    ];
-
-    // Headers including the API token
-    $headers = [
-        "Authorization: cpanel {$cpanelUsername}:{$apiToken}",
-    ];
-
-    // Initialize cURL session
-    $ch = curl_init();
-
-    // Set cURL options
-    curl_setopt($ch, CURLOPT_URL, $apiUrl);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-    // Execute the cURL session
-    $response = curl_exec($ch);
-
-    // Check for errors
-    if (curl_errno($ch)) {
-        echo 'cURL Error: ' . curl_error($ch);
-    } else {
-        $decodedResponse = json_decode($response, true);
-        if (isset($decodedResponse['status']) && $decodedResponse['status'] === 1) {
-            echo 'Email created successfully: ' . $email . PHP_EOL;
-            echo 'Password: ' . $password . PHP_EOL;
-        } else {
-            echo 'Failed to create email. Response: ' . $response . PHP_EOL;
+    $fullEmail = "{$user}@{$domain}";
+    foreach ($data['data'] as $account) {
+        if (isset($account['email']) && strtolower($account['email']) === strtolower($fullEmail)) {
+            return true;
         }
     }
 
-    // Close the cURL session
-    curl_close($ch);
+    return false;
 }
 
-// Example usage
-$postEmail = "adeko.oloruntoba"; // Replace with input email
-createEmail($postEmail);
-?>
+function createEmail($user)
+{
+    $cpanelHost = $_ENV['CPANEL_HOST'];
+    $cpanelUser = $_ENV['CPANEL_USER'];
+    $cpanelPassword = $_ENV['CPANEL_PASS'];
+//    $domain      = $_ENV['DOMAIN'];
+
+    $domain = $cpanelHost;
+    $quota = 250;
+    $password = generateStrongPassword();
+
+    $user = trim(strtolower($user));
+    if (str_contains($user, '@')) {
+        $user = explode('@', $user)[0];
+    }
+
+    $email = "{$user}@{$domain}";
+
+    if (emailExists($user, $domain, $cpanelHost, $cpanelUser, $cpanelPassword)) {
+        echo "⚠️ Skipped (already exists): {$email}\n";
+        return;
+    }
+
+    $url = "https://{$cpanelHost}:2083/execute/Email/add_pop?email={$user}&domain={$domain}&password={$password}&quota={$quota}";
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_USERPWD, "{$cpanelUser}:{$cpanelPassword}");
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+
+    if (isset($data['status']) && $data['status'] === 1) {
+        echo "✅ Created: {$email}\nPassword: {$password}\n";
+    } else {
+        echo "❌ Failed to create: {$email}\nResponse:\n";
+        print_r($data);
+    }
+}
+
+// ✅ Example usage
+createEmail('adeko.oloruntoba');

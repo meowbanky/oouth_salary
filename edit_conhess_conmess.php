@@ -1,569 +1,434 @@
-<?php ini_set('max_execution_time', '300');
-require_once('Connections/paymaster.php');
-include_once('classes/model.php');
+<?php
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+require_once 'classes/model.php';
 require_once 'libs/App.php';
+require_once 'libs/middleware.php';
+
 $App = new App();
 $App->checkAuthentication();
-require_once 'libs/middleware.php';
 checkPermission();
-?>
-<?php
 
-//Start session
 session_start();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: index.php");
-	exit();
+// Restrict to authenticated users
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '') {
+    header("Location: index.php");
+    exit;
 }
 
-if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
-		global $salary;
+// Sanitize and decode search input
+$searchItem = isset($_GET['item']) ? urldecode(trim($_GET['item'])) : '';
 
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($salary, $theValue) : mysqli_escape_string($salary, $theValue);
+// Fetch allowances
+try {
+    $results_per_page = 100;
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $start_from = ($page - 1) * $results_per_page;
 
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
+    $sql = 'SELECT allow_id, allocode.ADJDESC, CONCAT(allowancetable.grade, "/", allowancetable.step) AS grade_step, allowancetable.`value`
+            FROM allowancetable
+            INNER JOIN allocode ON allowancetable.allowcode = allocode.ADJCD';
+    $params = [];
+    if ($searchItem !== '') {
+        $sql .= ' WHERE allocode.ADJDESC = :adjdesc';
+        $params[':adjdesc'] = $searchItem;
+    }
+    $sql .= ' ORDER BY allow_id ASC, grade ASC, step ASC LIMIT :start, :limit';
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(':start', $start_from, PDO::PARAM_INT);
+    $stmt->bindValue(':limit', $results_per_page, PDO::PARAM_INT);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->execute();
+    $allowances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Debug: Log first allowance row
+    error_log('First allowance row: ' . print_r($allowances[0] ?? [], true));
+
+    // Count total for export label and pagination
+    $countSql = 'SELECT COUNT(*) as Total FROM allowancetable
+            INNER JOIN allocode ON allowancetable.allowcode = allocode.ADJCD' . ($searchItem !== '' ? ' WHERE allocode.ADJDESC = :adjdesc' : '');
+    $countStmt = $conn->prepare($countSql);
+    if ($searchItem !== '') {
+        $countStmt->bindParam(':adjdesc', $searchItem);
+    }
+    $countStmt->execute();
+    $totalAllowances = $countStmt->fetchColumn();
+    $total_pages = ceil($totalAllowances / $results_per_page);
+} catch (PDOException $e) {
+    error_log("Query error: " . $e->getMessage());
+    $allowances = [];
+    $totalAllowances = 0;
+    $total_pages = 1;
 }
-
-$currentPage = $_SERVER["PHP_SELF"];
-
-
-
-
-
-
-$today = '';
-$today = date('Y-m-d');
 ?>
+
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
-<html>
-<?php include('header1.php'); ?>
-
-<body data-color="grey" class="flat" style="zoom: 1;">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
-
-		<?php include('header.php'); ?>
-
-
-		<?php include('sidebar.php'); ?>
-
-
-
-		<div id="content" class="clearfix sales_content_minibar">
-
-			<script type="text/javascript">
-				$(document).ready(function() {
-
-
-				});
-			</script>
-			<div id="content-header" class="hidden-print">
-				<h1> <i class="icon fa fa-table"></i>
-					Salary Table</h1>
-
-
-			</div>
-
-
-			<div id="breadcrumb" class="hidden-print">
-				<a href="home.php"><i class="fa fa-home"></i> Dashboard</a><a class="current" href="edit_conhess_conmess.php">Edit Salary Table</a>
-			</div>
-			<div class="clear"></div>
-			<div id="datatable_wrapper"></div>
-			<div class=" pull-right">
-				<div class="row">
-					<div id="datatable_wrapper"></div>
-					<div class="col-md-12 center" style="text-align: center;">
-						<?php
-						if (isset($_SESSION['msg'])) {
-							echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-							unset($_SESSION['msg']);
-							unset($_SESSION['alertcolor']);
-						}
-						?>
-						<?php
-						if (isset($_SESSION['msg'])) {
-							echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-							unset($_SESSION['msg']);
-							unset($_SESSION['alertcolor']);
-						}
-						?>
-						<div class="btn-group  ">
-							<div id="buttons">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php echo 'pfa'; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php echo 'pfa'; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php echo 'pfa'; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
-
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row ">
-				<form action="pfa.php" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-					<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-					<input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Allowance & Deduction" />
-					<span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-				</form>
-			</div>
-
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-th"></i>
-							</span>
-							<h5>Salary Table</h5>
-							<span title="" class="label label-info tip-left" data-original-title="total Employee">Total Allowance/Deduction<?php echo '100' ?></span>
-
-						</div>
-						<!--endbegiing of employee details-->
-						<div id="datatable_wrapper">
-
-							<div class="row top-spacer-20">
-
-								<div class="col-md-12">
-
-									<div class="container">
-										<nav aria-label="page navigation example" class="hidden-print">
-											<ul class="pagination">
-
-												<?php
-												$results_per_page = 100;
-												if (isset($_GET['page'])) {
-													$page = $_GET['page'];
-												} else {
-													$page = 1;
-												}
-												$results_per_page = 100;
-												if (!isset($_GET['item'])) {
-													$sql = 'SELECT count(*) as Total FROM allowancetable';
-												} else {
-													$sql = 'SELECT count(*) as Total FROM allowancetable';
-												}
-
-												$result = $conn->query($sql);
-												$row = $result->fetch();
-												$total_pages = ceil($row['Total'] / $results_per_page);
-												for ($i = 1; $i <= $total_pages; $i++) {
-													echo '<li class="page-item ';
-													if ($i == $page) {
-														echo ' active"';
-													};
-													echo '"><a class="page-link" href="edit_conhess_conmess.php?page=' . $i . '">' . $i . '</a></li>';
-												}
-												?>
-											</ul>
-										</nav>
-									</div>
-
-									<table class="table table-striped table-bordered table-hover table-checkable order-column tblbtn" id="sample_1">
-										<thead>
-											<tr>
-												<th> id </th>
-												<th> Allowance </th>
-												<th> Grade/Step </th>
-												<th> Value </th>
-
-											</tr>
-										</thead>
-										<tbody>
-
-											<!--Begin Data Table-->
-											<?php
-											//retrieveData('employment_types', 'id', '2', '1');
-											$results_per_page = 100;
-											if (isset($_GET['page'])) {
-												$page = $_GET['page'];
-											} else {
-												$page = 1;
-											}
-
-											try {
-												$start_from = ($page - 1) * $results_per_page;
-												if (!isset($_GET['item'])) {
-													$sql = 'SELECT
-	allow_id, 
-	allowancetable.allowcode, 
-	allocode.ADJDESC, 
-	allowancetable.grade, 
-	allowancetable.step, 
-	allowancetable.`value`
-FROM
-	allowancetable
-	INNER JOIN
-	allocode
-	ON 
-		allowancetable.allowcode = allocode.ADJCD
-ORDER BY
-	allow_id ASC, 
-	GRADE ASC, 
-	STEP ASC LIMIT ' . $start_from . ',' . $results_per_page;
-												} else {
-													$sql = 'SELECT
-	allow_id, 
-	allowancetable.allowcode, 
-	allocode.ADJDESC, 
-	allowancetable.grade, 
-	allowancetable.step, 
-	allowancetable.`value`
-FROM
-	allowancetable
-	INNER JOIN
-	allocode
-	ON 
-		allowancetable.allowcode = allocode.ADJCD
-		WHERE ADJDESC = "' . $_GET['item'] . '"
-ORDER BY
-	allow_id ASC, 
-	GRADE ASC, 
-	STEP ASC ';
-												}
-												$query = $conn->prepare($sql);
-												$fin = $query->execute();
-												$res = $query->fetchAll(PDO::FETCH_ASSOC);
-												//sdsd
-
-												foreach ($res as $row => $link) {
-											?><tr class="odd gradeX">
-														<?php
-														$thisemployeealterid = $link['allow_id'];
-														$thisemployeeNum = $link['allow_id'];
-														echo '<td>' . $link['allow_id'] .  '</td><td class="stylecaps">' . $link['ADJDESC'] . '</td>';
-
-														echo '<td>';
-														echo $link['grade'] . '/' . $link['step'];
-														echo '</td><td>';
-														echo $link['value'];
-														echo '</td>';
-														echo '</tr>';
-														?>
-
-												<?php
-												}
-											} catch (PDOException $e) {
-												echo $e->getMessage();
-											}
-												?>
-												<!--End Data Table-->
-
-
-
-
-
-										</tbody>
-									</table>
-
-
-
-
-
-
-
-								</div>
-								<div class="container">
-										<nav aria-label="page navigation example" class="hidden-print">
-											<ul class="pagination">
-
-												<?php
-												$results_per_page = 100;
-												if (isset($_GET['page'])) {
-													$page = $_GET['page'];
-												} else {
-													$page = 1;
-												}
-												$results_per_page = 100;
-												if (!isset($_GET['item'])) {
-													$sql = 'SELECT count(*) as Total FROM allowancetable';
-												} else {
-													$sql = 'SELECT count(*) as Total FROM allowancetable';
-												}
-
-												$result = $conn->query($sql);
-												$row = $result->fetch();
-												$total_pages = ceil($row['Total'] / $results_per_page);
-												for ($i = 1; $i <= $total_pages; $i++) {
-													echo '<li class="page-item ';
-													if ($i == $page) {
-														echo ' active"';
-													};
-													echo '"><a class="page-link" href="edit_conhess_conmess.php?page=' . $i . '">' . $i . '</a></li>';
-												}
-												?>
-											</ul>
-										</nav>
-									</div>
-							</div>
-						</div>
-					</div>
-					<!-- Button trigger modal -->
-
-
-					<!-- Modal -->
-
-
-
-
-
-
-				</div>
-			</div>
-			<div id="footer" class="col-md-12 hidden-print">
-				Please visit our
-				<a href="#" target="_blank">
-					website </a>
-				to learn the latest information about the project.
-				<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-			</div>
-
-
-
-			<script type="text/javascript">
-				COMMON_SUCCESS = "Success";
-				COMMON_ERROR = "Error";
-				$.ajaxSetup({
-					cache: false,
-					headers: {
-						"cache-control": "no-cache"
-					}
-				});
-
-				$(document).ready(function() {
-
-					$("#item").autocomplete({
-						source: 'searchAllowDed.php',
-						type: 'POST',
-						delay: 10,
-						autoFocus: false,
-						minLength: 1,
-						select: function(event, ui) {
-							event.preventDefault();
-							$("#item").val(ui.item.value);
-							$item = $("#item").val();
-							//$('#add_item_form').ajaxSubmit({beforeSubmit: salesBeforeSubmit, success: itemScannedSuccess});
-							$('#add_item_form').ajaxSubmit({
-								beforeSubmit: salesBeforeSubmit,
-								type: "POST",
-								url: "edit_conhess_conmess.php",
-								success: function(data) {
-									window.location.href = "edit_conhess_conmess.php?item=" + $item;
-								}
-
-
-							});
-						}
-					});
-
-					$('#item').focus();
-					var last_focused_id = null;
-					var submitting = false;
-
-					function salesBeforeSubmit(formData, jqForm, options) {
-						if (submitting) {
-							return false;
-						}
-						submitting = true;
-						$("#ajax-loader").show();
-
-					}
-
-					function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-						if (($('#code').val()) == 1) {
-							gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-						} else {
-							gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-							//	window.location.reload(true);
-							$("#ajax-loader").hide();
-
-						}
-						setTimeout(function() {
-							$('#item').focus();
-						}, 10);
-
-						setTimeout(function() {
-
-							$.gritter.removeAll();
-							return false;
-
-						}, 1000);
-
-					}
-
-
-
-					$('#item').click(function() {
-						$(this).attr('placeholder', '');
-					});
-					//Ajax submit current location
-					$("#employee_current_location_id").change(function() {
-						$("#form_set_employee_current_location_id").ajaxSubmit(function() {
-							window.location.reload(true);
-						});
-					});
-
-
-					$('#employee_form').validate({
-
-						// Specify the validation rules
-						rules: {
-
-							namee: "required",
-							dept: "required",
-							acct_no: {
-								required: {
-									depends: function(element) {
-										if (($("#bank option:selected").text() != 'CHEQUE/CASH') || $("#bank option:selected").text() != 'CHEQUE/CASH') {
-											return true;
-										} else {
-											return false;
-										}
-									}
-								},
-								//"required": false,
-								minlength: 10,
-								maxlength: 10,
-								number: true
-							},
-
-							rsa_pin: {
-								required: {
-									depends: function(element) {
-										if ($("#pfa option:selected").text() != 'OTHERS') {
-											return true;
-										} else {
-											return false;
-										}
-									}
-								},
-								number: true
-							}
-
-
-						},
-
-						// Specify the validation error messages
-						messages: {
-							namee: "The name is a required field.",
-
-
-						},
-
-						errorClass: "text-danger",
-						errorElement: "span",
-						highlight: function(element, errorClass, validClass) {
-							$(element).parents('.form-group').removeClass('has-success').addClass('has-error');
-						},
-						unhighlight: function(element, errorClass, validClass) {
-							$(element).parents('.form-group').removeClass('has-error').addClass('has-success');
-						},
-
-						submitHandler: function(form) {
-
-							//form.submit();
-							doEmployeeSubmit(form);
-						}
-					});
-
-					document.getElementById('item').focus();
-
-					//						$('#sample_1').Tabledit({
-					//			      url:'action.php',
-					//			      columns:{
-					//			       identifier:[0, "StaffNo"],
-					//			       editable:[[5, 'PFAPIN']
-					//			      },
-					//			      restoreButton:false,
-					//			      onSuccess:function(data, textStatus, jqXHR)
-					//			      {
-					//			       if(data.action == 'delete')
-					//			       {
-					//			        $('#'+data.id).remove();
-					//			       }
-					//			      }
-					//			     });
-
-
-				});
-			</script>
-
-
-			<script>
-				$(document).ready(function() {
-
-
-
-					$('#sample_1').Tabledit({
-						url: 'salaryTable_edit.php',
-						deleteButton: false,
-						columns: {
-							identifier: [0, "id"],
-							editable: [
-								[3, 'value']
-							]
-
-						},
-						dropdowns: {},
-						dblclick: true,
-						keyboard: true,
-						hideIdentifier: true,
-						restoreButton: false,
-						onSuccess: function(data, textStatus, jqXHR) {
-							if (data.action == 'delete') {
-								$('#' + data.id).remove();
-							}
-						}
-					});
-
-				});
-			</script>
-			<script src="js/tableExport.js"></script>
-			<script src="js/main.js"></script>
-		</div><!--end #content-->
-	</div><!--end #wrapper-->
-
-	<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Salary Table - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <style>
+        .dataTable {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+        .dataTable th, .dataTable td {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .dataTable thead {
+            background-color: #1E3A8A; /* Navy blue */
+            color: #fff;
+        }
+        .dataTable tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+        .dataTables_paginate .paginate_button {
+            @apply px-3 py-2 mx-1 rounded-md text-white bg-blue-600 hover:bg-blue-700;
+        }
+        .dataTables_paginate .paginate_button.current {
+            @apply bg-green-500 text-white; /* Green */
+        }
+        .dataTables_paginate .paginate_button.disabled {
+            @apply text-gray-400 bg-gray-100 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400;
+        }
+        .ui-autocomplete {
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 0.375rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .ui-autocomplete .ui-menu-item {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+        .ui-autocomplete .ui-menu-item:hover {
+            background: #f3f4f6;
+        }
+        .editable-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            outline: none;
+            font-size: 0.875rem;
+        }
+        .editable-input:focus {
+            border-color: #10B981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+        .editable {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <?php include 'header.php'; ?>
+    <div class="flex min-h-screen">
+        <?php include 'sidebar.php'; ?>
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Edit Salary Table</span>
+                </nav>
+
+                <?php if (isset($_SESSION['msg'])): ?>
+                    <div class="bg-<?php echo $_SESSION['alertcolor']; ?>-100 text-<?php echo $_SESSION['alertcolor']; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                        <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                        <button onclick="this.parentElement.remove()" class="text-<?php echo $_SESSION['alertcolor']; ?>-600 hover:text-<?php echo $_SESSION['alertcolor']; ?>-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
+
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-table mr-2"></i> Salary Table
+                    <small class="text-base text-gray-600 ml-2">Edit allowances and deductions</small>
+                </h1>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <form id="add_item_form" action="edit_conhess_conmess.php" method="get" class="flex items-center">
+                        <div class="relative w-full max-w-md">
+                            <input type="text" name="item" id="item" class="w-full border border-gray-300 rounded-md p-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Enter Allowance & Deduction" value="<?php echo htmlspecialchars($searchItem); ?>">
+                            <span id="ajax-loader" class="absolute right-3 top-3 hidden">
+                                <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                        <button type="submit" class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Salary Table</h2>
+                        <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-800 bg-blue-100 rounded">
+                            Total Allowance/Deduction: <?php echo $totalAllowances; ?>
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="salaryTable" class="w-full dataTable">
+                            <thead>
+                                <tr>
+                                    <th class="hidden">ID</th>
+                                    <th>Allowance</th>
+                                    <th>Grade/Step</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($allowances as $row): ?>
+                                    <tr data-id="<?php echo htmlspecialchars($row['allow_id']); ?>">
+                                        <td class="hidden" data-id="<?php echo htmlspecialchars($row['allow_id']); ?>"><?php echo htmlspecialchars($row['allow_id']); ?></td>
+                                        <td class="uppercase"><?php echo htmlspecialchars($row['ADJDESC']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['grade_step']); ?></td>
+                                        <td class="editable" data-value="<?php echo htmlspecialchars($row['value']); ?>"><?php echo htmlspecialchars($row['value']); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav class="mt-4" aria-label="page navigation">
+                        <ul class="flex justify-center">
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <li>
+                                    <a href="edit_conhess_conmess.php?page=<?php echo $i; ?><?php echo $searchItem ? '&item=' . urlencode($searchItem) : ''; ?>" class="px-3 py-2 mx-1 rounded-md <?php echo $i == $page ? 'bg-green-500 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Log initial table HTML and data
+            console.log('Initial table HTML:', $('#salaryTable').html());
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('DataTables version:', $.fn.DataTable ? $.fn.DataTable.version : 'Not loaded');
+            console.log('PHP allowances data:', <?php echo json_encode($allowances); ?>);
+
+            // Initialize DataTable
+            const table = $('#salaryTable').DataTable({
+                dom: 'Bfrtip',
+                pageLength: 100,
+                searching: false,
+                ordering: true,
+                order: [[1, 'asc']],
+                columns: [
+                    { data: 'allow_id', visible: false },
+                    { data: 'ADJDESC' },
+                    { data: 'grade_step' },
+                    { data: 'value', className: 'editable' }
+                ],
+                data: <?php echo json_encode($allowances); ?>,
+                columnDefs: [
+                    { targets: 0, visible: false },
+                    { targets: [1, 2], orderable: false }
+                ],
+                buttons: [
+                    { extend: 'print', title: 'Salary_Table_Export' },
+                    { extend: 'csv', title: 'Salary_Table_Export' },
+                    { extend: 'excel', title: 'Salary_Table_Export' }
+                ],
+                drawCallback: function() {
+                    $('#salaryTable tbody td:nth-child(4)').addClass('editable').css('cursor', 'pointer');
+                    console.log('Editable cells after draw:', $('#salaryTable tbody td.editable').length);
+                    console.log('First row DOM:', $('#salaryTable tbody tr:first').html());
+                },
+                initComplete: function() {
+                    console.log('DataTable columns:', this.api().columns().count());
+                    console.log('Editable cells:', $('#salaryTable tbody td.editable').length);
+                    console.log('First row data:', this.api().row(0).data());
+                }
+            });
+
+            // Debug column rendering
+            console.log('Table columns after init:', $('#salaryTable thead th').length);
+            $('#salaryTable thead th').each(function(i) {
+                console.log(`Column ${i}:`, $(this).text(), 'Visible:', $(this).is(':visible'));
+            });
+
+            // Inline editing with event delegation
+            $(document).on('dblclick touchstart', '#salaryTable tbody td.editable', function(e) {
+                e.preventDefault();
+                if (e.type === 'touchstart') {
+                    e.preventDefault(); // Prevent zoom on double-tap
+                    if (e.originalEvent.touches.length > 1) return; // Ignore multi-touch
+                }
+                const $cell = $(this);
+                console.log('Double-click detected on cell:', $cell.text(), 'Index:', $cell.index());
+
+                // Get row and ID
+                const $row = $cell.closest('tr');
+                const rowData = table.row($row).data();
+                let id = rowData ? rowData.allow_id : null;
+
+                // Fallbacks to DOM data-id
+                if (!id) {
+                    id = $row.data('id') || $row.find('td.hidden').data('id');
+                    console.log('Fallback ID from DOM:', id);
+                }
+
+                const originalValue = $cell.data('value') || $cell.text();
+                console.log('Row data:', rowData);
+                console.log('allow_id:', id);
+                console.log('Original value:', originalValue);
+
+                if (!id) {
+                    console.error('No allow_id found for row:', rowData, 'DOM ID:', $row.data('id'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to edit: ID not found.'
+                    });
+                    return;
+                }
+
+                // Replace cell content with input
+                $cell.html(`<input type="number" class="editable-input" value="${originalValue}" />`);
+                const $input = $cell.find('input');
+                $input.focus();
+
+                // Save on blur or Enter
+                $input.on('blur keypress', function(e) {
+                    if (e.type === 'blur' || e.which === 13) {
+                        const newValue = $input.val().trim();
+                        console.log('Saving value:', newValue, 'for ID:', id);
+
+                        if (newValue === '' || isNaN(newValue) || parseFloat(newValue) < 0) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Input',
+                                text: 'Please enter a valid positive number.'
+                            });
+                            $cell.html(originalValue).data('value', originalValue);
+                            return;
+                        }
+
+                        if (newValue !== originalValue.toString()) {
+                            $.ajax({
+                                url: 'ajax_edit.php',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify({ data: { [id]: { value: newValue } } }),
+                                dataType: 'json',
+                                success: function(response) {
+                                    console.log('AJAX response:', response);
+                                    if (response.status === true) {
+                                        $cell.html(newValue).data('value', newValue);
+                                        table.cell($cell).data(newValue).draw();
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Success',
+                                            text: response.message || 'Value updated successfully.',
+                                            timer: 1500,
+                                            showConfirmButton: false
+                                        });
+                                    } else {
+                                        $cell.html(originalValue).data('value', originalValue);
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: response.message || 'Failed to update value.'
+                                        });
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('AJAX error:', xhr.status, error, xhr.responseText);
+                                    $cell.html(originalValue).data('value', originalValue);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred: ' + xhr.status + ' ' + error
+                                    });
+                                }
+                            });
+                        } else {
+                            $cell.html(originalValue).data('value', originalValue);
+                        }
+                    }
+                });
+            });
+
+            // Autocomplete with space handling
+            $('#item').autocomplete({
+                source: function(request, response) {
+                    console.log('Autocomplete search term:', request.term);
+                    $.ajax({
+                        url: 'searchAllowDed.php',
+                        type: 'POST',
+                        data: { term: request.term },
+                        dataType: 'json',
+                        success: function(data) {
+                            console.log('Autocomplete response:', data);
+                            response(data);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Autocomplete error:', xhr.status, error);
+                        }
+                    });
+                },
+                delay: 10,
+                autoFocus: false,
+                minLength: 1,
+                select: function(event, ui) {
+                    event.preventDefault();
+                    console.log('Autocomplete selected:', ui.item.value);
+                    $('#item').val(ui.item.value);
+                    $('#add_item_form').submit();
+                },
+                search: function() {
+                    console.log('Autocomplete search started');
+                    $('#ajax-loader').removeClass('hidden');
+                },
+                response: function() {
+                    console.log('Autocomplete response received');
+                    $('#ajax-loader').addClass('hidden');
+                }
+            }).focus();
+
+            // Clear placeholder on click
+            $('#item').on('click', function() {
+                $(this).attr('placeholder', '');
+            });
+
+            // Debug event binding
+            console.log('Double-click event bound to:', $('#salaryTable tbody td.editable').length, 'cells');
+        });
+    </script>
 </body>
-
 </html>
-<?php
-//mysqli_free_result($employee);
-?>

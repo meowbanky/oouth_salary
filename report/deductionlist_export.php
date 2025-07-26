@@ -3,14 +3,14 @@ ob_start();
 
 session_start();
 
-ini_set('max_execution_time', 300); // 300 seconds = 5 minutes
+ini_set('max_execution_time', 0); // 300 seconds = 5 minutes
 ini_set('memory_limit', '256M');    // Increase memory limit
-set_time_limit(300);                // Another way to set timeout
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+file_put_contents('log.txt', date('Y-m-d H:i:s') . " — Running export\n", FILE_APPEND);
 include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
 require_once('../../config.php');
@@ -18,7 +18,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
     header("location: ../index.php");
     exit;
 }
-require 'office_vendor/autoload.php';
+//require 'office_vendor/autoload.php';
 
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -27,7 +27,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 
-require 'vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 
 $period = filter_input(INPUT_POST, 'period', FILTER_VALIDATE_INT) ?: -1;
@@ -210,8 +210,11 @@ function downloadExcelFile($filePath, $fileName)
         }
 
         // Now turn off error reporting to prevent corrupting file content
-        error_reporting(0);
-        ini_set('display_errors', 0);
+//        error_reporting(0);
+//        ini_set('display_errors', 0);
+
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
 
         // Clear the output buffer
         ob_end_clean();
