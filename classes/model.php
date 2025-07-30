@@ -5,7 +5,7 @@
         header('Location: ../../index.php');
 	}*/
 
-include_once('Connections/paymaster.php');
+include_once('../Connections/paymaster.php');
 //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 function retrieveDescSingleFilter($table, $basevar, $filter1, $val1)

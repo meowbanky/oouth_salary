@@ -23,9 +23,8 @@ $adminItems = [
     ['href' => 'payperiods.php', 'icon' => 'fas fa-calendar', 'label' => 'Pay Periods'],
     ['href' => 'edit_conhess_conmess.php', 'icon' => 'fas fa-table', 'label' => 'Salary Table'],
     ['href' => 'users.php', 'icon' => 'fas fa-users', 'label' => 'Users'],
-    ['href' => 'payprocess.php', 'icon' => 'fas fa-cog', 'label' => 'Billing'],
+    ['href' => 'payprocess.php', 'icon' => 'fas fa-cog', 'label' => 'Proces'],
     ['href' => 'multiAdjustment.php', 'icon' => 'fas fa-shopping-cart', 'label' => 'Periodic Payments'],
-    ['href' => 'billing.php', 'icon' => 'fas fa-pen-to-square', 'label' => 'Billing'],
     ['href' => 'departments.php', 'icon' => 'fas fa-home', 'label' => 'Department'],
     ['href' => 'bank.php', 'icon' => 'fas fa-university', 'label' => 'Bank'],
     ['href' => 'editpfa.php', 'icon' => 'fas fa-coins', 'label' => 'PFA'],
@@ -42,13 +41,13 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
     <h2 class="text-xl font-bold mb-6">Menu</h2>
     <ul class="space-y-2">
         <?php foreach ($menuItems as $item): ?>
-            <li>
-                <a href="<?php echo $item['href']; ?>"
-                   class="flex items-center py-2 px-4 rounded hover:bg-gray-700 <?php echo $currentPage === $item['href'] ? 'bg-blue-600' : ''; ?>">
-                    <i class="<?php echo $item['icon']; ?> mr-3 text-lg"></i>
-                    <span><?php echo $item['label']; ?></span>
-                </a>
-            </li>
+        <li>
+            <a href="<?php echo $item['href']; ?>"
+                class="flex items-center py-2 px-4 rounded hover:bg-gray-700 <?php echo $currentPage === $item['href'] ? 'bg-blue-600' : ''; ?>">
+                <i class="<?php echo $item['icon']; ?> mr-3 text-lg"></i>
+                <span><?php echo $item['label']; ?></span>
+            </a>
+        </li>
         <?php endforeach; ?>
     </ul>
 </aside>

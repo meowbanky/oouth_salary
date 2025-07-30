@@ -180,7 +180,7 @@ $(document).ready(function() {
         });
     });
 
-    $('.edit-button').click(function() {
+    $(document).on('click', '.edit-button', function() {
         var staff_id = $(this).data('staff_id');
         var name = $(this).data('name');
         var deleted = $(this).data('status');
