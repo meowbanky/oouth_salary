@@ -27,7 +27,7 @@ if (!defined('SMTPSECURE')) {
 if (!defined('PORT')) {
     define('PORT', 587);
 }if (!defined('SMTPDEBUG')) {
-    define('SMTPDEBUG', 3);
+    define('SMTPDEBUG', 0);
 }
 
 

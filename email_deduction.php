@@ -1,645 +1,421 @@
 <?php
-session_start();
-require_once('Connections/paymaster.php');
-include_once('classes/model.php');
-
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+require_once 'classes/model.php';
 require_once 'libs/App.php';
 require_once 'libs/middleware.php';
+
 $App = new App();
 $App->checkAuthentication();
-
 checkPermission();
 
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
-	header("location: index.php");
-	exit();
+session_start();
+
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '' || ($_SESSION['role'] ?? '') !== 'Admin') {
+    header("Location: index.php");
+    exit;
 }
 
+// Load email deduction list
+try {
+    $query = $conn->prepare(
+        'SELECT tbl_earning_deduction.edDesc, email_deductionlist.allow_id, email_deductionlist.email, email_deductionlist.bcc 
+         FROM email_deductionlist 
+         INNER JOIN tbl_earning_deduction ON email_deductionlist.allow_id = tbl_earning_deduction.ed_id'
+    );
+    $query->execute();
+    $emailDeductions = $query->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $emailDeductions = [];
+    error_log("Database error: " . $e->getMessage());
+}
 
-
-
-
+// Load earning/deduction options for dropdown
+try {
+    $earningQuery = $conn->prepare('SELECT * FROM tbl_earning_deduction');
+    $earningQuery->execute();
+    $earnings = $earningQuery->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $earnings = [];
+    error_log("Database error: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
-<html>
-<?php include('header1.php'); ?>
-
-<body data-color="grey" class="flat" style="zoom: 1;">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1>
-				<a href="index.php">
-					<img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt="">
-				</a>
-			</h1>
-			<a id="menu-trigger" href="#">
-				<i class="fa fa-bars fa fa-2x"></i>
-			</a>
-			<div class="clear"></div>
-		</div>
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs">
-					<a title="" href="switch_user" data-toggle="modal" data-target="#myModal">
-						<i class="icon fa fa-user fa-2x"></i>
-						<span class="text"> Welcome
-							<b>
-								<?php echo $_SESSION['SESS_FIRST_NAME']; ?>
-							</b>
-						</span>
-					</a>
-				</li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="pos/" onclick="return false;">
-						<i class="icon fa fa-clock-o fa-2x"></i>
-						<span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?>
-						</span>
-					</a>
-				</li>
-				<li class="btn ">
-					<a href="#">
-						<i class="icon fa fa-cog"></i>
-						<span class="text">Settings</span>
-					</a>
-				</li>
-				<li class="btn  ">
-					<a href="index.php">
-						<i class="fa fa-power-off"></i>
-						<span class="text">Logout</span>
-					</a>
-				</li>
-			</ul>
-		</div>
-		<?php include('sidebar.php'); ?>
-		<div id="content" class="clearfix sales_content_minibar">
-
-			<div id="content-header" class="hidden-print">
-				<h1>
-					<i class="icon fa fa-envelope"></i>
-					DEDUCTION EMAIL LIST
-				</h1>
-			</div>
-			<div id="breadcrumb" class="hidden-print">
-				<a href="home.php">
-					<i class="fa fa-home"></i> Dashboard
-				</a>
-				<a class="current" href="email_deduction.php">email Deduction</a>
-			</div>
-			<div class="clear"></div>
-			<div id="datatable_wrapper"></div>
-			<div class=" pull-right">
-				<div class="row">
-					<div id="datatable_wrapper"></div>
-					<div class="col-md-12 center" style="text-align: center;">
-						<div class="btn-group  "></div>
-					</div>
-				</div>
-			</div>
-			<div class="row"></div>
-			<div class="row">
-				<!-- BEGIN PAGE BAR -->
-				<div class="page-bar">
-					<div class="row payperiod">
-						<div class="col-md-8">
-							<div class="form-group">
-								<label class="col-md-4 control-label"><b>Current Payroll Period: </b></label>
-								<div class="col-md-8">
-									<?php echo $_SESSION['activeperiodDescription']; ?> &nbsp; <span class="label label-inverse label-sm label-success"> Open </span>
-								</div>
-							</div>
-						</div>
-
-
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col-md-12">
-					<!-- BEGIN EXAMPLE TABLE PORTLET-->
-					<div class="portlet light bordered">
-
-						<div class="portlet-body">
-							<div class="table-toolbar">
-								<div class="row">
-									<div class="col-md-6">
-										<div class="btn-group">
-											<a class="btn red" data-toggle="modal" data-target="#responsive"> Add New <i class="fa fa-plus"></i></a>
-										</div>
-									</div>
-									<div class="col-md-6">
-										<div class="btn-group pull-right">
-											<button class="btn blue  btn-outline dropdown-toggle" data-toggle="dropdown">Export
-												<i class="fa fa-angle-down"></i>
-											</button>
-											<ul class="dropdown-menu pull-right">
-												<li>
-													<a href="javascript:;">
-														<i class="fa fa-print"></i> Print </a>
-												</li>
-												<li><a onclick="exportAll('csv');" href="javascript://">CSV</a></li>
-												<li><a onclick="exportAll('txt');" href="javascript://">TXT</a></li>
-												<li><a onclick="exportAll('xls');" href="javascript://">XLS</a></li>
-											</ul>
-										</div>
-									</div>
-								</div>
-
-
-								<!-- responsive -->
-								<div id="responsive" class="modal fade" tabindex="-1" data-width="560">
-									<div class="modal-dialog">
-										<div class="modal-content">
-											<div class="modal-header" style="background: #6e7dc7;">
-												<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-												<h4 class="modal-title">Add email to List</h4>
-											</div>
-											<div class="modal-body">
-												<form class="form-horizontal" method="post" action="classes/controller.php?act=email_deductionlist">
-													<div class="row">
-														<div class="form-group">
-
-															<div class="col-md-12">
-																<label class="control-label">Description</label>
-																<select required="" class="form-control" id="newearningcode" name="newearningcode">
-																	<option>- - Select Earning - -</option>
-																	<?php // retrieveSelect('tbl_earning_deduction', '*', 'edType', '1', 'ed_id');
-
-
-																	try {
-																		$query = $conn->prepare(
-																			'SELECT * FROM tbl_earning_deduction'
-																		);
-																		$res = $query->execute(array());
-																		$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-																		while ($row = array_shift($out)) {
-
-																			echo ('<option value="' . $row['ed_id'] . '" data-code="' . $row['edType'] . '">' . $row['ed'] . ' - ' . $row['ed_id'] . '</option>');
-																		}
-																	} catch (PDOException $e) {
-																		echo $e->getMessage();
-																	}
-
-																	?>
-																</select>
-															</div>
-														</div>
-														<div class="form-group">
-															<div class="col-md-12">
-																<label class="control-label"> email Deduction List</label>
-																<input type="email" required class="form-control" name="email" placeholder="email">
-															</div>
-
-														</div>
-														<div class="form-group">
-															<div class="col-md-12">
-																<label class="control-label"> CC email Deduction List</label>
-																<input type="email" required class="form-control" name="cc_email" placeholder="cc_email">
-															</div>
-
-														</div>
-													</div>
-													<div class="modal-footer">
-														<button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-														<button type="submit" class="btn red">Create New</button>
-													</div>
-												</form>
-											</div>
-										</div>
-									</div>
-								</div>
-
-
-							</div>
-							<table class="table table-striped table-bordered table-hover table-checkable order-column" id="sample_1">
-								<thead>
-									<tr>
-										<th> #</th>
-										<th> ID </th>
-										<th> List Name </th>
-										<th> email </th>
-										<th> cc email </th>
-									</tr>
-								</thead>
-								<tbody>
-
-									<!--Begin Data Table-->
-									<?php
-									try {
-										$query = $conn->prepare(
-											'SELECT tbl_earning_deduction.edDesc, email_deductionlist.allow_id, email_deductionlist.email, email_deductionlist.bcc FROM email_deductionlist INNER JOIN tbl_earning_deduction ON  email_deductionlist.allow_id = tbl_earning_deduction.ed_id'
-										);
-										$fin = $query->execute();
-										$res = $query->fetchAll(PDO::FETCH_ASSOC);
-										//print_r($res);
-
-										foreach ($res as $row => $link) {
-									?><tr class="odd gradeX">
-												<td><input type="checkbox"></td> <?php echo '<td>' . $link['allow_id'] .  '</td><td>' . $link['edDesc'] .  '</td><td>' . $link['email'] . '</td><td>' . $link['bcc'] . '</td>
-                                                           </tr>';
-																				}
-																			} catch (PDOException $e) {
-																				echo $e->getMessage();
-																			}
-																					?>
-
-										<!--End Data Table-->
-
-								</tbody>
-							</table>
-						</div>
-					</div>
-					<!-- END EXAMPLE TABLE PORTLET-->
-				</div>
-				<!-- BEGIN PAGE TITLE-->
-
-				<!-- END PAGE TITLE-->
-				<!-- END PAGE HEADER-->
-
-
-
-				<div class="clearfix"></div>
-				<!-- END DASHBOARD STATS 1-->
-
-
-
-			</div>
-			<!-- END CONTENT BODY -->
-		</div>
-		<!-- END CONTENT -->
-
-
-
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="#" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info">
-				<span class="label label-info"> 14.1</span>
-			</span>
-		</div>
-
-		<script src="js/tableExport.js"></script>
-		<script src="js/main.js"></script>
-		<script>
-			$(document).ready(function() {
-
-
-
-				$('#sample_1').Tabledit({
-					url: 'email_deductionlist_edit.php',
-					deleteButton: false,
-					columns: {
-						identifier: [1, "id"],
-						editable: [
-							[3, 'value'],
-							[4, 'value2']
-						]
-
-					},
-					dropdowns: {},
-					dblclick: true,
-					keyboard: true,
-					hideIdentifier: true,
-					restoreButton: false,
-					onSuccess: function(data, textStatus, jqXHR) {
-						if (data.action == 'delete') {
-							$('#' + data.id).remove();
-						}
-					}
-				});
-
-			});
-		</script>
-		<script type="text/javascript">
-			$(document).ready(function() {
-				//$("#ajax-loader").show();
-				//$("#pickEmployee").select2();
-				//$("#newdeductioncodeunion").select2();
-				//$("Input[type=Select]").select2();
-				$('#item').focus();
-				var last_focused_id = null;
-				var submitting = false;
-
-				function salesBeforeSubmit(formData, jqForm, options) {
-					if (submitting) {
-						return false;
-					}
-					submitting = true;
-					$("#ajax-loader").show();
-
-				}
-
-				function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-					if (($('#code').val()) == 1) {
-						gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-					} else {
-						gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-						window.location.reload(true);
-						$("#ajax-loader").hide();
-
-					}
-					setTimeout(function() {
-						$('#item').focus();
-					}, 10);
-
-					setTimeout(function() {
-
-						$.gritter.removeAll();
-						return false;
-
-					}, 1000);
-
-				}
-
-				$("#item").autocomplete({
-					source: 'searchStaff.php',
-					type: 'POST',
-					delay: 10,
-					autoFocus: false,
-					minLength: 1,
-					select: function(event, ui) {
-						event.preventDefault();
-						$("#item").val(ui.item.value);
-						$('#add_item_form').ajaxSubmit({
-							beforeSubmit: salesBeforeSubmit,
-							success: itemScannedSuccess
-						});
-
-					}
-				});
-
-				$('#item').click(function() {
-					$(this).attr('placeholder', '');
-				});
-
-				$("#no_times_repayment").blur(function() {
-					// alert(parseFloat($("#principal").val().trim()));
-					var monthlyPayment = ((parseFloat($("#Principal").val()) + parseFloat($("#interest").val())) / parseFloat($("#no_times_repayment").val()));
-
-					$("#monthlyRepayment").val(monthlyPayment);
-				});
-
-				$("#monthlyRepayment").blur(function() {
-					// alert(parseFloat($("#principal").val().trim()));
-					var monthlyPayment = ((parseFloat($("#Principal").val()) + parseFloat($("#interest").val())) / parseFloat($(this).val()));
-
-					$("#no_times_repayment").val(monthlyPayment);
-				});
-
-
-				//Ajax submit current location
-
-				$("#addearningsButton").click(function() {
-
-					$("#form_newearningcode").ajaxSubmit({
-						url: 'classes/controller.php?act=addemployeeearning',
-						success: function(response, message) {
-
-							$("#form_newearningcode").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-								$("#reloadtable").load(location.href + " #reloadtable");
-
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-				})
-
-
-				$("#addDeductionButtonUnion").click(function() {
-
-					$("#form_newedeductioncodeunion").ajaxSubmit({
-						url: 'classes/controller.php?act=addemployeedeductionunion',
-						success: function(response, message) {
-
-							$("#form_newedeductioncode").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-
-								$("#reloadtable").load(location.href + " #reloadtable");
-
-
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-				})
-
-				$("#addDeductionButton").click(function() {
-
-					$("#form_newedeductioncode").ajaxSubmit({
-						url: 'classes/controller.php?act=addemployeededuction',
-						success: function(response, message) {
-
-							$("#form_newedeductioncode").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-
-								$("#reloadtable").load(location.href + " #reloadtable");
-
-
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-				})
-
-				$("#addLoanButton").click(function() {
-
-					$("#form_newloanemployeededuction").ajaxSubmit({
-						url: 'classes/controller.php?act=loan_corporate',
-						success: function(response, message) {
-
-							$("#form_newedeductioncode").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-								$("#reloadtable").load(location.href + " #reloadtable");
-
-
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-				})
-
-				$(".btn btn-outline dark").click(function() {
-
-					alert('ok');
-					location.reload(true);
-
-
-				});
-
-				$("#newdeductioncode").change(function() {
-					var $option = $(this).find('option:selected');
-					var $value = $option.val();
-
-					if ($value == 41) {
-
-						$("#form_newedeductioncode").ajaxSubmit({
-							url: 'classes/getPensionValue.php',
-							success: function(response, message) {
-
-								$("#form").unmask();
-								submitting = false;
-
-								if (message == 'success') {
-									if ($.trim(response) == 'manual') {
-
-										$("#deductionamount").val('');
-										$("#deductionamount").attr('readonly', false);
-
-									} else {
-										$("#deductionamount").val(response);
-										$("#deductionamount").attr('readonly', true);
-									}
-								} else {
-									gritter("Error", message, 'gritter-item-error', false, false);
-
-								}
-
-
-							}
-						});
-					} else {
-						$("#deductionamount").val('');
-						$("#deductionamount").attr('readonly', false);
-					}
-				});
-
-				$("#newdeductioncodeloan").change(function() {
-					$("#form_newloanemployeededuction").ajaxSubmit({
-						url: 'classes/getLoanBalance.php',
-						success: function(response, message) {
-
-							$("#form").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-								if (response > 0) {
-									$("#addLoanButton").attr('disabled', true);
-									$("#Balance").val(response);
-								} else {
-									$("#addLoanButton").attr('disabled', false);
-									$("#Balance").val(response);
-								}
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-				});
-
-				$("#newearningcode").change(function() {
-
-					$("#form_newearningcode").ajaxSubmit({
-						url: 'classes/getSalaryValue.php',
-						success: function(response, message) {
-
-							$("#form").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-								if ($.trim(response) == 'manual') {
-
-									$("#earningamount").val('');
-									$("#earningamount").attr('readonly', false);
-
-								} else {
-									$("#earningamount").val(response);
-									$("#earningamount").attr('readonly', true);
-								}
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-				});
-
-				$("#newdeductioncodeunion").change(function() {
-
-					$("#form_newedeductioncodeunion").ajaxSubmit({
-						url: 'classes/getUnionValue.php',
-						success: function(response, message) {
-
-							$("#form").unmask();
-							submitting = false;
-
-							if (message == 'success') {
-								if ($.trim(response) == 'manual') {
-									$("#deductionamountunion").val('');
-									$("#deductionamountunion").attr('readonly', false);
-
-								} else {
-
-									$("#deductionamountunion").val(response);
-									$("#deductionamountunion").attr('readonly', true);
-
-								}
-							} else {
-								gritter("Error", message, 'gritter-item-error', false, false);
-
-							}
-
-
-						}
-					});
-
-
-
-				});
-
-			});
-		</script>
-	</div>
-	<!--end #content-->
-	</div>
-	<!--end #wrapper-->
-	<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Deduction Manager - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    
+    <style>
+        /* Ensure footer is always visible */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        /* Modal positioning fixes */
+        #emailDeductionModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+        }
+        
+        /* Ensure SweetAlert2 appears above modal */
+        .swal2-container {
+            z-index: 10000 !important;
+        }
+        
+        .swal2-popup {
+            z-index: 10001 !important;
+        }
+        
+        /* DataTable styling improvements */
+        .dataTables_wrapper {
+            margin-bottom: 1rem;
+        }
+        
+        /* Ensure proper spacing */
+        .container {
+            flex: 1;
+        }
+        
+        /* Prevent body scroll when modal is open */
+        body.overflow-hidden {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <?php include 'header.php'; ?>
+    <div class="flex min-h-screen">
+        <?php include 'sidebar.php'; ?>
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Email Deduction Manager</span>
+                </nav>
+                <?php if (isset($_SESSION['msg'])): ?>
+                <div
+                    class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                    <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                    <button onclick="this.parentElement.remove()"
+                        class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-envelope mr-2"></i> Email Deduction Manager
+                    <small class="text-base text-gray-600 ml-2">Manage email notifications for deductions</small>
+                </h1>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <div class="mb-4 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800">Email Deduction List</h2>
+                        <div>
+                            <button id="reload-button"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <i class="fas fa-sync-alt"></i> Reload
+                            </button>
+                            <button id="add-email-deduction-button"
+                                class="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                            <button id="download-excel-button"
+                                class="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <i class="fas fa-file-excel"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="emailDeductionTable" class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-800 text-white">
+                                    <th class="py-2 px-4">ID</th>
+                                    <th class="py-2 px-4">List Name</th>
+                                    <th class="py-2 px-4">Email</th>
+                                    <th class="py-2 px-4">CC Email</th>
+                                    <th class="py-2 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($emailDeductions as $item): ?>
+                                <tr>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($item['allow_id']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($item['edDesc']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($item['email']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($item['bcc']); ?></td>
+                                    <td class="py-2 px-4">
+                                        <button class="edit-email-deduction-btn text-blue-600 hover:text-blue-900 mr-2"
+                                            data-allow_id="<?php echo htmlspecialchars($item['allow_id']); ?>"
+                                            data-eddesc="<?php echo htmlspecialchars($item['edDesc']); ?>"
+                                            data-email="<?php echo htmlspecialchars($item['email']); ?>"
+                                            data-bcc="<?php echo htmlspecialchars($item['bcc']); ?>">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="delete-email-deduction-btn text-red-600 hover:text-red-900"
+                                            data-allow_id="<?php echo htmlspecialchars($item['allow_id']); ?>"
+                                            data-eddesc="<?php echo htmlspecialchars($item['edDesc']); ?>">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit/Add Modal -->
+    <div id="emailDeductionModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" id="modalTitle">Add/Edit Email Deduction</h2>
+                <button type="button" id="closeModalButton" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="emailDeductionForm" method="POST" autocomplete="off">
+                <input type="hidden" name="action" id="action" value="create">
+                <input type="hidden" name="allow_id" id="allow_id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <select id="newearningcode" name="newearningcode" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <option value="">- - Select Earning - -</option>
+                        <?php foreach ($earnings as $earning): ?>
+                        <option value="<?php echo htmlspecialchars($earning['ed_id']); ?>" 
+                                data-code="<?php echo htmlspecialchars($earning['edType']); ?>">
+                            <?php echo htmlspecialchars($earning['ed']); ?> - <?php echo htmlspecialchars($earning['ed_id']); ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter email address..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">CC Email</label>
+                    <input type="email" id="cc_email" name="cc_email" placeholder="Enter CC email address..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancelBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
+                    <button type="submit" id="saveBtn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    $(function() {
+        // Initialize DataTable with proper configuration
+        var emailDeductionTable = $('#emailDeductionTable').DataTable({
+            pageLength: 25,
+            ordering: true,
+            columnDefs: [
+                { orderable: false, targets: 4 } // Disable sorting on Actions column
+            ]
+        });
+
+        // Reload button
+        $('#reload-button').click(function() {
+            location.reload();
+        });
+        
+        // Download Excel button
+        $('#download-excel-button').click(function() {
+            window.location.href = 'libs/export_email_deductions_excel.php';
+        });
+
+        // Add email deduction button
+        $('#add-email-deduction-button').click(function() {
+            $('#modalTitle').text('Add New Email Deduction');
+            $('#emailDeductionForm')[0].reset();
+            $('#action').val('create');
+            $('#allow_id').val('');
+            showModal();
+        });
+
+        // Edit email deduction button with event delegation
+        $(document).on('click', '.edit-email-deduction-btn', function() {
+            $('#modalTitle').text('Edit Email Deduction');
+            $('#action').val('update');
+            $('#allow_id').val($(this).data('allow_id'));
+            $('#newearningcode').val($(this).data('allow_id'));
+            $('#email').val($(this).data('email'));
+            $('#cc_email').val($(this).data('bcc'));
+            showModal();
+        });
+
+        // Delete email deduction button with event delegation
+        $(document).on('click', '.delete-email-deduction-btn', function() {
+            const allowId = $(this).data('allow_id');
+            const edDesc = $(this).data('eddesc');
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete email deduction for "${edDesc}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Deleting...',
+                        text: 'Please wait while we delete the email deduction.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: 'libs/manage_email_deduction.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'delete',
+                            allow_id: allowId
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: response.status === 'success' ? 'success' : 'error',
+                                title: response.status === 'success' ? 'Deleted!' : 'Error',
+                                text: response.message,
+                                timer: response.status === 'success' ? 2000 : 0,
+                                showConfirmButton: response.status !== 'success'
+                            }).then((result) => {
+                                if (response.status === 'success') {
+                                    location.reload();
+                                }
+                            });
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while deleting the email deduction',
+                                showConfirmButton: true
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        // Close modal buttons
+        $('#closeModalButton, #cancelBtn').click(function() {
+            hideModal();
+        });
+
+        // Close modal when clicking outside
+        $('#emailDeductionModal').click(function(e) {
+            if (e.target === this) {
+                hideModal();
+            }
+        });
+
+        // Form submission
+        $('#emailDeductionForm').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            
+            // Show loading state
+            $('#saveBtn').prop('disabled', true).text('Saving...');
+            
+            $.ajax({
+                url: 'libs/manage_email_deduction.php',
+                type: 'POST',
+                dataType: 'json',
+                data: formData,
+                success: function(response) {
+                    // Hide modal first
+                    hideModal();
+                    
+                    // Show alert after modal is hidden
+                    setTimeout(function() {
+                        Swal.fire({
+                            icon: response.status === 'success' ? 'success' : 'error',
+                            title: response.status === 'success' ? 'Success' : 'Error',
+                            text: response.message,
+                            timer: response.status === 'success' ? 2000 : 0,
+                            showConfirmButton: response.status !== 'success'
+                        }).then((result) => {
+                            if (response.status === 'success') {
+                                location.reload();
+                            }
+                        });
+                    }, 100);
+                },
+                error: function() {
+                    // Hide modal first
+                    hideModal();
+                    
+                    // Show error alert
+                    setTimeout(function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while saving the email deduction',
+                            showConfirmButton: true
+                        });
+                    }, 100);
+                },
+                complete: function() {
+                    // Reset button state
+                    $('#saveBtn').prop('disabled', false).text('Save');
+                }
+            });
+        });
+
+        // Modal functions
+        function showModal() {
+            $('#emailDeductionModal').removeClass('hidden').addClass('flex');
+            $('body').addClass('overflow-hidden');
+        }
+
+        function hideModal() {
+            $('#emailDeductionModal').addClass('hidden').removeClass('flex');
+            $('body').removeClass('overflow-hidden');
+        }
+    });
+    </script>
+    <?php include 'footer.php'; ?>
 </body>
 
 </html>
