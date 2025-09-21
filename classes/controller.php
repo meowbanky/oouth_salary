@@ -865,9 +865,8 @@ switch ($act) {
     case 'addemployeededuction':
         $currentempl = $_POST['curremployee'];
         $edcode = $_POST['newdeductioncode'];
-        $deductionamount = trim($_POST['deductionamount']);
+        $earningamount = str_replace(',', '', trim($_POST['deductionamount']));
         $recordtime = date('Y-m-d H:i:s');
-
 
         try {
             $query = $conn->prepare('SELECT * FROM allow_deduc WHERE staff_id = ?  AND allow_id = ? ');
@@ -876,24 +875,31 @@ switch ($act) {
 
             if ($existtrans) {
                 //same transaction for current employee, current period posted
-                $query = 'UPDATE allow_deduc SET value = ?, date_insert = ?, inserted_by = ? WHERE staff_id = ?  AND allow_id = ? ';
-                $conn->prepare($query)->execute(array($deductionamount, $recordtime, $_SESSION['SESS_MEMBER_ID'], $currentempl, $edcode));
-                $_SESSION['msg'] = $msg = "Deduction UPdated successfully saved";
-                $_SESSION['alertcolor'] = $type = "success";
+                $query = 'UPDATE allow_deduc SET value = ?, date_insert = ?, inserted_by = ? WHERE staff_id = ?  AND allow_id = ?';
+                $conn->prepare($query)->execute(array($earningamount, $recordtime, $_SESSION['SESS_MEMBER_ID'], $currentempl, $edcode));
+
+                $_SESSION['alertcolor'] = $type = "danger";
+                $msg = "Duplicate Earning not allowed";
                 $source = $_SERVER['HTTP_REFERER'];
-                //redirect($msg, $type, $source);
+                redirect($msg, $type, $source);
                 header('Location: ' . $source);
             } else {
-                if ($deductionamount > 0) {
-                    $query = 'INSERT INTO allow_deduc (staff_id, allow_id, value, date_insert, inserted_by,transcode) VALUES (?,?,?,?,?,?)';
-                    $conn->prepare($query)->execute(array($currentempl, $edcode, $deductionamount, $recordtime, $_SESSION['SESS_MEMBER_ID'], '02'));
-                    $_SESSION['msg'] = $msg = "Deduction successfully saved";
+                if ($earningamount > -1) {
+
+                    $query = $conn->prepare('SELECT code FROM tbl_earning_deduction WHERE ed_id = ?');
+                    $res = $query->execute(array($edcode));
+                    $existtrans = $query->fetch();
+                    $code = $existtrans['code'];
+
+                    $query = 'INSERT INTO allow_deduc (transcode,staff_id, allow_id, value, date_insert, inserted_by) VALUES (?,?,?,?,?,?)';
+                    $conn->prepare($query)->execute(array($code, $currentempl, $edcode, $earningamount, $recordtime, $_SESSION['SESS_MEMBER_ID']));
+                    $_SESSION['msg'] = $msg = "Earning successfully saved";
                     $_SESSION['alertcolor'] = $type = "success";
                     $source = $_SERVER['HTTP_REFERER'];
                     //redirect($msg, $type, $source);
                     header('Location: ' . $source);
                 } else {
-                    $_SESSION['msg'] = $msg = "Employee not Entitiled to the Deduction";
+                    $_SESSION['msg'] = $msg = "Employee not Entitiled to the Allowance";
                     $_SESSION['alertcolor'] = $type = "danger";
                     $source = $_SERVER['HTTP_REFERER'];
                     //redirect($msg, $type, $source);
@@ -1293,6 +1299,8 @@ switch ($act) {
             $salary_type = isset($_POST['salary_type']) ? filter_var($_POST['salary_type']) : '';
             $pfa = filter_var($_POST['pfa']);
             $rsa_pin = filter_var($_POST['rsa_pin']);
+            $callType = filter_var($_POST['callType'], FILTER_SANITIZE_NUMBER_INT);
+            $hazardType = filter_var($_POST['hazardType'], FILTER_SANITIZE_NUMBER_INT);
             $recordtime = date('Y-m-d H:i:s');
             $userID = $_SESSION['SESS_MEMBER_ID'] ?? null;
         
@@ -1302,6 +1310,12 @@ switch ($act) {
             // (Optional) Check for required fields here and return JSON error if missing
             if (!$emp_no || !$namee || !$dept || !$designation || !$grade || !$gradestep || !$doe || !$bank || !$acct_no || !$insertemail) {
                 echo json_encode(['success' => false, 'error' => 'Missing required fields.']);
+                exit;
+            }
+            
+            // Check for callType and hazardType (these can be 0, so we check isset instead of empty)
+            if (!isset($_POST['callType']) || !isset($_POST['hazardType'])) {
+                echo json_encode(['success' => false, 'error' => 'Missing required field: callType or hazardType']);
                 exit;
             }
         
@@ -1315,10 +1329,10 @@ switch ($act) {
         
             try {
                 // Insert into DB
-                $query = 'INSERT INTO employee (salary_type, EMAIL, staff_id, `NAME`, EMPDATE, DEPTCD, POST, GRADE, STEP, ACCTNO, BCODE, STATUSCD, PFACODE, PFAACCTNO, userID, editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+                $query = 'INSERT INTO employee (salary_type, EMAIL, staff_id, `NAME`, EMPDATE, DEPTCD, POST, GRADE, STEP, ACCTNO, BCODE, STATUSCD, PFACODE, PFAACCTNO, CALLTYPE, HARZAD_TYPE, userID, editTime) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
                 $conn->prepare($query)->execute([
                     $salary_type, $insertemail, $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep,
-                    $acct_no, $bank, 'A', $pfa, $rsa_pin, $userID, $recordtime
+                    $acct_no, $bank, 'A', $pfa, $rsa_pin, $callType, $hazardType, $userID, $recordtime
                 ]);
         
                 // Call the email creation API
@@ -1376,6 +1390,11 @@ switch ($act) {
                         respond(['success' => false, 'error' => "Missing required field: $field"]);
                     }
                 }
+                
+                // Check for callType and hazardType (these can be 0, so we check isset instead of empty)
+                if (!isset($_POST['callType']) || !isset($_POST['hazardType'])) {
+                    respond(['success' => false, 'error' => "Missing required field: callType or hazardType"]);
+                }
             
                 // Sanitize
                 $emp_no      = filter_var($_POST['emp_no'],      FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -1390,6 +1409,8 @@ switch ($act) {
                 $pfa         = filter_var($_POST['pfa'],         FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 $rsa_pin     = strip_tags($_POST['rsa_pin']);
                 $email       = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+                $callType    = filter_var($_POST['callType'],    FILTER_SANITIZE_NUMBER_INT);
+                $hazardType  = filter_var($_POST['hazardType'],  FILTER_SANITIZE_NUMBER_INT);
             
                 // Validate date (YYYY-MM-DD)
                 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $doe)) {
@@ -1406,17 +1427,17 @@ switch ($act) {
             
                 // Optional: Validate/limit field lengths here (not shown for brevity)
             
-                try {
+                                try {
                     $query = "UPDATE employee SET 
                             EMAIL=?, `NAME`=?, EMPDATE=?, DEPTCD=?, POST=?, 
                             GRADE=?, STEP=?, ACCTNO=?, BCODE=?, PFACODE=?, 
-                            PFAACCTNO=?, editTime=NOW() 
+                            PFAACCTNO=?, CALLTYPE=?, HARZAD_TYPE=?, editTime=NOW() 
                         WHERE staff_id=?";
-            
+
                     $stmt = $conn->prepare($query);
                     $stmt->execute([
                         $email, $namee, $doe, $dept, $designation, $grade, $gradestep,
-                        $acct_no, $bank, $pfa, $rsa_pin, $emp_no
+                        $acct_no, $bank, $pfa, $rsa_pin, $callType, $hazardType, $emp_no
                     ]);
                     // Check affected rows (optional)
                     if ($stmt->rowCount() > 0) {
