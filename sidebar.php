@@ -29,6 +29,9 @@ $adminItems = [
     ['href' => 'bank.php', 'icon' => 'fas fa-university', 'label' => 'Bank'],
     ['href' => 'editpfa.php', 'icon' => 'fas fa-coins', 'label' => 'PFA'],
     ['href' => 'email_deduction.php', 'icon' => 'fas fa-envelope', 'label' => 'Email Deductions'],
+    ['href' => 'monthly_comparison_report.php', 'icon' => 'fas fa-chart-line', 'label' => 'Monthly Comparison'],
+    ['href' => 'abeokuta_variance_tracking_enhanced.php', 'icon' => 'fas fa-exchange-alt', 'label' => 'Abeokuta Variance'],
+    ['href' => 'abeokuta_audit_report.php', 'icon' => 'fas fa-clipboard-list', 'label' => 'Abeokuta Audit'],
 ];
 
 // Merge admin items for admin users

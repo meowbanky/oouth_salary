@@ -6,7 +6,10 @@ $hostname_salary = "localhost";
 $database_salary = "oouthsal_salary3";
 $username_salary = "oouthsal_root";
 $password_salary = "Oluwaseyi@7980";
-$salary = mysqli_connect($hostname_salary, $username_salary, $password_salary) or trigger_error(mysqli_error($salary), E_USER_ERROR);
+$salary = mysqli_connect($hostname_salary, $username_salary, $password_salary);
+if (!$salary) {
+    trigger_error(mysqli_connect_error(), E_USER_ERROR);
+}
 
 try {
 	$conn = new PDO("mysql:host=$hostname_salary;dbname=$database_salary", $username_salary, $password_salary, array(PDO::ATTR_PERSISTENT => true));
