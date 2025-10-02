@@ -94,11 +94,17 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </h1>
                         <p class="text-sm text-blue-700/70 mt-1">Manage, search and add employee records.</p>
                     </div>
-                    <button type="button"
-                        class="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
-                        id="openAddEmpModal">
-                        <i class="fas fa-user-plus mr-2"></i> Add Employee
-                    </button>
+                    <div class="flex gap-2">
+                        <a href="export_employees.php?<?php echo http_build_query($_GET); ?>"
+                            class="bg-green-700 hover:bg-green-900 text-white px-5 py-2 rounded-lg font-semibold shadow transition">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </a>
+                        <button type="button"
+                            class="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
+                            id="openAddEmpModal">
+                            <i class="fas fa-user-plus mr-2"></i> Add Employee
+                        </button>
+                    </div>
                 </div>
                 <?php if (isset($_SESSION['msg'])): ?>
                 <div class="mb-4">
