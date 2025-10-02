@@ -10,6 +10,7 @@ checkPermission();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,8 @@ checkPermission();
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-building"></i> Departmental Payroll Summary
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive payroll summaries by department with financial breakdowns.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive payroll summaries by department
+                            with financial breakdowns.</p>
                     </div>
                 </div>
 
@@ -49,7 +51,9 @@ checkPermission();
                                     <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
                                     </label>
-                                    <select name="period" id="period" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         $period = isset($_POST['period']) ? $_POST['period'] : -1;
@@ -67,18 +71,22 @@ checkPermission();
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-wrap gap-3">
-                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button" id="export-excel-button" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="export-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Export Excel
                                 </button>
-                                <button type="button" id="export-pdf-button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="export-pdf-button"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
-                                <button type="button" onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" onclick="window.print()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
                             </div>
@@ -101,33 +109,43 @@ checkPermission();
                 ?>
 
                 <?php if ($month != '') { ?>
-                    <!-- Report Header -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                Departmental Payroll Summary for the Month of: <?php echo htmlspecialchars($month); ?>
-                            </p>
-                        </div>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Departmental Payroll Summary for the Month of: <?php echo htmlspecialchars($month); ?>
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Report Table -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
-                                <thead class="bg-blue-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Department Name</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">No. of Employee</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Total Allowance</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Total Deduction</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Department Net Pay</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Department Name</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        No. of Employee</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Total Allowance</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Total Deduction</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Department Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
                                     if (isset($_POST['period']) && $_POST['period'] != '') {
                                         try {
                                             $query = $conn->prepare('SELECT master_staff.DEPTCD, ANY_VALUE(tbl_dept.dept) AS dept, ANY_VALUE(Sum(tbl_master.allow)) as "allow", ANY_VALUE(count(tbl_master.staff_id)) as "numb", ANY_VALUE(Sum(tbl_master.deduc)) as "deduct", ANY_VALUE(Sum(tbl_master.allow) - Sum(tbl_master.deduc)) as "net", ANY_VALUE(tbl_dept.dept) AS dept FROM tbl_master INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD WHERE master_staff.period = ? and tbl_master.period = ? GROUP BY master_staff.DEPTCD order by dept asc');
@@ -190,33 +208,31 @@ checkPermission();
                                         echo '</tr>';
                                     }
                                     ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Footer -->
-                        <div class="bg-gray-50 px-6 py-4 border-t">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
-                                    <p><strong>Date:</strong> <?php 
-                                        $Today = date('y:m:d', time());
-                                        $new = date('l, F d, Y', strtotime($Today));
-                                        echo $new;
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
+                                        echo date('l, F d, Y');
                                     ?></p>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
-                                    <?php if (isset($countStaff) && $countStaff > 0): ?>
-                                        <p><strong>Total Employees:</strong> <?php echo number_format($countStaff); ?></p>
-                                        <p><strong>Total Allowances:</strong> ₦<?php echo number_format($sumAll); ?></p>
-                                        <p><strong>Total Deductions:</strong> ₦<?php echo number_format($sumDeduct); ?></p>
-                                        <p><strong>Total Net Pay:</strong> ₦<?php echo number_format($sumTotal); ?></p>
-                                    <?php endif; ?>
-                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
+                                <?php if (isset($countStaff) && $countStaff > 0): ?>
+                                <p><strong>Total Employees:</strong> <?php echo number_format($countStaff); ?></p>
+                                <p><strong>Total Allowances:</strong> ₦<?php echo number_format($sumAll); ?></p>
+                                <p><strong>Total Deductions:</strong> ₦<?php echo number_format($sumDeduct); ?></p>
+                                <p><strong>Total Net Pay:</strong> ₦<?php echo number_format($sumTotal); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -252,8 +268,9 @@ checkPermission();
 
         function downloadExcel() {
             // Show loading indicator
-            $('#export-excel-button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Exporting...');
-            
+            $('#export-excel-button').prop('disabled', true).html(
+                '<i class="fas fa-spinner fa-spin"></i> Exporting...');
+
             $.ajax({
                 type: "POST",
                 url: 'payrollDept_export_excel.php',
@@ -263,8 +280,9 @@ checkPermission();
                 },
                 timeout: 300000,
                 success: function(response) {
-                    $('#export-excel-button').prop('disabled', false).html('<i class="fas fa-file-excel"></i> Export Excel');
-                    
+                    $('#export-excel-button').prop('disabled', false).html(
+                        '<i class="fas fa-file-excel"></i> Export Excel');
+
                     try {
                         // Check if response is an error JSON
                         if (typeof response === 'string' && response.includes('{"error":')) {
@@ -272,11 +290,12 @@ checkPermission();
                             alert(errorData.error);
                             return;
                         }
-                        
+
                         // Check if response is HTML error page
                         if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
                             console.error('Received HTML error page instead of data');
-                            alert('Server error occurred. Please try again or contact administrator.');
+                            alert(
+                                'Server error occurred. Please try again or contact administrator.');
                             return;
                         }
 
@@ -287,7 +306,9 @@ checkPermission();
                         }
 
                         var downloadLink = document.createElement('a');
-                        downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                        downloadLink.href =
+                            'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                            response;
                         downloadLink.download = 'Payroll_Dept_' + '<?php echo $month; ?>' + '.xlsx';
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
@@ -299,7 +320,8 @@ checkPermission();
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#export-excel-button').prop('disabled', false).html('<i class="fas fa-file-excel"></i> Export Excel');
+                    $('#export-excel-button').prop('disabled', false).html(
+                        '<i class="fas fa-file-excel"></i> Export Excel');
                     console.error('AJAX Error:', status, error);
                     if (status === 'timeout') {
                         alert('Request timed out. Please try again or contact administrator.');
@@ -312,8 +334,9 @@ checkPermission();
 
         function downloadPDF() {
             // Show loading indicator
-            $('#export-pdf-button').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Exporting...');
-            
+            $('#export-pdf-button').prop('disabled', true).html(
+                '<i class="fas fa-spinner fa-spin"></i> Exporting...');
+
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = 'payrollDept_export_pdf.php';
@@ -336,13 +359,15 @@ checkPermission();
             document.body.appendChild(form);
             form.submit();
             document.body.removeChild(form);
-            
+
             // Reset button after a delay
             setTimeout(function() {
-                $('#export-pdf-button').prop('disabled', false).html('<i class="fas fa-file-pdf"></i> Export PDF');
+                $('#export-pdf-button').prop('disabled', false).html(
+                    '<i class="fas fa-file-pdf"></i> Export PDF');
             }, 2000);
         }
     });
     </script>
 </body>
+
 </html>

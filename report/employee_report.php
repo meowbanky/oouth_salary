@@ -10,6 +10,7 @@ checkPermission();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,8 @@ checkPermission();
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-users"></i> Employee Report
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive employee information reports.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive employee information reports.
+                        </p>
                     </div>
                 </div>
 
@@ -49,7 +51,9 @@ checkPermission();
                                     <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
                                     </label>
-                                    <select name="period" id="period" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         $period = isset($_POST['period']) ? $_POST['period'] : -1;
@@ -67,18 +71,22 @@ checkPermission();
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-wrap gap-3">
-                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button" onclick="downloadExcel()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" onclick="downloadExcel()"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Download Excel
                                 </button>
-                                <button type="button" onclick="exportPDF()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" onclick="exportPDF()"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-pdf"></i> Download PDF
                                 </button>
-                                <button type="button" onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" onclick="window.print()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
                             </div>
@@ -101,39 +109,61 @@ checkPermission();
                 ?>
 
                 <?php if ($month != '' && $month != 'Not Selected') { ?>
-                    <!-- Report Header -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                Employee Report for the Month of: <?php echo htmlspecialchars($month); ?>
-                            </p>
-                        </div>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Employee Report for the Month of: <?php echo htmlspecialchars($month); ?>
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Report Table -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
-                                <thead class="bg-blue-50">
-                                    <tr>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">S/No</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Staff No.</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Email</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Dept</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Emp Date</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Post</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Grade</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Step</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Bank</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Acct. No.</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        S/No</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Staff No.</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Email</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Dept</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Emp Date</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Post</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Grade</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Step</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Bank</th>
+                                    <th
+                                        class="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Acct. No.</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
                                     if (isset($_POST['period']) && $_POST['period'] != '') {
                                         try {
                                             $sql = 'SELECT master_staff.staff_id, master_staff.`NAME`, tbl_dept.dept, master_staff.GRADE, master_staff.STEP, 
@@ -192,30 +222,28 @@ checkPermission();
                                         echo '</tr>';
                                     }
                                     ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Footer -->
-                        <div class="bg-gray-50 px-6 py-4 border-t">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
-                                    <p><strong>Date:</strong> <?php 
-                                        $today = date('y:m:d', time());
-                                        $formattedDate = date('l, F d, Y', strtotime($today));
-                                        echo $formattedDate;
-                                    ?></p>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
-                                    <?php if (isset($totalEmployees) && $totalEmployees > 0): ?>
-                                        <p><strong>Total Employees:</strong> <?php echo $totalEmployees; ?></p>
-                                    <?php endif; ?>
-                                </div>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
+                                        echo date('l, F d, Y');
+                                ?></p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
+                                <?php if (isset($totalEmployees) && $totalEmployees > 0): ?>
+                                <p><strong>Total Employees:</strong> <?php echo $totalEmployees; ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -237,7 +265,7 @@ checkPermission();
             alert('Please select a Pay Period before downloading Excel.');
             return;
         }
-        
+
         $('#ajax-loader').show();
         $.ajax({
             type: "POST",
@@ -257,7 +285,9 @@ checkPermission();
                     }
 
                     var downloadLink = document.createElement('a');
-                    downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                    downloadLink.href =
+                        'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                        response;
                     downloadLink.download = 'Employee_Report_' + '<?php echo $month; ?>' + '.xlsx';
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
@@ -284,7 +314,7 @@ checkPermission();
             alert('Please select a Pay Period before downloading PDF.');
             return;
         }
-        
+
         $('#ajax-loader').show();
         var form = document.createElement('form');
         form.method = 'POST';
@@ -311,4 +341,5 @@ checkPermission();
     }
     </script>
 </body>
+
 </html>
