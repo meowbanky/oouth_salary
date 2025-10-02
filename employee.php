@@ -303,11 +303,10 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="flex justify-center mt-4">
                     <nav class="inline-flex -space-x-px">
                         <?php 
-                        $queryParams = ['page' => $i];
-                        if ($search) $queryParams['search'] = $search;
-                        if ($status_filter) $queryParams['status'] = $status_filter;
                         for ($i=1; $i <= $total_pages; $i++): 
-                            $queryParams['page'] = $i;
+                            $queryParams = ['page' => $i];
+                            if ($search) $queryParams['search'] = $search;
+                            if ($status_filter) $queryParams['status'] = $status_filter;
                         ?>
                         <a href="?<?php echo http_build_query($queryParams); ?>"
                             class="px-3 py-1 border <?php echo $page==$i ? 'bg-blue-600 text-white' : 'bg-white text-blue-800'; ?> rounded mx-0.5 text-xs font-semibold hover:bg-blue-100">
