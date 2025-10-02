@@ -202,10 +202,10 @@ if ($period != -1) {
                                     foreach ($res as $row) {
                                         echo '<tr class="odd gradeX">';
                                         echo '<td class="stylecaps">' . $counter . '</td>';
-                                        echo '<td class="stylecaps">' . htmlspecialchars($row['staff_id']) . '</td>';
-                                        echo '<td class="stylecaps">' . htmlspecialchars($row['NAME']) . '</td>';
-                                        echo '<td class="stylecaps">' . htmlspecialchars($row['PFANAME']) . '</td>';
-                                        echo '<td class="stylecaps">' . htmlspecialchars($row['PFAACCTNO']) . '</td>';
+                                        echo '<td class="stylecaps">' . htmlspecialchars($row['staff_id'] ?? '') . '</td>';
+                                        echo '<td class="stylecaps">' . htmlspecialchars($row['NAME'] ?? '') . '</td>';
+                                        echo '<td class="stylecaps">' . htmlspecialchars($row['PFANAME'] ?? '') . '</td>';
+                                        echo '<td class="stylecaps">' . htmlspecialchars($row['PFAACCTNO'] ?? '') . '</td>';
                                         echo '<td align="right">' . number_format($row['deduc'], 2) . '</td>';
                                         $sumTotal += floatval($row['deduc']);
                                         $counter++;

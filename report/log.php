@@ -81,6 +81,10 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 							if (isset($_POST['to'])) {
 								$to = $_POST['to'];
 							}
+							
+							// Define variables for export filename
+							$deductionName = 'LOG_REPORT';
+							$month = date('M_Y', strtotime($from));
 							try {
 								$query = $conn->prepare('SELECT tbl_earning_deduction.edDesc, allow_deduc.`value`, A.`NAME` AS STAFFNAME,  counter, B.`NAME`,date_insert FROM allow_deduc INNER JOIN tbl_earning_deduction ON  allow_deduc.allow_id = tbl_earning_deduction.ed_id INNER JOIN employee AS A ON  allow_deduc.staff_id = A.staff_id INNER JOIN employee AS B ON  allow_deduc.inserted_by = B.staff_id WHERE
 								date_insert BETWEEN ? AND ?	ORDER BY date_insert DESC');
