@@ -21,7 +21,31 @@ checkPermission();
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('report_sidebar_modern.php'); ?>
+        <?php include('report_sidebar_modern.php'); ?>                <!-- Breadcrumb Navigation -->
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="../home.php" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i class="fas fa-home w-4 h-4 mr-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                                <a href="index.php" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                            </div>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                                <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Gross Salary</span>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+
+
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
             <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
