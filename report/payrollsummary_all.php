@@ -1,100 +1,108 @@
 <?php
-session_start();
-
-include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-    header("location: ../index.php");
-    exit();
-}
-if (!function_exists("GetSQLValueString")) {
-    function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-    {
-        global $salary;
-
-        $theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($salary, $theValue) : mysqli_escape_string($salary, $theValue);
-
-        switch ($theType) {
-            case "text":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "long":
-            case "int":
-                $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-                break;
-            case "double":
-                $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-                break;
-            case "date":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "defined":
-                $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-                break;
-        }
-        return $theValue;
-    }
-}
+include_once('../classes/model.php');
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
 ?>
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat">
-<div class="modal fade hidden-print" id="myModal"></div>
-<div id="wrapper">
-    <div id="header" class="hidden-print">
-        <h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-        <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-        <div class="clear"></div>
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Summary - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
 
-    <div id="user-nav" class="hidden-print hidden-xs">
-        <ul class="btn-group ">
-            <li class="btn hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-            <li class="btn hidden-xs disabled">
-                <a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-                            <?php
-                            $Today = date('y:m:d', time());
-                            $new = date('l, F d, Y', strtotime($Today));
-                            echo $new;
-                            ?> </span></a>
-            </li>
-            <li class="btn"><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-            <li class="btn">
-                <a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-            </li>
-        </ul>
-    </div>
-
-    <?php include("report_sidebar.php"); ?>
-
-    <div id="content" class="clearfix sales_content_minibar">
-        <div id="content-header" class="hidden-print">
-            <h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-        </div>
-
-        <div id="breadcrumb" class="hidden-print">
-            <a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payrollDept.php">Report Input: Detailed Payroll Summary Report</a>
-        </div>
-        <div class="clear"></div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="widget-box">
-                    <div class="widget-title">
-                            <span class="icon">
-                                <i class="fa fa-align-justify"></i>
-                            </span>
-                        <h5 align="center"></h5>
-                        <div class="clear"></div>
-                        <div class="clear"></div>
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('../sidebar.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-calculator"></i> Payroll Summary Report
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive payroll summary reports for all
+                            employees.</p>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h4 style="text-transform: uppercase;" class="inline-block text-center"><img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
+                </div>
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" action="payrollsummary_all.php" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
+                                    </label>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Pay Period</option>
+                                        <?php
+                                        global $conn;
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                            $res = $query->execute(array('1'));
+                                            $out = $query->fetchAll(PDO::FETCH_ASSOC);
 
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL<br> PAYROLL SUMMARY FOR THE MONTH OF
+                                            while ($row = array_shift($out)) {
+                                                echo '<option value="' . $row['periodId'] . '"';
+                                                if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
+                                                    echo 'selected = "selected"';
+                                                };
+                                                echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo $e->getMessage();
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
 
-                                <?php $month = '';
+                            <div class="flex flex-wrap gap-3">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                                <button type="button" id="export-pdf-button"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                                <button type="button" id="download-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-excel"></i> Download Excel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <?php if (isset($_POST['generate_report']) && isset($_POST['period']) && $_POST['period'] != '') { ?>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            PAYROLL SUMMARY FOR THE MONTH OF: <?php 
+                                $month = '';
                                 global $conn;
                                 if (!isset($_POST['period'])) {
                                     $period = -1;
@@ -113,68 +121,35 @@ if (!function_exists("GetSQLValueString")) {
                                     $e->getMessage();
                                 }
                                 ?>
-                            </h4>
-                        </div>
-
-                        <div class="col-md-12 hidden-print">
-                            <form class="form-horizontal form-horizontal-mobiles" method="POST" action="payrollsummary_all.php">
-                                <div class="form-group">
-                                    <label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period :</label>
-                                    <div class="col-sm-9 col-md-9 col-lg-10">
-                                        <div class="input-group">
-                                            <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-                                            <select name="period" id="period" class="form-control hidden-print">
-                                                <option value="">Select Pay Period</option>
-
-                                                <?php
-                                                global $conn;
-
-                                                try {
-                                                    $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-                                                    $res = $query->execute(array('1'));
-                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                    while ($row = array_shift($out)) {
-                                                        echo '<option value="' . $row['periodId'] . '"';
-                                                        if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-                                                            echo 'selected = "selected"';
-                                                        };
-                                                        echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-                                                    }
-                                                } catch (PDOException $e) {
-                                                    echo $e->getMessage();
-                                                }
-                                                ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions" style="display: flex; gap: 10px;">
-                                    <button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-                                    <button type="button" id="export-pdf-button" class="custom-button pdf-button">
-                                        <i class="fas fa-file-pdf"></i> Export PDF
-                                    </button>
-                                    <button type="button" id="download-excel-button" class="custom-button excel-button">
-                                        <i class="fas fa-download"></i> Download Excel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                        </p>
                     </div>
-                    <div class="widget-content nopadding">
-                        <div class="table-responsive">
-                            <table id="sample_1" class="table_without">
-                                <thead>
+                </div>
+                <?php } ?>
+                <?php if (isset($_POST['generate_report']) && isset($_POST['period']) && $_POST['period'] != '') { ?>
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
                                 <tr>
-                                    <th> Code </th>
-                                    <th> Description </th>
-                                    <th> Amount </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Code</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Description</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Amount</th>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td colspan="3" class="stylecaps"> Earnings </td>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Earnings Section Header -->
+                                <tr class="bg-green-50">
+                                    <td colspan="3"
+                                        class="px-6 py-4 text-center text-sm font-bold text-green-800 uppercase">
+                                        <i class="fas fa-plus-circle mr-2"></i>Earnings
+                                    </td>
                                 </tr>
                                 <?php
                                 //retrieveData('employment_types', 'id', '2', '1');
@@ -192,87 +167,104 @@ if (!function_exists("GetSQLValueString")) {
                                     $sumAll = 0;
                                     $sumDeduct = 0;
                                     $sumTotal = 0;
-                                    echo '<tr class="odd gradeX">';
                                     if ($numberofstaff > 0) {
                                         foreach ($res as $row => $link) {
-                                            ?>
-                                            <?php
-                                            echo '<td class="stylecaps">' . $link['allow_id'] .  '</td>';
-                                            echo '<td class="stylecaps">' . $link['ed'] .  '</td><td align="right">' . number_format($link['allow']) . '</td>';
+                                            echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
+                                            echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $link['allow_id'] . '</td>';
+                                            echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $link['ed'] . '</td>';
+                                            echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($link['allow']) . '</td>';
                                             $sumAll = $sumAll + floatval($link['allow']);
                                             $counter++;
                                             echo '</tr>';
                                         }
-                                        echo '<tr class="odd gradeX">';
-                                        echo '<td class="stylecaps" colspan="2">TOTAL earnings</td><td align="right"> ' . number_format($sumAll) . '</td>';
+                                        echo '<tr class="bg-green-50 border-t-2 border-green-200">';
+                                        echo '<td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">TOTAL EARNINGS</td>';
+                                        echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">₦' . number_format($sumAll) . '</td>';
                                         echo '</tr>';
                                     }
                                 } catch (PDOException $e) {
                                     echo $e->getMessage();
                                 }
 
-                                echo '<tr class="odd gradeX">';
-                                echo '<td class="stylecaps"></td><td align="right"> </td>';
-                                echo '</tr>';
+                                    <!-- Deductions Section Header -->
+                                    <tr class="bg-red-50">
+                                        <td colspan="3" class="px-6 py-4 text-center text-sm font-bold text-red-800 uppercase">
+                                            <i class="fas fa-minus-circle mr-2"></i>Deductions
+                                        </td>
+                                    </tr>
 
-                                echo '<tr class="odd gradeX">';
-                                echo '<td class="stylecaps" colspan=3>DEDUCTIONS</td>';
-                                echo '</tr>';
-
-                                //Deduction summary
-                                try {
-                                    $query = $conn->prepare('SELECT sum(tbl_master.deduc) as deduct, allow_id,tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE tbl_master.type = ? and period = ? GROUP BY tbl_master.allow_id ');
-                                    $fin = $query->execute(array('2', $period));
-                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                    $numberofstaff = count($res);
-                                    $counter = 1;
-                                    $sumDeduct = 0;
-                                    $sumTotal = 0;
-                                    echo '<tr class="odd gradeX">';
-                                    if ($numberofstaff > 0) {
-                                        foreach ($res as $row => $link) {
-                                            ?>
-                                            <?php
-                                            echo '<td class="stylecaps">' . $link['allow_id'] .  '</td>';
-                                            echo '<td class="stylecaps">' . $link['ed'] .  '</td><td align="right">' . number_format($link['deduct']) . '</td>';
-                                            $sumDeduct = $sumDeduct + floatval($link['deduct']);
-                                            $counter++;
+                                    <!-- Deduction summary -->
+                                    <?php
+                                    try {
+                                        $query = $conn->prepare('SELECT sum(tbl_master.deduc) as deduct, allow_id,tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE tbl_master.type = ? and period = ? GROUP BY tbl_master.allow_id ');
+                                        $fin = $query->execute(array('2', $period));
+                                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                        $numberofstaff = count($res);
+                                        $counter = 1;
+                                        $sumDeduct = 0;
+                                        $sumTotal = 0;
+                                        if ($numberofstaff > 0) {
+                                            foreach ($res as $row => $link) {
+                                                echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $link['allow_id'] . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $link['ed'] . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($link['deduct']) . '</td>';
+                                                $sumDeduct = $sumDeduct + floatval($link['deduct']);
+                                                $counter++;
+                                                echo '</tr>';
+                                            }
+                                            echo '<tr class="bg-red-50 border-t-2 border-red-200">';
+                                            echo '<td colspan="2" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">TOTAL DEDUCTIONS</td>';
+                                            echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">₦' . number_format($sumDeduct) . '</td>';
                                             echo '</tr>';
-                                        }
-                                        echo '<tr class="odd gradeX">';
-                                        echo '<td colspan="2" class="stylecaps">TOTAL DEDUCTIONS</td><td align="right"> ' . number_format($sumDeduct) . '</td>';
-                                        echo '</tr>';
-                                        echo '<tfoot>';
-                                        echo '<tr class="odd gradeX">';
-                                        echo '<td colspan="2" class="stylecaps">NET PAY</td><td align="right"> ' . number_format(floatval($sumAll) - floatval($sumDeduct)) . '</td>';
-                                        echo '</tr>';
-                                        echo '</tfoot>';
+                                            
+                                            // Net Pay Section
+                                            echo '<tr class="bg-blue-50 border-t-4 border-blue-300">';
+                                            echo '<td colspan="2" class="px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-900">NET PAY</td>';
+                                            echo '<td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-900 text-right">₦' . number_format(floatval($sumAll) - floatval($sumDeduct)) . '</td>';
+                                            echo '</tr>';
                                     }
                                 } catch (PDOException $e) {
                                     echo $e->getMessage();
                                 }
-                                ?>
-                                </tbody>
-                            </table>
+                                        }
+                                    } catch (PDOException $e) {
+                                        echo $e->getMessage();
+                                    }
+                                    ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
+                                        $Today = date('y:m:d', time());
+                                        $new = date('l, F d, Y', strtotime($Today));
+                                        echo $new; 
+                                    ?></p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Total Earnings:</strong>
+                                    ₦<?php echo isset($sumAll) ? number_format($sumAll) : '0'; ?></p>
+                                <p><strong>Total Deductions:</strong>
+                                    ₦<?php echo isset($sumDeduct) ? number_format($sumDeduct) : '0'; ?></p>
+                                <p><strong>Net Pay:</strong>
+                                    ₦<?php echo isset($sumAll) && isset($sumDeduct) ? number_format($sumAll - $sumDeduct) : '0'; ?>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <?php } ?>
             </div>
-            <div id="register_container" class="receiving"></div>
-        </div>
+        </main>
     </div>
 
-    <div id="footer" class="col-md-12 hidden-print">
-        Please visit our
-        <a href="http://www.oouth.com/" target="_blank">
-            website </a>
-        to learn the latest information about the project.
-        <span class="text-info"> <span class="label label-info"> 14.1</span></span>
-    </div>
-</div><!--end #content-->
-<!--end #wrapper-->
-
-<script type="text/javascript" language="javascript">
+    <script type="text/javascript" language="javascript">
     $(document).ready(function() {
         //'sales_report.php');
 
@@ -348,7 +340,9 @@ if (!function_exists("GetSQLValueString")) {
                 $('#ajax-loader').hide();
                 try {
                     var downloadLink = document.createElement('a');
-                    downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                    downloadLink.href =
+                        'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                        response;
                     downloadLink.download = 'Payroll_Summary_' + '<?php echo $month; ?>' + '.xlsx';
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
@@ -369,58 +363,7 @@ if (!function_exists("GetSQLValueString")) {
             }
         });
     }
-</script>
-<script src="js/tableExport.js"></script>
-<script src="js/main.js"></script>
-
-<style>
-    .custom-button {
-        display: inline-flex;
-        align-items: center;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 5px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.3s;
-    }
-
-    .custom-button i {
-        margin-right: 8px;
-        font-size: 16px;
-    }
-
-    .pdf-button {
-        background-color: #f28c38; /* Orange color */
-        color: white;
-    }
-
-    .pdf-button:hover {
-        background-color: #d87a32; /* Darker orange on hover */
-    }
-
-    .excel-button {
-        background-color: #2e7d32; /* Green color */
-        color: white;
-    }
-
-    .excel-button:hover {
-        background-color: #1b5e20; /* Darker green on hover */
-    }
-
-    .custom-button:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(242, 140, 56, 0.3); /* Focus ring for accessibility */
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-</style>
+    </script>
 </body>
 
 </html>
