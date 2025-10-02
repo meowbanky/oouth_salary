@@ -1,450 +1,526 @@
 <?php
 session_start();
 ini_set('max_execution_time', '0');
+
+require_once('../Connections/paymaster.php');
 include_once('../classes/model.php');
-require_once('Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: ../index.php");
-	exit();
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
+
+// Get parameters from URL
+$periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : -1;
+$periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : -1;
+$dept = isset($_GET['dept']) ? $_GET['dept'] : -1;
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$results_per_page = 100;
+
+// Get period descriptions for display
+function getPeriodDescription($conn, $periodId) {
+    if ($periodId == -1) return '';
+    $query = $conn->prepare('SELECT CONCAT(description, "-", periodYear) as description FROM payperiods WHERE periodId = ?');
+    $query->execute([$periodId]);
+    $result = $query->fetch(PDO::FETCH_ASSOC);
+    return $result ? $result['description'] : '';
 }
 
+$monthFrom = getPeriodDescription($conn, $periodFrom);
+$monthTo = getPeriodDescription($conn, $periodTo);
 
-
+// Get department name
+$deptName = '';
+if ($dept != -1) {
+    try {
+        $query = $conn->prepare('SELECT dept FROM tbl_dept WHERE dept_id = ?');
+        $query->execute([$dept]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        $deptName = $result ? $result['dept'] : '';
+    } catch (PDOException $e) {
+        $deptName = 'Unknown Department';
+    }
+}
 ?>
+
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
-
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
-
-
-
-
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
-		<?php include("report_sidebar.php"); ?>
-
-
-
-		<div id="content" class="clearfix sales_content_minibar">
-
-			<div id="content-header" class="hidden-print">
-				<h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-			</div>
-
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payrollDept.php">Report Input: Detailed Payroll by Dept Report</a>
-			</div>
-			<div class="clear"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-align-justify"></i>
-							</span>
-							<h5 align="center"></h5>
-							<div class="clear"></div>
-							<div class="clear"></div>
-
-						</div>
-						<div class="row">
-							<div class="col-md-12 pull-left">
-								<img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
-								<h2 class="page-title pull-right">
-									<p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL<br> DEPARTMENTAL PAYROLL SUMMARY BETWEEN THE MONTH OF
-									<p align="center">
-
-										<?php $monthFrom = '';
-
-										$periodTo = -1;
-										$periodFrom = -1;
-										$monthTo = '';
-										global $conn;
-										if (!isset($_GET['periodFrom'])) {
-											$periodFrom = -1;
-										} else {
-											$periodFrom = $_GET['periodFrom'];
-										}
-										if (!isset($_GET['periodTo'])) {
-											$periodTo = -1;
-										} else {
-											$periodTo = $_GET['periodTo'];
-										}
-										try {
-											$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-											$res = $query->execute(array($periodFrom));
-											$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-											while ($row = array_shift($out)) {
-												echo ($monthFrom = $row['description'] . '-' . $row['periodYear']);
-											}
-										} catch (PDOException $e) {
-											$e->getMessage();
-										}
-
-										?> TO <?php $month = '';
-												global $conn;
-												if (!isset($_GET['periodTo'])) {
-													$periodTo = -1;
-												} else {
-													$periodTo = $_GET['periodTo'];
-												}
-												try {
-													$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-													$res = $query->execute(array($periodTo));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-													while ($row = array_shift($out)) {
-														echo ($monthTo = $row['description'] . '-' . $row['periodYear']);
-													}
-												} catch (PDOException $e) {
-													$e->getMessage();
-												}
-
-												?>
-								</h2>
-							</div>
-							<div class="col-md-12 hidden-print">
-								<form class="form-horizontal form-horizontal-mobiles" method="GET" action="payrollTablebyDept.php">
-									<div class="form-group">
-										<div class="row">
-											<div class="col-md-6">
-												<div class="form-group">
-													<label class="control-label">Period:</label>
-
-													<select name="periodFrom" id="periodFrom" class="form-control hidden-print" required="required">
-														<option value="">Select Pay Period</option>
-
-														<?php
-														global $conn;
-
-														try {
-															$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-															$res = $query->execute(array('1'));
-															$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-															while ($row = array_shift($out)) {
-																echo '<option value="' . $row['periodId'] . '"';
-																if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-																	echo 'selected = "selected"';
-																};
-																echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-															}
-														} catch (PDOException $e) {
-															echo $e->getMessage();
-														}
-
-														?>
-													</select>
-												</div>
-											</div>
-
-											<div class="col-md-6">
-												<div class="form-group">
-													<label class="control-label">Period:</label>
-
-													<select name="periodTo" id="periodTo" class="form-control hidden-print" required="required">
-														<option value="">Select Pay Period</option>
-
-														<?php
-														global $conn;
-
-														try {
-															$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-															$res = $query->execute(array('1'));
-															$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-															while ($row = array_shift($out)) {
-																echo '<option value="' . $row['periodId'] . '"';
-																if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-																	echo 'selected = "selected"';
-																};
-																echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-															}
-														} catch (PDOException $e) {
-															echo $e->getMessage();
-														}
-
-														?>
-													</select>
-												</div>
-											</div>
-
-											<div class="col-md-6">
-												<div class="form-group">
-													<label class="control-label">Department:</label>
-													<select name="dept" id="dept" class="form-control hidden-print" required="required">
-														<option value="">Select Dept</option>
-														<?php retrieveSelectwithoutWhere('tbl_dept', '*', 'dept', 'dept_id', 'dept'); ?>
-													</select>
-												</div>
-											</div>
-										</div>
-
-									</div>
-
-									<div class="form-actions">
-										<button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-									</div>
-								</form>
-							</div>
-						</div>
-						<?php
-
-						//												 		
-						if (!isset($_GET['dept']) || ($_GET['dept'] == '')) {
-							$dept = -1;
-						} else {
-							$dept = $_GET['dept'];
-						}
-
-						$results_per_page = 100;
-						if (isset($_GET['page'])) {
-							$page = $_GET['page'];
-						} else {
-							$page = 1;
-						}
-
-
-						?>
-						<div class="top-panel pull-right hidden-print">
-							<div class="btn-group">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php retrieveDescSingleFilter('tbl_dept', 'dept', 'dept_id', $dept);
-																		echo ' ' . $month . ' Page ' . $page; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php retrieveDescSingleFilter('tbl_dept', 'dept', 'dept_id', $dept);
-																		echo ' ' . $month . ' Page ' . $page; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php retrieveDescSingleFilter('tbl_dept', 'dept', 'dept_id', $dept);
-																		echo ' ' . $month . ' Page ' . $page; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
-							</div>
-						</div>
-						<div class="widget-content nopadding">
-							<div class="table-responsive">
-
-								<nav aria-label="page navigation example" class="hidden-print">
-									<ul class="pagination">
-
-										<?php
-
-
-										//$results_per_page = 100;
-
-										$sql = 'SELECT count(staff_id) as "Total" FROM master_staff WHERE period BETWEEN ' . $periodFrom . ' AND ' . $periodTo . ' AND master_staff.DEPTCD = ' . $dept;
-										$result = $conn->query($sql);
-										$row = $result->fetch();
-										$total_pages = ceil($row['Total'] / $results_per_page);
-										for ($i = 1; $i <= $total_pages; $i++) {
-											//echo "<a href='payslip_all.php?page=".$i."'";
-											//	if($i ==$page){echo " class='curPage'";}
-											//	echo "> ".$i." </a>";
-											echo '<li class="page-item ';
-											if ($i == $page) {
-												echo ' active"';
-											};
-											echo '"><a class="page-link" href="payrollTablebyDept.php?page=' . $i . '&periodFrom=' . $periodFrom . '&periodTo=' . $periodTo . '&dept=' . $dept . '">' . $i . '</a></li>';
-										}
-										?>
-									</ul>
-
-									<table border="1" class="table table-striped table-bordered table-hover table-checkable order-column" id="sample_1">
-										<thead>
-											<tr>
-
-
-												<th>STAFF NO</th>
-												<th> NAME</th>
-												<th> PAY PERIOD</th>
-												<th> DEPT</th>
-												<?php global $conn;
-												$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
-												$res = $query->execute(array(1));
-												$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-												while ($row = array_shift($out)) {
-													echo '<th>' . $row['ed'] . '</th>';
-												}
-												echo '<th> TOTAL ALLOW </th>';
-
-
-												global $conn;
-												$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
-												$res = $query->execute(array(1));
-												$out = $query->fetchAll(PDO::FETCH_ASSOC);
-												//get employee info                                          
-												while ($row = array_shift($out)) {
-													echo '<th>' . $row['ed'] . '</th>';
-												}
-
-
-												echo '<th>TOTAL DEDUC</th>';
-												echo '<th> NET PAY</th>';
-												?>
-
-											</tr>
-										</thead>
-										<tbody>
-											<?php
-											//retrieveData('employment_types', 'id', '2', '1');
-
-
-
-
-											try {
-												$start_from = ($page - 1) * $results_per_page;
-												$query = $conn->prepare('SELECT
-master_staff.staff_id, DEPTCD,ANY_VALUE(master_staff.`NAME`) AS `NAME`, ANY_VALUE(tbl_dept.dept) AS dept,ANY_VALUE(concat(payperiods.description," ",payperiods.periodYear)) as period FROM
-master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN payperiods ON payperiods.periodId = master_staff.period 
-WHERE master_staff.period BETWEEN ? AND ? AND DEPTCD = ? GROUP BY master_staff.staff_id ORDER BY DEPTCD, staff_id LIMIT ' . $start_from . ',' . $results_per_page);
-												$fin = $query->execute(array($periodFrom, $periodTo, $dept));
-												$res = $query->fetchAll(PDO::FETCH_ASSOC);
-												$numberofstaff = count($res);
-												$counter = 1;
-												//sdsd
-												$sumAll = 0;
-												$sumDeduct = 0;
-												$sumTotal = 0;
-												$countStaff = 0;
-												echo '<tr class="odd gradeX">';
-												foreach ($res as $row => $link) {
-											?>
-											<?php
-
-													//                                                                $query2 = $conn->prepare('SELECT Count(master_staff.DEPTCD) as "numb" FROM master_staff WHERE STATUSCD = ? and DEPTCD = ? GROUP BY DEPTCD ');
-													//                                                                $fin2 = $query2->execute(array('A',$link['DEPTCD']));
-													//                                                                $res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
-													//                                                                foreach($res2 as $row2 => $link2){
-													//                                                                	$numb =  $link2['numb'];
-													//                                                                	$countStaff = $countStaff + $numb;
-													//                                                                }
-													$allow = 0;
-													$dedu = 0;
-													$net = 0;
-													echo '<td class="stylecaps">' . $link['staff_id'] .  '</td><td class="stylecaps"">' . $link['NAME'] . '</td>';
-													echo '<td align="left"> From ' . $monthFrom . 'To ' . $monthTo . '</td>';
-													echo '<td >' . $link['dept'] . '</td>';
-
-													global $conn;
-													$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
-													$res = $query->execute(array(1));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-													//get employee info 
-													$allow = 0;
-													while ($row = array_shift($out)) {
-														$j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
-														echo '<td>' . number_format($j) . '</td>';
-														$allow = $allow + $j;
-													}
-													echo '<td>' . number_format($allow) . '</td>';
-
-													$dedu = 0;
-													global $conn;
-													$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
-													$res = $query->execute(array(1));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-													//get employee info                                          
-													while ($row = array_shift($out)) {
-														$j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
-														echo '<td>' . number_format($j) . '</td>';
-														$dedu = $dedu + $j;
-													}
-
-
-													echo '<td>' .  number_format($dedu) . '</td>';
-													echo '<td>' .  number_format(floatval($allow) - floatval($dedu)) . '</td>';
-													echo '</tr>';
-												}
-												//																echo '<tr class="odd gradeX">';
-												//																echo '<td class="stylecaps">TOTAL</td><td align="right"> <strong>' . number_format($countStaff) . '</strong></td><td align="right"> <strong>' . number_format($sumAll) . '</strong></td>';
-												//                                   											echo '<td align="right"><strong>'.number_format($sumDeduct).'</strong></td>';
-												//                                                                               
-												//                                                        echo '<td align="right"><strong>'. number_format($sumTotal).'</strong></td>';
-												//																											
-												//																echo '</tr>';
-											} catch (PDOException $e) {
-												echo $e->getMessage();
-											}
-											?>
-
-
-										</tbody>
-									</table>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div id="register_container" class="receiving"></div>
-			</div>
-
-		</div>
-
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="http://www.oouth.com/" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
-
-	</div><!--end #content-->
-	<!--end #wrapper-->
-
-
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {
-			//'sales_report.php');
-
-
-			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
-				$("#complex_radio").prop('checked', true);
-			});
-
-			$("#report_date_range_simple").change(function() {
-				$("#simple_radio").prop('checked', true);
-			});
-
-
-
-			function receivingsBeforeSubmit(formData, jqForm, options) {
-				var submitting = false;
-				if (submitting) {
-					return false;
-				}
-				submitting = true;
-
-				$("#ajax-loader").show();
-				//	$("#finish_sale_button").hide();
-			}
-		})
-	</script>
-	<script src="js/tableExport.js"></script>
-	<script src="js/main.js"></script>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departmental Payroll Table - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('../sidebar.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-table"></i> Departmental Payroll Table
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Detailed payroll breakdown by department with
+                            comprehensive employee data.</p>
+                    </div>
+                </div>
+
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <!-- Organization Header -->
+                        <div class="text-center mb-8">
+                            <img src="img/oouth_logo.gif" alt="OOUTH Logo" class="h-16 mx-auto mb-4">
+                            <h3 class="text-lg font-bold text-blue-800">OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                            </h3>
+                            <p class="text-blue-600 font-medium">Departmental Payroll Summary</p>
+                            <?php if ($monthFrom && $monthTo): ?>
+                            <p class="text-sm text-gray-600 mt-2">Period: <?php echo htmlspecialchars($monthFrom); ?> to
+                                <?php echo htmlspecialchars($monthTo); ?></p>
+                            <?php endif; ?>
+                            <?php if ($deptName): ?>
+                            <p class="text-sm text-gray-600">Department: <?php echo htmlspecialchars($deptName); ?></p>
+                            <?php endif; ?>
+                        </div>
+
+                        <form method="GET" action="payrollTablebyDept.php" class="space-y-6">
+                            <div class="grid md:grid-cols-3 gap-6">
+                                <div>
+                                    <label for="periodFrom" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period From
+                                    </label>
+                                    <select name="periodFrom" id="periodFrom"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Starting Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? ORDER BY periodId DESC');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodFrom) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="periodTo" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period To
+                                    </label>
+                                    <select name="periodTo" id="periodTo"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Ending Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? ORDER BY periodId DESC');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodTo) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="dept" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-building mr-2 text-blue-600"></i>Department
+                                    </label>
+                                    <select name="dept" id="dept"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Department</option>
+                                        <?php retrieveSelectwithoutWhere('tbl_dept', '*', 'dept', 'dept_id', 'dept'); ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 pt-4">
+                                <button name="generate_report" type="submit"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                                <?php if ($periodFrom != -1 && $periodTo != -1 && $dept != -1): ?>
+                                <button type="button" onclick="window.print()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                                <button type="button" id="export-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-excel"></i> Export Excel
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <?php if ($periodFrom != -1 && $periodTo != -1 && $dept != -1): ?>
+                <!-- Pagination Controls -->
+                <?php
+                    try {
+                        $sql = 'SELECT COUNT(staff_id) as "Total" FROM master_staff WHERE period BETWEEN ? AND ? AND master_staff.DEPTCD = ?';
+                        $query = $conn->prepare($sql);
+                        $query->execute([$periodFrom, $periodTo, $dept]);
+                        $row = $query->fetch(PDO::FETCH_ASSOC);
+                        $total_pages = ceil($row['Total'] / $results_per_page);
+                    } catch (PDOException $e) {
+                        $total_pages = 1;
+                    }
+                    ?>
+
+                <?php if ($total_pages > 1): ?>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-list"></i> Pagination Controls
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <?php
+                                        $queryParams = [
+                                            'page' => $i,
+                                            'periodFrom' => $periodFrom,
+                                            'periodTo' => $periodTo,
+                                            'dept' => $dept
+                                        ];
+                                        ?>
+                                        <?php $pageClasses = $page == $i ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-800 border-gray-300 hover:bg-blue-100'; ?>
+                                        <a href="?<?php echo http_build_query($queryParams); ?>"
+                                           class="px-3 py-2 border rounded text-sm font-semibold transition <?php echo $pageClasses; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                            <?php endfor; ?>
+                        </div>
+                        <p class="text-center text-sm text-gray-600 mt-4">
+                            Page <?php echo $page; ?> of <?php echo $total_pages; ?>
+                            (<?php echo number_format($row['Total'] ?? 0); ?> total employees)
+                        </p>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-4 border-b flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-table"></i> Employee Payroll Details
+                        </h2>
+                        <img src="img/oouth_logo.gif" alt="OOUTH Logo" class="h-10">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Staff No</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Pay Period</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Department</th>
+                                    <?php
+                                        // Get allowance columns
+                                        try {
+                                            $query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
+                                            $query->execute([1]);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                echo '<th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">' . htmlspecialchars($row['ed']) . '</th>';
+                                            }
+                                            echo '<th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Total Allow</th>';
+
+                                            // Get deduction columns
+                                            $query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
+                                            $query->execute([1]);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                echo '<th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">' . htmlspecialchars($row['ed']) . '</th>';
+                                            }
+                                            echo '<th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Total Deduct</th>';
+                                            echo '<th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Net Pay</th>';
+                                        } catch (PDOException $e) {
+                                            echo '<th class="px-6 py-3 text-center text-xs font-medium text-red-700 uppercase tracking-wider">Error loading columns</th>';
+                                        }
+                                        ?>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
+                                    try {
+                                        $start_from = ($page - 1) * $results_per_page;
+                                        $query = $conn->prepare('SELECT
+                                            master_staff.staff_id, DEPTCD, ANY_VALUE(master_staff.`NAME`) AS `NAME`, 
+                                            ANY_VALUE(tbl_dept.dept) AS dept, ANY_VALUE(CONCAT(payperiods.description," ",payperiods.periodYear)) as period 
+                                            FROM master_staff 
+                                            INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD 
+                                            INNER JOIN payperiods ON payperiods.periodId = master_staff.period 
+                                            WHERE master_staff.period BETWEEN ? AND ? AND DEPTCD = ? 
+                                            GROUP BY master_staff.staff_id 
+                                            ORDER BY DEPTCD, staff_id 
+                                            LIMIT ?, ?');
+                                        $query->execute([$periodFrom, $periodTo, $dept, $start_from, $results_per_page]);
+                                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
+
+                                        if (count($res) > 0) {
+                                            foreach ($res as $link) {
+                                                echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . htmlspecialchars($link['staff_id']) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['NAME']) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">From ' . htmlspecialchars($monthFrom) . ' To ' . htmlspecialchars($monthTo) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['dept']) . '</td>';
+
+                                                $allow = 0;
+                                                $dedu = 0;
+
+                                                // Allowance columns
+                                                $query2 = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
+                                                $query2->execute([1]);
+                                                while ($row = $query2->fetch(PDO::FETCH_ASSOC)) {
+                                                    $j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">₦' . number_format($j) . '</td>';
+                                                    $allow += $j;
+                                                }
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">₦' . number_format($allow) . '</td>';
+
+                                                // Deduction columns
+                                                $query3 = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
+                                                $query3->execute([1]);
+                                                while ($row = $query3->fetch(PDO::FETCH_ASSOC)) {
+                                                    $j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">₦' . number_format($j) . '</td>';
+                                                    $dedu += $j;
+                                                }
+
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">₦' . number_format($dedu) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-900 text-right">₦' . number_format(floatval($allow) - floatval($dedu)) . '</td>';
+                                                echo '</tr>';
+                                            }
+                                        } else {
+                                            echo '<tr>';
+                                            echo '<td colspan="100%" class="px-6 py-4 text-center text-sm text-gray-500">No payroll data found for the selected criteria.</td>';
+                                            echo '</tr>';
+                                        }
+                                    } catch (PDOException $e) {
+                                        echo '<tr>';
+                                        echo '<td colspan="100%" class="px-6 py-4 text-center text-sm text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</td>';
+                                        echo '</tr>';
+                                    }
+                                    ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php echo date('l, F d, Y'); ?></p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Department:</strong> <?php echo htmlspecialchars($deptName); ?></p>
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($monthFrom); ?> to
+                                    <?php echo htmlspecialchars($monthTo); ?></p>
+                                <p><strong>Page:</strong> <?php echo $page; ?> of <?php echo $total_pages; ?></p>
+                                <p><strong>Total Employees:</strong> <?php echo number_format($row['Total'] ?? 0); ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="bg-white rounded-xl shadow-lg p-6 text-center text-gray-600">
+                    <i class="fas fa-info-circle text-4xl text-blue-500 mb-4"></i>
+                    <p class="text-lg font-semibold">Please select Period From, Period To, and Department to generate
+                        the payroll table.</p>
+                    <p class="text-sm mt-2">Use the form above to view detailed payroll information by department.</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        // Form validation
+        $('#generate_report').click(function(e) {
+            const periodFrom = $('#periodFrom').val();
+            const periodTo = $('#periodTo').val();
+            const dept = $('#dept').val();
+
+            if (!periodFrom || !periodTo || !dept) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please select Period From, Period To, and Department before generating the report.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1E40AF'
+                });
+            }
+        });
+
+        // Export Excel functionality
+        $('#export-excel-button').click(function() {
+            downloadExcel();
+        });
+
+        function downloadExcel() {
+            // Show loading indicator
+            $('#export-excel-button').prop('disabled', true).html(
+                '<i class="fas fa-spinner fa-spin"></i> Exporting...');
+
+            // Get current parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const periodFrom = urlParams.get('periodFrom');
+            const periodTo = urlParams.get('periodTo');
+            const dept = urlParams.get('dept');
+
+            $.ajax({
+                type: "POST",
+                url: 'payrollTablebyDept_export_excel.php',
+                data: {
+                    periodFrom: periodFrom,
+                    periodTo: periodTo,
+                    dept: dept,
+                    periodFrom_text: '<?php echo $monthFrom; ?>',
+                    periodTo_text: '<?php echo $monthTo; ?>',
+                    dept_text: '<?php echo $deptName; ?>'
+                },
+                timeout: 300000,
+                success: function(response) {
+                    $('#export-excel-button').prop('disabled', false).html(
+                        '<i class="fas fa-file-excel"></i> Export Excel');
+
+                    try {
+                        // Check if response is an error JSON
+                        if (typeof response === 'string' && response.includes('{"error":')) {
+                            var errorData = JSON.parse(response);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Export Error',
+                                text: errorData.error,
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#1E40AF'
+                            });
+                            return;
+                        }
+
+                        // Check if response is HTML error page
+                        if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Server Error',
+                                text: 'Server error occurred. Please try again or contact administrator.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#1E40AF'
+                            });
+                            return;
+                        }
+
+                        // Check if response is empty or invalid
+                        if (!response || response.length === 0) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'No Data',
+                                text: 'No data received from server. Please try again.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#1E40AF'
+                            });
+                            return;
+                        }
+
+                        var downloadLink = document.createElement('a');
+                        downloadLink.href =
+                            'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                            response;
+                        downloadLink.download =
+                            'Payroll_Table_<?php echo $deptName; ?>_<?php echo $monthFrom; ?>_to_<?php echo $monthTo; ?>.xlsx';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Export Successful',
+                            text: 'Excel file has been downloaded successfully!',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
+                    } catch (e) {
+                        console.error('Error processing Excel response:', e);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Export Error',
+                            text: 'Error generating Excel file. Please try again.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#export-excel-button').prop('disabled', false).html(
+                        '<i class="fas fa-file-excel"></i> Export Excel');
+                    console.error('AJAX Error:', status, error);
+
+                    let errorMessage = 'Error downloading Excel file. Please try again.';
+                    if (status === 'timeout') {
+                        errorMessage =
+                            'Request timed out. Please try again or contact administrator.';
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Export Failed',
+                        text: errorMessage,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                }
+            });
+        }
+    });
+    </script>
 </body>
 
 </html>
