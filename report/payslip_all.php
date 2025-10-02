@@ -134,7 +134,7 @@ $total_pages = ceil($total_row['Total'] / $results_per_page);
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('../sidebar.php'); ?>
+        <?php include('report_sidebar_modern.php'); ?>
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
             <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
