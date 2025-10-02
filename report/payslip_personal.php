@@ -17,6 +17,7 @@ if (isset($_GET['period'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,6 +27,8 @@ if (isset($_GET['period'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-form@4.3.0/dist/jquery.form.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -40,7 +43,8 @@ if (isset($_GET['period'])) {
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-user"></i> Personal Payslip
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Generate individual employee payslips with detailed salary breakdown.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate individual employee payslips with detailed
+                            salary breakdown.</p>
                     </div>
                 </div>
 
@@ -57,7 +61,8 @@ if (isset($_GET['period'])) {
                                 <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
                                     <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
                                 </label>
-                                <select name="period" id="period" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm">
+                                <select name="period" id="period"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm">
                                     <option value="">Select Pay Period</option>
                                     <?php
                                     try {
@@ -79,7 +84,9 @@ if (isset($_GET['period'])) {
                                     <i class="fas fa-search mr-2 text-green-600"></i>Staff Search
                                 </label>
                                 <div class="relative">
-                                    <input type="text" name="item" id="item" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" placeholder="Enter Staff Name or Staff No" />
+                                    <input type="text" name="item" id="item"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        placeholder="Enter Staff Name or Staff No" />
                                     <div id="ajax-loader" class="absolute right-3 top-3 hidden">
                                         <i class="fas fa-spinner fa-spin text-blue-600"></i>
                                     </div>
@@ -87,15 +94,18 @@ if (isset($_GET['period'])) {
                                 <input type="hidden" name="staff_id" id="staff_id" value="">
                             </div>
                         </div>
-                        
+
                         <div class="flex flex-wrap gap-3 mt-6">
-                            <button type="button" onclick="generatePayslip()" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                            <button type="button" onclick="generatePayslip()"
+                                class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                 <i class="fas fa-search"></i> Generate Payslip
                             </button>
-                            <button type="button" id="btnPrint" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                            <button type="button" id="btnPrint"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                 <i class="fas fa-print"></i> Print
                             </button>
-                            <button type="button" id="sendmail" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                            <button type="button" id="sendmail"
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                 <i class="fas fa-envelope"></i> Send Email
                             </button>
                         </div>
@@ -119,18 +129,18 @@ if (isset($_GET['period'])) {
 
                 <!-- Payslip Display Section -->
                 <?php if (isset($_GET['item']) && $_GET['item'] != '') { ?>
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                Payslip for <?php echo htmlspecialchars($fullPeriod); ?>
-                            </p>
-                        </div>
-                        
-                        <div class="p-6">
-                            <?php
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Payslip for <?php echo htmlspecialchars($fullPeriod); ?>
+                        </p>
+                    </div>
+
+                    <div class="p-6">
+                        <?php
                             $item = $_GET['item'];
                             try {
                                 $query = $conn->prepare('SELECT staff_id FROM master_staff WHERE staff_id=? and period = ?');
@@ -278,8 +288,8 @@ if (isset($_GET['period'])) {
                                 echo '</div>';
                             }
                             ?>
-                        </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -306,58 +316,122 @@ if (isset($_GET['period'])) {
         // Email sending functionality
         $('#sendmail').click(function() {
             event.preventDefault();
+
             const staff_no = $('#staff_no').val();
             const period = $('#period_hidden').val();
-            const All = 0;
-            
-            $('#ajax-loader').show();
-            $('#sendmail').prop('disabled', true);
 
-            $('#form_payprocess').ajaxSubmit({
-                data: {
-                    staff_no: staff_no,
-                    period: period,
-                    All: All
-                },
-                url: 'callPdf.php',
-                xhrFields: {
-                    onprogress: function(e) {
-                        $('#sample_1').html(e.target.responseText);
-                    }
-                },
-                success: function(response, message) {
-                    $('#ajax-loader').hide();
-                    $('#sendmail').prop('disabled', false);
-                    
-                    if (message == 'success') {
-                        alert("Email sent successfully!");
-                    } else {
-                        alert("Error sending email. Please try again.");
-                    }
-                },
-                error: function() {
-                    $('#ajax-loader').hide();
-                    $('#sendmail').prop('disabled', false);
-                    alert("Error sending email. Please try again.");
+            if (!staff_no || !period) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please generate a payslip first before sending email.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1E40AF'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Send Email?',
+                text: 'This will send the payslip to the employee\'s email address.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1E40AF',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Send Email',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendEmail();
                 }
             });
         });
+
+        function sendEmail() {
+            const staff_no = $('#staff_no').val();
+            const period = $('#period_hidden').val();
+            const All = 0;
+
+            // Show loading state
+            Swal.fire({
+                title: 'Sending Email...',
+                text: 'Please wait while we send the payslip.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('staff_no', staff_no);
+            formData.append('period', period);
+            formData.append('All', All);
+
+            $.ajax({
+                url: 'callPdf.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response, textStatus, xhr) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Email Sent Successfully!',
+                        text: 'The payslip has been sent to the employee\'s email address.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Sending Email',
+                        text: 'There was an error sending the email. Please try again.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                }
+            });
+        }
     });
 
     function generatePayslip() {
         const period = $('#period').val();
         const staffId = $('#staff_id').val();
-        
+
         if (!period) {
-            alert('Please select a pay period.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please select a pay period.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
             return;
         }
-        
+
         if (!staffId) {
-            alert('Please search and select a staff member.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please search and select a staff member.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
             return;
         }
-        
+
+        // Show loading state
+        Swal.fire({
+            title: 'Generating Payslip...',
+            text: 'Please wait while we generate the payslip.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         window.location.href = "payslip_personal.php?item=" + staffId + "&period=" + period;
     }
 
@@ -388,4 +462,5 @@ if (isset($_GET['period'])) {
     });
     </script>
 </body>
+
 </html>
