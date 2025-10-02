@@ -185,16 +185,18 @@ checkPermission();
                                 } catch (PDOException $e) {
                                     echo $e->getMessage();
                                 }
+                                ?>
 
-                                    <!-- Deductions Section Header -->
-                                    <tr class="bg-red-50">
-                                        <td colspan="3" class="px-6 py-4 text-center text-sm font-bold text-red-800 uppercase">
-                                            <i class="fas fa-minus-circle mr-2"></i>Deductions
-                                        </td>
-                                    </tr>
+                                <!-- Deductions Section Header -->
+                                <tr class="bg-red-50">
+                                    <td colspan="3"
+                                        class="px-6 py-4 text-center text-sm font-bold text-red-800 uppercase">
+                                        <i class="fas fa-minus-circle mr-2"></i>Deductions
+                                    </td>
+                                </tr>
 
-                                    <!-- Deduction summary -->
-                                    <?php
+                                <!-- Deduction summary -->
+                                <?php
                                     try {
                                         $query = $conn->prepare('SELECT sum(tbl_master.deduc) as deduct, allow_id,tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE tbl_master.type = ? and period = ? GROUP BY tbl_master.allow_id ');
                                         $fin = $query->execute(array('2', $period));
@@ -223,10 +225,6 @@ checkPermission();
                                             echo '<td colspan="2" class="px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-900">NET PAY</td>';
                                             echo '<td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-blue-900 text-right">₦' . number_format(floatval($sumAll) - floatval($sumDeduct)) . '</td>';
                                             echo '</tr>';
-                                    }
-                                } catch (PDOException $e) {
-                                    echo $e->getMessage();
-                                }
                                         }
                                     } catch (PDOException $e) {
                                         echo $e->getMessage();
