@@ -16,12 +16,24 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
 $results_per_page = 200;
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$status_filter = isset($_GET['status']) ? trim($_GET['status']) : '';
 
 $where = '';
 $params = [];
+$conditions = [];
+
 if ($search) {
-    $where = 'WHERE employee.NAME LIKE :search OR employee.staff_id LIKE :search';
+    $conditions[] = '(employee.NAME LIKE :search OR employee.staff_id LIKE :search)';
     $params[':search'] = "%$search%";
+}
+
+if ($status_filter) {
+    $conditions[] = 'employee.STATUSCD = :status';
+    $params[':status'] = $status_filter;
+}
+
+if (!empty($conditions)) {
+    $where = 'WHERE ' . implode(' AND ', $conditions);
 }
 $countSql = "SELECT COUNT(*) as total FROM employee $where";
 $stmt = $conn->prepare($countSql);
@@ -39,7 +51,9 @@ $sql = "SELECT
         ORDER BY statuscd, staff_id ASC 
         LIMIT :start, :limit";
 $stmt = $conn->prepare($sql);
-if ($search) $stmt->bindValue(':search', "%$search%");
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
 $stmt->bindValue(':start', ($page - 1) * $results_per_page, PDO::PARAM_INT);
 $stmt->bindValue(':limit', $results_per_page, PDO::PARAM_INT);
 $stmt->execute();
@@ -100,6 +114,33 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <input type="text" name="search" placeholder="Search by Name or Staff No"
                         value="<?php echo htmlspecialchars($search); ?>"
                         class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-blue-500 bg-white shadow-sm" />
+                    <select name="status"
+                        class="px-4 py-2 border border-gray-300 rounded focus:outline-blue-500 bg-white shadow-sm">
+                        <option value="">All Status</option>
+                        <?php
+                        // Get status options from staff_status table or use hardcoded values as fallback
+                        try {
+                            $statusQuery = $conn->prepare('SELECT STATUSCD, STATUS FROM staff_status ORDER BY STATUSCD');
+                            $statusQuery->execute();
+                            $statuses = $statusQuery->fetchAll(PDO::FETCH_ASSOC);
+                        } catch (Exception $e) {
+                            // Fallback to hardcoded status values if table doesn't exist
+                            $statuses = [
+                                ['STATUSCD' => 'A', 'STATUS' => 'ACTIVE'],
+                                ['STATUSCD' => 'D', 'STATUS' => 'DISMISSED'],
+                                ['STATUSCD' => 'T', 'STATUS' => 'TERMINATION'],
+                                ['STATUSCD' => 'R', 'STATUS' => 'RESIGNATION'],
+                                ['STATUSCD' => 'S', 'STATUS' => 'SUSPENSION'],
+                                ['STATUSCD' => 'DE', 'STATUS' => 'DEATH']
+                            ];
+                        }
+                        foreach ($statuses as $status) {
+                            $selected = ($status_filter === $status['STATUSCD']) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars($status['STATUSCD']) . '" ' . $selected . '>' . 
+                                 htmlspecialchars($status['STATUS']) . '</option>';
+                        }
+                        ?>
+                    </select>
                     <button class="bg-blue-700 hover:bg-blue-900 text-white px-4 py-2 rounded shadow" type="submit">
                         <i class="fas fa-search"></i> Search
                     </button>
@@ -255,8 +296,14 @@ $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <!-- Pagination -->
                 <div class="flex justify-center mt-4">
                     <nav class="inline-flex -space-x-px">
-                        <?php for ($i=1; $i <= $total_pages; $i++): ?>
-                        <a href="?<?php echo http_build_query(['page'=>$i] + ($search ? ['search'=>$search] : [])); ?>"
+                        <?php 
+                        $queryParams = ['page' => $i];
+                        if ($search) $queryParams['search'] = $search;
+                        if ($status_filter) $queryParams['status'] = $status_filter;
+                        for ($i=1; $i <= $total_pages; $i++): 
+                            $queryParams['page'] = $i;
+                        ?>
+                        <a href="?<?php echo http_build_query($queryParams); ?>"
                             class="px-3 py-1 border <?php echo $page==$i ? 'bg-blue-600 text-white' : 'bg-white text-blue-800'; ?> rounded mx-0.5 text-xs font-semibold hover:bg-blue-100">
                             <?php echo $i; ?>
                         </a>
