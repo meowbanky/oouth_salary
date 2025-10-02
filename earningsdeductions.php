@@ -70,21 +70,21 @@ function getTypeIcon($type) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    
+
     <style>
-        /* Ensure SweetAlert2 appears above modal */
-        .swal2-container {
-            z-index: 10000 !important;
-        }
-        
-        .swal2-popup {
-            z-index: 10001 !important;
-        }
-        
-        /* Modal positioning fixes */
-        #itemModal {
-            z-index: 9999;
-        }
+    /* Ensure SweetAlert2 appears above modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+
+    .swal2-popup {
+        z-index: 10001 !important;
+    }
+
+    /* Modal positioning fixes */
+    #itemModal {
+        z-index: 9999;
+    }
     </style>
 </head>
 
@@ -290,34 +290,34 @@ function getTypeIcon($type) {
             showModal('create', 'Add New Union Deduction', 3);
         });
 
-            // Edit buttons - using event delegation
-    $(document).on('click', '.edit-item-btn', function() {
-        const id = $(this).data('id');
-        const description = $(this).data('description');
-        const type = $(this).data('type');
-        
-        showModal('update', 'Edit Item', type, id, description);
-    });
+        // Edit buttons - using event delegation
+        $(document).on('click', '.edit-item-btn', function() {
+            const id = $(this).data('id');
+            const description = $(this).data('description');
+            const type = $(this).data('type');
 
-    // Delete buttons - using event delegation
-    $(document).on('click', '.delete-item-btn', function() {
-        const id = $(this).data('id');
-        const description = $(this).data('description');
-        
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Do you want to delete "${description}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                deleteItem(id);
-            }
+            showModal('update', 'Edit Item', type, id, description);
         });
-    });
+
+        // Delete buttons - using event delegation
+        $(document).on('click', '.delete-item-btn', function() {
+            const id = $(this).data('id');
+            const description = $(this).data('description');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to delete "${description}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteItem(id);
+                }
+            });
+        });
 
         // Modal controls
         $('#closeModalButton, #cancelBtn').click(function() {
