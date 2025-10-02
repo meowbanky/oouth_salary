@@ -266,10 +266,24 @@ checkPermission();
                         '<i class="fas fa-file-excel"></i> Export Excel');
 
                     try {
+                        // Check if response is an error JSON
+                        if (typeof response === 'string' && response.includes('{"error":')) {
+                            var errorData = JSON.parse(response);
+                            alert(errorData.error);
+                            return;
+                        }
+                        
+                        // Check if response is HTML error page
                         if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
                             console.error('Received HTML error page instead of data');
                             alert(
                                 'Server error occurred. Please try again or contact administrator.');
+                            return;
+                        }
+
+                        // Check if response is empty or invalid
+                        if (!response || response.length === 0) {
+                            alert('No data received from server. Please try again.');
                             return;
                         }
 
@@ -283,6 +297,7 @@ checkPermission();
                         document.body.removeChild(downloadLink);
                     } catch (e) {
                         console.error('Error processing Excel response:', e);
+                        console.error('Response:', response);
                         alert('Error generating Excel file. Please try again.');
                     }
                 },
