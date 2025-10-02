@@ -1,372 +1,302 @@
 <?php
-session_start();
 ini_set('max_execution_time', '0');
-include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: ../index.php");
-	exit();
-}
+include_once('../classes/model.php');
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
+
 if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
-		global $con;
-
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
-
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
+    function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
+    {
+        global $con;
+        $theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
+        switch ($theType) {
+            case "text":
+                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+                break;
+            case "long":
+            case "int":
+                $theValue = ($theValue != "") ? intval($theValue) : "NULL";
+                break;
+            case "double":
+                $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
+                break;
+            case "date":
+                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
+                break;
+            case "defined":
+                $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
+                break;
+        }
+        return $theValue;
+    }
 }
-
-
 ?>
+
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Variance Report - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
 
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('../sidebar.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-chart-line"></i> Payroll Variance Report
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Compare payroll data between different periods to identify variances.</p>
+                    </div>
+                </div>
 
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="GET" action="variance.php" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="periodFrom" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-check mr-2 text-green-600"></i>Current Month
+                                    </label>
+                                    <select name="periodFrom" id="periodFrom" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                        <option value="">Select Pay Period</option>
+                                        <?php
+                                        $periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : -1;
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = $row['periodId'] == $periodFrom ? 'selected' : '';
+                                                echo "<option value='{$row['periodId']}' $selected>{$row['description']} - {$row['periodYear']}</option>";
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
 
+                                <div>
+                                    <label for="periodTo" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-minus mr-2 text-red-600"></i>Previous Month
+                                    </label>
+                                    <select name="periodTo" id="periodTo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                        <option value="">Select Pay Period</option>
+                                        <?php
+                                        $periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : -1;
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = $row['periodId'] == $periodTo ? 'selected' : '';
+                                                echo "<option value='{$row['periodId']}' $selected>{$row['description']} - {$row['periodYear']}</option>";
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-3">
+                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                                <button type="button" onclick="exportAll('xls','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-excel"></i> Export XLS
+                                </button>
+                                <button type="button" onclick="exportAll('csv','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-csv"></i> Export CSV
+                                </button>
+                                <button type="button" onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
+                <?php
+                // Get period descriptions for display
+                $monthTo = '';
+                $monthFrom = '';
+                $periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : -1;
+                $periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : -1;
+                
+                if ($periodFrom != -1) {
+                    try {
+                        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear FROM payperiods WHERE periodId = ?');
+                        $query->execute([$periodFrom]);
+                        $row = $query->fetch(PDO::FETCH_ASSOC);
+                        $monthFrom = $row ? $row['description'] . '-' . $row['periodYear'] : '';
+                    } catch (PDOException $e) {
+                        $monthFrom = 'Error loading period';
+                    }
+                }
 
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
-		<?php include("report_sidebar.php"); ?>
+                if ($periodTo != -1) {
+                    try {
+                        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear FROM payperiods WHERE periodId = ?');
+                        $query->execute([$periodTo]);
+                        $row = $query->fetch(PDO::FETCH_ASSOC);
+                        $monthTo = $row ? $row['description'] . '-' . $row['periodYear'] : '';
+                    } catch (PDOException $e) {
+                        $monthTo = 'Error loading period';
+                    }
+                }
+                ?>
 
+                <?php if ($monthFrom != '' && $monthTo != '') { ?>
+                    <!-- Report Header -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                        <div class="bg-blue-50 px-6 py-4 border-b">
+                            <h2 class="text-lg font-semibold text-blue-800 text-center">
+                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                            </h2>
+                            <p class="text-center text-blue-700 font-medium mt-2">
+                                Payroll Variance Between the Month of <?php echo htmlspecialchars($monthFrom); ?> AND <?php echo htmlspecialchars($monthTo); ?>
+                            </p>
+                        </div>
+                    </div>
 
+                    <!-- Report Table -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                                <thead class="bg-blue-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">S/N</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Staff No</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider"><?php echo htmlspecialchars($monthFrom); ?></th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider"><?php echo htmlspecialchars($monthTo); ?></th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Variance</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <?php
+                                    if ($periodFrom != -1 && $periodTo != -1) {
+                                        try {
+                                            $query = $conn->prepare('SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ? UNION SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ? ORDER BY staff_id;');
+                                            $query->execute([$periodTo, $periodFrom]);
+                                            $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                            
+                                            $numberofstaff = count($res);
+                                            $i = 1;
+                                            $sumCurrent = 0;
+                                            $sumPrevious = 0;
 
-		<div id="content" class="clearfix sales_content_minibar">
+                                            if ($numberofstaff > 0) {
+                                                foreach ($res as $link) {
+                                                    echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $i . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . htmlspecialchars($link['staff_id']) . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['NAME']) . '</td>';
 
-			<div id="content-header" class="hidden-print">
-				<h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-			</div>
+                                                    // Get variance data using the variance() function
+                                                    $currentAmount = variance($periodFrom, $link['staff_id']);
+                                                    $previousAmount = variance($periodTo, $link['staff_id']);
+                                                    $varianceAmount = $currentAmount - $previousAmount;
 
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payrollDept.php">Report Input: Detailed Variance Report</a>
-			</div>
-			<div class="clear"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-align-justify"></i>
-							</span>
-							<h5 align="center"></h5>
-							<div class="clear"></div>
-							<div class="clear"></div>
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($currentAmount) . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($previousAmount) . '</td>';
+                                                    
+                                                    // Color code the variance
+                                                    $varianceClass = $varianceAmount >= 0 ? 'text-green-600' : 'text-red-600';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right ' . $varianceClass . '">₦' . number_format($varianceAmount) . '</td>';
+                                                    echo '</tr>';
 
-						</div>
-						<div class="row">
-							<div class="col-md-12 pull-left">
-								<img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
-								<h2 class="page-title pull-right">
-									<p align="center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL<br> PAYROLL VARIANCE BETWEEN THE MONTH OF
-									<p align="center">
+                                                    $sumCurrent += $currentAmount;
+                                                    $sumPrevious += $previousAmount;
+                                                    $i++;
+                                                }
 
-										<?php $monthTo = '';
-										$monthFrom = '';
-										$periodTo = -1;
-										$periodFrom = -1;
-										global $conn;
-										if (!isset($_GET['periodFrom'])) {
-											$periodFrom = -1;
-										} else {
-											$periodFrom = $_GET['periodFrom'];
-										}
-										if (!isset($_GET['periodTo'])) {
-											$periodTo = -1;
-										} else {
-											$periodTo = $_GET['periodTo'];
-										}
-										try {
-											$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-											$res = $query->execute(array($periodFrom));
-											$out = $query->fetchAll(PDO::FETCH_ASSOC);
+                                                // Total row
+                                                $totalVariance = $sumCurrent - $sumPrevious;
+                                                $totalVarianceClass = $totalVariance >= 0 ? 'text-green-600' : 'text-red-600';
+                                                
+                                                echo '<tr class="bg-blue-50 border-t-2 border-blue-200">';
+                                                echo '<td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">TOTAL</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">₦' . number_format($sumCurrent) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">₦' . number_format($sumPrevious) . '</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-right ' . $totalVarianceClass . '">₦' . number_format($totalVariance) . '</td>';
+                                                echo '</tr>';
+                                            } else {
+                                                echo '<tr>';
+                                                echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No variance data found for the selected periods.</td>';
+                                                echo '</tr>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo '<tr>';
+                                            echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</td>';
+                                            echo '</tr>';
+                                        }
+                                    } else {
+                                        echo '<tr>';
+                                        echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Please select both current and previous months to generate the variance report.</td>';
+                                        echo '</tr>';
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Report Footer -->
+                        <div class="bg-gray-50 px-6 py-4 border-t">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div class="text-sm text-gray-600">
+                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                    <p><strong>Date:</strong> <?php 
+                                        $Today = date('y:m:d', time());
+                                        $new = date('l, F d, Y', strtotime($Today));
+                                        echo $new;
+                                    ?></p>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <p><strong>Current Month:</strong> <?php echo htmlspecialchars($monthFrom); ?></p>
+                                    <p><strong>Previous Month:</strong> <?php echo htmlspecialchars($monthTo); ?></p>
+                                    <?php if (isset($totalVariance)): ?>
+                                        <p><strong>Overall Variance:</strong> <span class="<?php echo $totalVariance >= 0 ? 'text-green-600' : 'text-red-600'; ?>">₦<?php echo number_format($totalVariance); ?></span></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+        </main>
+    </div>
 
-											while ($row = array_shift($out)) {
-												echo ($monthFrom = $row['description'] . '-' . $row['periodYear']);
-											}
-										} catch (PDOException $e) {
-											$e->getMessage();
-										}
-
-										?> AND <?php $month = '';
-												global $conn;
-												if (!isset($_GET['periodTo'])) {
-													$periodTo = -1;
-												} else {
-													$periodTo = $_GET['periodTo'];
-												}
-												try {
-													$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-													$res = $query->execute(array($periodTo));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-													while ($row = array_shift($out)) {
-														echo ($monthTo = $row['description'] . '-' . $row['periodYear']);
-													}
-												} catch (PDOException $e) {
-													$e->getMessage();
-												}
-
-												?>
-								</h2>
-							</div>
-							<div class="col-md-12 hidden-print">
-								<form class="form-horizontal form-horizontal-mobiles" method="GET" action="variance.php">
-									<div class="form-group">
-										<div class="col-md-6">
-											<div class="form-group">
-												<label class="control-label">Current Month:</label>
-
-												<select name="periodFrom" id="periodFrom" class="form-control hidden-print" required="required">
-													<option value="">Select Pay Period</option>
-
-													<?php
-													global $conn;
-
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $periodFrom) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
-
-													?>
-												</select>
-											</div>
-										</div>
-
-										<div class="col-md-6">
-											<div class="form-group">
-												<label class="control-label">Previous Month:</label>
-
-												<select name="periodTo" id="periodTo" class="form-control hidden-print" required="required">
-													<option value="">Select Pay Period</option>
-
-													<?php
-													global $conn;
-
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $periodTo) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
-
-													?>
-												</select>
-											</div>
-										</div>
-
-									</div>
-
-									<div class="form-actions">
-										<button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-									</div>
-								</form>
-							</div>
-						</div>
-						<?php
-
-
-						$results_per_page = 100;
-						if (isset($_GET['page'])) {
-							$page = $_GET['page'];
-						} else {
-							$page = 1;
-						} ?>
-						<div class="top-panel pull-right hidden-print">
-							<div class="btn-group">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php echo 'variance btw ' . $monthTo . ' AND ' . $monthFrom; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php echo 'variance btw ' . $monthTo . ' AND ' . $monthFrom; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php echo 'variance btw ' . $monthTo . ' AND ' . $monthFrom; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
-							</div>
-						</div>
-						<div class="widget-content nopadding">
-							<div class="table-responsive">
-
-								<table border="1" class="table table-striped table-bordered table-hover table-checkable order-column table_without" id="sample_1">
-									<thead>
-										<tr>
-
-											<th>S/N</th>
-											<th>STAFF NO</th>
-											<th> NAME</th>
-											<th> <?php echo $monthFrom; ?></th>
-											<th> <?php echo $monthTo; ?></th>
-											<th> VARIANCE</th>
-
-										</tr>
-									</thead>
-									<tbody>
-										<?php
-										//retrieveData('employment_types', 'id', '2', '1');
-
-
-
-
-										try {
-
-//											$query = $conn->prepare('SELECT master_staff.staff_id, ANY_VALUE(master_staff.`NAME`) AS `NAME`, ANY_VALUE(tbl_dept.dept) AS dept,ANY_VALUE(concat(payperiods.description," ",payperiods.periodYear)) as period FROM master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN payperiods ON payperiods.periodId = master_staff.period
-//                                            WHERE master_staff.period = ? GROUP BY master_staff.staff_id ORDER BY master_staff.staff_id');
-
-                                            $query = $conn->prepare('SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ?
-                                                                        UNION SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ?
-                                                                        ORDER BY staff_id;');
-                                            $fin = $query->execute(array($periodTo,$periodFrom));
-											$res = $query->fetchAll(PDO::FETCH_ASSOC);
-											$numberofstaff = count($res);
-											$counter = 1;
-											//sdsd
-											$i = 1;
-											$sumCurrent = 0;
-											$sumPrevious = 0;
-											echo '<tr class="odd gradeX">';
-											foreach ($res as $row => $link) {
-
-												echo '<td class="stylecaps">' . $i .  '</td>';
-												echo '<td class="stylecaps">' . $link['staff_id'] .  '</td>';
-												echo '<td class="stylecaps"">' . $link['NAME'] . '</td>';
-
-												$j = variance($periodFrom, $link['staff_id']);
-												$sumCurrent = $j + $sumCurrent;
-												echo '<td align="right">' . number_format($j) . '</td>';
-												$k = variance($periodTo, $link['staff_id']);
-												$sumPrevious = $k + $sumPrevious;
-												echo '<td align="right">' . number_format($k) . '</td>';
-												echo '<td align="right">' .  number_format($j - $k) . '</td>';
-												echo '</tr>';
-
-												$i = $i + 1;
-											}
-											echo '<tr class="odd gradeX">';
-											echo '<td class="stylecaps" colspan="3">TOTAL</td>';
-											echo '<td align="right"> <strong>' . number_format($sumCurrent) . '</strong></td>';
-											echo '<td align="right"> <strong>' . number_format($sumPrevious) . '</strong></td>';
-											echo '<td align="right"> <strong>' . number_format($sumCurrent - $sumPrevious) . '</strong></td>';
-											echo '</tr>';
-										} catch (PDOException $e) {
-											echo $e->getMessage();
-										}
-										?>
-
-
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div id="register_container" class="receiving"></div>
-			</div>
-
-		</div>
-
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="http://www.oouth.com/" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
-
-	</div><!--end #content-->
-	<!--end #wrapper-->
-
-
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {
-			//'sales_report.php');
-
-
-			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
-				$("#complex_radio").prop('checked', true);
-			});
-
-			$("#report_date_range_simple").change(function() {
-				$("#simple_radio").prop('checked', true);
-			});
-
-		});
-
-		function receivingsBeforeSubmit(formData, jqForm, options) {
-			var submitting = false;
-			if (submitting) {
-				return false;
-			}
-			submitting = true;
-
-			$("#ajax-loader").show();
-			//	$("#finish_sale_button").hide();
-		}
-	</script>
-	<script src="js/tableExport.js"></script>
-	<script src="js/main.js"></script>
+    <script type="text/javascript" language="javascript">
+    $(document).ready(function() {
+        // Form validation
+        $('#generate_report').click(function(e) {
+            if (!$('#periodFrom').val() || !$('#periodTo').val()) {
+                e.preventDefault();
+                alert('Please select both Current Month and Previous Month before generating the report.');
+            }
+        });
+    });
+    </script>
 </body>
-
 </html>
