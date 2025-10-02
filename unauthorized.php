@@ -2,8 +2,8 @@
 session_start();
 // Redirect if user is authenticated and admin
 if (isset($_SESSION['SESS_MEMBER_ID']) && $_SESSION['role'] === 'Admin') {
-    header("Location: home.php");
-    exit();
+    // header("Location: home.php");
+    // exit();
 }
 ?>
 <!DOCTYPE html>

@@ -7,7 +7,7 @@ include_once('functions.php');
 include_once('../Connections/paymaster.php');
 include_once('../passwordHash.php');
 include_once('create_email.php');
-include_once('../backup.php');
+// include_once('../backup.php');
 $act = strip_tags(addslashes($_GET['act']));
 $act = filter_var($_GET['act']);
 $source = $_SERVER['HTTP_REFERER'];

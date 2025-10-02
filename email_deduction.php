@@ -53,52 +53,52 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    
+
     <style>
-        /* Ensure footer is always visible */
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .flex-1 {
-            flex: 1;
-        }
-        
-        /* Modal positioning fixes */
-        #emailDeductionModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
-        }
-        
-        /* Ensure SweetAlert2 appears above modal */
-        .swal2-container {
-            z-index: 10000 !important;
-        }
-        
-        .swal2-popup {
-            z-index: 10001 !important;
-        }
-        
-        /* DataTable styling improvements */
-        .dataTables_wrapper {
-            margin-bottom: 1rem;
-        }
-        
-        /* Ensure proper spacing */
-        .container {
-            flex: 1;
-        }
-        
-        /* Prevent body scroll when modal is open */
-        body.overflow-hidden {
-            overflow: hidden;
-        }
+    /* Ensure footer is always visible */
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .flex-1 {
+        flex: 1;
+    }
+
+    /* Modal positioning fixes */
+    #emailDeductionModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+    }
+
+    /* Ensure SweetAlert2 appears above modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+
+    .swal2-popup {
+        z-index: 10001 !important;
+    }
+
+    /* DataTable styling improvements */
+    .dataTables_wrapper {
+        margin-bottom: 1rem;
+    }
+
+    /* Ensure proper spacing */
+    .container {
+        flex: 1;
+    }
+
+    /* Prevent body scroll when modal is open */
+    body.overflow-hidden {
+        overflow: hidden;
+    }
     </style>
 </head>
 
@@ -188,7 +188,8 @@ try {
         </div>
     </div>
     <!-- Edit/Add Modal -->
-    <div id="emailDeductionModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div id="emailDeductionModal"
+        class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold" id="modalTitle">Add/Edit Email Deduction</h2>
@@ -199,33 +200,37 @@ try {
             <form id="emailDeductionForm" method="POST" autocomplete="off">
                 <input type="hidden" name="action" id="action" value="create">
                 <input type="hidden" name="allow_id" id="allow_id">
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <select id="newearningcode" name="newearningcode" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                    <select id="newearningcode" name="newearningcode"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                         <option value="">- - Select Earning - -</option>
                         <?php foreach ($earnings as $earning): ?>
-                        <option value="<?php echo htmlspecialchars($earning['ed_id']); ?>" 
-                                data-code="<?php echo htmlspecialchars($earning['edType']); ?>">
-                            <?php echo htmlspecialchars($earning['ed']); ?> - <?php echo htmlspecialchars($earning['ed_id']); ?>
+                        <option value="<?php echo htmlspecialchars($earning['ed_id']); ?>"
+                            data-code="<?php echo htmlspecialchars($earning['edType']); ?>">
+                            <?php echo htmlspecialchars($earning['ed']); ?> -
+                            <?php echo htmlspecialchars($earning['ed_id']); ?>
                         </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input type="email" id="email" name="email" placeholder="Enter email address..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
-                
+
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">CC Email</label>
                     <input type="email" id="cc_email" name="cc_email" placeholder="Enter CC email address..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
-                
+
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancelBtn"
                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
@@ -241,8 +246,10 @@ try {
         var emailDeductionTable = $('#emailDeductionTable').DataTable({
             pageLength: 25,
             ordering: true,
-            columnDefs: [
-                { orderable: false, targets: 4 } // Disable sorting on Actions column
+            columnDefs: [{
+                    orderable: false,
+                    targets: 4
+                } // Disable sorting on Actions column
             ]
         });
 
@@ -250,7 +257,7 @@ try {
         $('#reload-button').click(function() {
             location.reload();
         });
-        
+
         // Download Excel button
         $('#download-excel-button').click(function() {
             window.location.href = 'libs/export_email_deductions_excel.php';
@@ -280,7 +287,7 @@ try {
         $(document).on('click', '.delete-email-deduction-btn', function() {
             const allowId = $(this).data('allow_id');
             const edDesc = $(this).data('eddesc');
-            
+
             Swal.fire({
                 title: 'Are you sure?',
                 text: `Do you want to delete email deduction for "${edDesc}"?`,
@@ -303,7 +310,7 @@ try {
                             Swal.showLoading();
                         }
                     });
-                    
+
                     $.ajax({
                         url: 'libs/manage_email_deduction.php',
                         type: 'POST',
@@ -314,11 +321,15 @@ try {
                         },
                         success: function(response) {
                             Swal.fire({
-                                icon: response.status === 'success' ? 'success' : 'error',
-                                title: response.status === 'success' ? 'Deleted!' : 'Error',
+                                icon: response.status === 'success' ?
+                                    'success' : 'error',
+                                title: response.status === 'success' ?
+                                    'Deleted!' : 'Error',
                                 text: response.message,
-                                timer: response.status === 'success' ? 2000 : 0,
-                                showConfirmButton: response.status !== 'success'
+                                timer: response.status === 'success' ?
+                                    2000 : 0,
+                                showConfirmButton: response.status !==
+                                    'success'
                             }).then((result) => {
                                 if (response.status === 'success') {
                                     location.reload();
@@ -354,10 +365,10 @@ try {
         $('#emailDeductionForm').submit(function(event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            
+
             // Show loading state
             $('#saveBtn').prop('disabled', true).text('Saving...');
-            
+
             $.ajax({
                 url: 'libs/manage_email_deduction.php',
                 type: 'POST',
@@ -366,12 +377,14 @@ try {
                 success: function(response) {
                     // Hide modal first
                     hideModal();
-                    
+
                     // Show alert after modal is hidden
                     setTimeout(function() {
                         Swal.fire({
-                            icon: response.status === 'success' ? 'success' : 'error',
-                            title: response.status === 'success' ? 'Success' : 'Error',
+                            icon: response.status === 'success' ?
+                                'success' : 'error',
+                            title: response.status === 'success' ?
+                                'Success' : 'Error',
                             text: response.message,
                             timer: response.status === 'success' ? 2000 : 0,
                             showConfirmButton: response.status !== 'success'
@@ -385,7 +398,7 @@ try {
                 error: function() {
                     // Hide modal first
                     hideModal();
-                    
+
                     // Show error alert
                     setTimeout(function() {
                         Swal.fire({

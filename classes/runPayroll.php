@@ -66,17 +66,17 @@ try { //echo $period ;
         $out_allow = $query_allow->fetchAll(PDO::FETCH_ASSOC);
 
         $total_rows = count($out_allow);
-        error_log("Total Rows: " . $total_rows);
-        error_log("Fetched Data: " . print_r($out_allow, true));
+        // // error_log("Total Rows: " . $total_rows);
+        // // error_log("Fetched Data: " . print_r($out_allow, true));
 
         $counter = 1;
 
         foreach ($out_allow as $row_allow) {
-            error_log("Processing Allow_id: {$row_allow['allow_id']} - Counter: $counter"); // Debug
+            // // error_log("Processing Allow_id: {$row_allow['allow_id']} - Counter: $counter"); // Debug
 
             if ($row_allow['allow_id'] == '21') {
                 try {
-                    error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+                    // // error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
                     $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
                                        WHERE allowancetable.grade = ? AND allowancetable.step = ? 
                                        AND allowcode = ? AND category = ?');
@@ -85,7 +85,7 @@ try { //echo $period ;
                     error_log( $e->getMessage());
                 }
             } elseif ($row_allow['allow_id'] == '5') {
-                error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+                // error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
 
                 try {
                     $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
@@ -96,7 +96,7 @@ try { //echo $period ;
                     error_log( $e->getMessage());
                 }
             } else {
-                error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
+                // error_log("Entering Allow_id: {$row_allow['allow_id']} - Counter: $counter");
 
                 try {
                     $query_value = $conn->prepare('SELECT allowancetable.`value` FROM allowancetable 
@@ -110,10 +110,10 @@ try { //echo $period ;
 
             if ($row_value = $query_value->fetch()) {
                 $output = $row_value['value'];
-                error_log("Counter: $counter Output 1 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
+                // error_log("Counter: $counter Output 1 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
             } else {
                 $output = number_format($row_allow['value'], 0, '.', '');
-                error_log("Counter: $counter Output 2 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
+                // error_log("Counter: $counter Output 2 - Grade: {$row['GRADE']} Step: {$row['STEP']} Allow_id: {$row_allow['allow_id']} Output: $output");
             }
 
             try {
@@ -183,7 +183,7 @@ try { //echo $period ;
 					$total_rowsConsolidated = mysqli_num_rows($result_consolidated);
 
 					if ($total_rowsConsolidated > 0) {
-						$sql_pensionRate = "SELECT (pension.PENSON/100) as rate FROM pension WHERE grade = '" . $row['GRADE'] . "' and step = '" . $row['STEP'] . "'";
+						$sql_pensionRate = "SELECT rate as rate FROM pension";
 						$result_pensionRate = mysqli_query($salary, $sql_pensionRate);
 						$row_pensionRate = mysqli_fetch_assoc($result_pensionRate);
 						$total_pensionRate = mysqli_num_rows($result_pensionRate);

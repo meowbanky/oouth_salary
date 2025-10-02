@@ -177,7 +177,7 @@ if (!$existtrans) {
 						$total_rowsConsolidated = mysqli_num_rows($result_consolidated);
 
 						if ($total_rowsConsolidated > 0) {
-							$sql_pensionRate = "SELECT (pension.PENSON/100) as rate FROM pension WHERE grade = '" . $row['GRADE'] . "' and step = '" . $row['STEP'] . "'";
+							$sql_pensionRate = "SELECT rate as rate FROM pension";
 							$result_pensionRate = mysqli_query($salary, $sql_pensionRate);
 							$row_pensionRate = mysqli_fetch_assoc($result_pensionRate);
 							$total_pensionRate = mysqli_num_rows($result_pensionRate);
