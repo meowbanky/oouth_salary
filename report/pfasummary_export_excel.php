@@ -24,6 +24,9 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
+// Set content type for AJAX response
+header('Content-Type: text/plain; charset=utf-8');
+
 try {
     // Get PFA summary data
     $query = $conn->prepare('SELECT COUNT(staff_id) AS no, ANY_VALUE(tbl_pfa.PFANAME) AS PFANAME, master_staff.PFACODE FROM master_staff INNER JOIN tbl_pfa ON master_staff.PFACODE = tbl_pfa.PFACODE WHERE master_staff.period = ? GROUP BY master_staff.PFACODE');
@@ -183,19 +186,19 @@ try {
     $sheet->setCellValue('A' . ($infoRow + 4), 'Total Employees: ' . $countStaff);
     $sheet->setCellValue('A' . ($infoRow + 5), 'Total Contributions: ₦' . number_format($sumTotal));
     
-    // Set headers for download
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment; filename="PFA_Summary_' . $period_text . '.xlsx"');
-    header('Cache-Control: max-age=0');
-    
-    // Create writer and save
+    // Create writer and save to output buffer
+    ob_start();
     $writer = new Xlsx($spreadsheet);
     $writer->save('php://output');
+    $excelData = ob_get_contents();
+    ob_end_clean();
+    
+    // Return as base64 for AJAX download
+    echo base64_encode($excelData);
     
 } catch (Exception $e) {
     error_log($e->getMessage());
-    die('Error generating Excel file. Please try again.');
+    http_response_code(500);
+    echo json_encode(['error' => 'Error generating Excel file. Please try again.']);
 }
-
-exit();
 ?>
