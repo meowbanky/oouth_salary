@@ -101,10 +101,8 @@ $headers = [
 ];
 
 // Set header values and style
-$col = 1;
 foreach ($headers as $column => $header) {
-    $sheet->setCellValueByColumnAndRow($col, 1, $header);
-    $col++;
+    $sheet->setCellValue($column . '1', $header);
 }
 
 // Style the header row
