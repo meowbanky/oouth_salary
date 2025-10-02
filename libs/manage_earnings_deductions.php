@@ -66,8 +66,8 @@ try {
             }
             
             // Insert new item
-            $insert_query = $conn->prepare('INSERT INTO tbl_earning_deduction (ed_id, edDesc, edType, code, status) VALUES (?, ?, ?, ?, ?)');
-            $insert_query->execute([$next_id, $description, $ed_type, $code, 'Active']);
+            $insert_query = $conn->prepare('INSERT INTO tbl_earning_deduction (ed_id, edDesc, ed,edType, code, status) VALUES (?, ?,?, ?, ?, ?)');
+            $insert_query->execute([$next_id, $description, $description, $ed_type, $code, 'Active']);
             
             echo json_encode([
                 'status' => 'success',
@@ -100,8 +100,8 @@ try {
             }
             
             // Update item
-            $update_query = $conn->prepare('UPDATE tbl_earning_deduction SET edDesc = ? WHERE ed_id = ?');
-            $update_query->execute([$description, $ed_id]);
+            $update_query = $conn->prepare('UPDATE tbl_earning_deduction SET edDesc = ?, ed = ? WHERE ed_id = ?');
+            $update_query->execute([$description, $description, $ed_id]);
             
             echo json_encode([
                 'status' => 'success',

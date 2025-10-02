@@ -39,7 +39,7 @@ if ($code == 1) {
           $row_consolidated = mysqli_fetch_assoc($result_consolidated);
           $total_rowsConsolidated = mysqli_num_rows($result_consolidated);
 
-          $sql_pensionRate = "SELECT (pension.PENSON/100) as rate FROM pension WHERE grade = '" . $_POST['grade_level'] . "' and step = '" . $_POST['step'] . "'";
+          $sql_pensionRate = "SELECT rate as rate FROM pension";
           $result_pensionRate = mysqli_query($salary, $sql_pensionRate);
           $row_pensionRate = mysqli_fetch_assoc($result_pensionRate);
           $total_pensionRate = mysqli_num_rows($result_pensionRate);

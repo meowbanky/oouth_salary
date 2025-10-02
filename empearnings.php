@@ -18,6 +18,9 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
 
 // Get current employee data
 $currentemp = null;
+
+
+
 if ($_SESSION['empDataTrack'] == 'next') {
    $query = $conn->prepare("SELECT employee.staff_id, employee.`NAME` FROM employee WHERE STATUSCD = 'A' ORDER BY staff_id desc");
    $query->execute();
@@ -43,6 +46,7 @@ $HARZAD_TYPE = '';
 $status = '';
 
 if ($currentemp) {
+   
    $query = $conn->prepare('SELECT
       employee.staff_id,
       employee.`NAME`,
@@ -119,12 +123,24 @@ if ($staffID) {
 // Get earning/deduction options
 $earningOptions = [];
 try {
-   $query = $conn->prepare('SELECT * FROM tbl_earning_deduction');
+   $query = $conn->prepare('SELECT * FROM tbl_earning_deduction where edType = 1 ORDER BY edDesc asc');
    $query->execute();
    $earningOptions = $query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
    error_log("Error loading earning options: " . $e->getMessage());
 }
+
+$deductionOptions = [];
+try {
+   $query = $conn->prepare('SELECT * FROM tbl_earning_deduction where edType > 1 ORDER BY edDesc asc');
+   $query->execute();
+   $deductionOptions = $query->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+   error_log("Error loading deduction options: " . $e->getMessage());
+}
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -265,16 +281,7 @@ try {
         /* gray-500 */
     }
 
-    #save-prorate-btn {
-        background-color: #2563eb !important;
-        color: white !important;
-        display: block !important;
-        visibility: visible !important;
-    }
 
-    #save-prorate-btn:hover {
-        background-color: #1d4ed8 !important;
-    }
 
     /* Responsive improvements */
     @media (max-width: 768px) {
@@ -597,6 +604,8 @@ try {
             </div>
 
             <!-- Employee Info Card -->
+
+
             <?php if ($staffID): ?>
             <div class="employee-card text-white p-6 rounded-lg shadow-md mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -608,14 +617,15 @@ try {
                     <div>
                         <h3 class="text-lg font-semibold mb-2">Position Details</h3>
                         <p><strong>Grade/Step:</strong>
-                            <?php echo htmlspecialchars($empGrade); ?>/<?php echo htmlspecialchars($empStep); ?></p>
-                        <p><strong>Department:</strong> <?php echo htmlspecialchars($dept); ?></p>
+                            <?php echo htmlspecialchars($empGrade ?? ''); ?>/<?php echo htmlspecialchars($empStep ?? ''); ?>
+                        </p>
+                        <p><strong>Department:</strong> <?php echo htmlspecialchars($dept ?? ''); ?></p>
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold mb-2">Status</h3>
                         <p><strong>Status:</strong>
                             <span class="px-2 py-1 bg-white bg-opacity-20 rounded text-sm">
-                                <?php echo htmlspecialchars($status); ?>
+                                <?php echo htmlspecialchars($status ?? ''); ?>
                             </span>
                         </p>
                     </div>
@@ -843,11 +853,11 @@ try {
                 </button>
             </div>
             <form id="earningForm" method="POST" autocomplete="off">
-                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID); ?>">
-                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade); ?>">
-                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep); ?>">
-                <input type="hidden" name="callType" value="<?php echo htmlspecialchars($callType); ?>">
-                <input type="hidden" name="HARZAD_TYPE" value="<?php echo htmlspecialchars($HARZAD_TYPE); ?>">
+                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID ?? ''); ?>">
+                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>">
+                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>">
+                <input type="hidden" name="callType" value="<?php echo htmlspecialchars($callType ?? ''); ?>">
+                <input type="hidden" name="HARZAD_TYPE" value="<?php echo htmlspecialchars($HARZAD_TYPE ?? ''); ?>">
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Earning Type</label>
@@ -858,7 +868,7 @@ try {
                         <?php foreach ($earningOptions as $option): ?>
                         <option value="<?php echo htmlspecialchars($option['ed_id']); ?>"
                             data-code="<?php echo htmlspecialchars($option['edType']); ?>">
-                            <?php echo htmlspecialchars($option['ed']); ?> -
+                            <?php echo htmlspecialchars($option['edDesc']); ?> -
                             <?php echo htmlspecialchars($option['ed_id']); ?>
                         </option>
                         <?php endforeach; ?>
@@ -892,9 +902,11 @@ try {
                 </button>
             </div>
             <form id="deductionForm" method="POST" autocomplete="off">
-                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID); ?>">
-                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade); ?>">
-                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep); ?>">
+                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID ?? ''); ?>">
+                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>">
+                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>">
+                <input type="hidden" name="callType" value="<?php echo htmlspecialchars($callType ?? ''); ?>">
+                <input type="hidden" name="HARZAD_TYPE" value="<?php echo htmlspecialchars($HARZAD_TYPE ?? ''); ?>">
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Deduction Type</label>
@@ -902,9 +914,10 @@ try {
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         required>
                         <option value="">Select Deduction Type</option>
-                        <?php foreach ($earningOptions as $option): ?>
-                        <option value="<?php echo htmlspecialchars($option['ed_id']); ?>">
-                            <?php echo htmlspecialchars($option['ed']); ?> -
+                        <?php foreach ($deductionOptions as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option['ed_id']); ?>"
+                            data-code="<?php echo htmlspecialchars($option['edType']); ?>">
+                            <?php echo htmlspecialchars($option['edDesc']); ?> -
                             <?php echo htmlspecialchars($option['ed_id']); ?>
                         </option>
                         <?php endforeach; ?>
@@ -938,9 +951,9 @@ try {
                 </button>
             </div>
             <form id="loanForm" method="POST" autocomplete="off">
-                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID); ?>">
-                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade); ?>">
-                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep); ?>">
+                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID ?? ''); ?>">
+                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>">
+                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>">
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -1007,7 +1020,7 @@ try {
     <!-- Prorate Allowance Modal -->
     <div id="prorateModal"
         class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold">Prorate Allowances</h2>
@@ -1016,9 +1029,9 @@ try {
                     </button>
                 </div>
                 <form id="prorateForm" method="POST" autocomplete="off">
-                    <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID); ?>">
-                    <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade); ?>">
-                    <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep); ?>">
+                    <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID ?? ''); ?>">
+                    <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>">
+                    <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>">
 
                     <?php
                 $split = explode(' ', $_SESSION['activeperiodDescription'], 2);
@@ -1043,39 +1056,64 @@ try {
                             required>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Current Allowances</label>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200">
-                                <thead>
-                                    <tr class="bg-gray-100">
-                                        <th class="py-2 px-4 border">Code</th>
-                                        <th class="py-2 px-4 border">Description</th>
-                                        <th class="py-2 px-4 border">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($earnings as $earning): ?>
-                                    <tr class="border-b">
-                                        <td class="py-2 px-4 border">
-                                            <?php echo htmlspecialchars($earning['allow_id']); ?>
-                                        </td>
-                                        <td class="py-2 px-4 border"><?php echo htmlspecialchars($earning['edDesc']); ?>
-                                        </td>
-                                        <td class="py-2 px-4 border text-right">
-                                            ₦<?php echo number_format($earning['value']); ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Current Allowances</label>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="py-2 px-4 border">Code</th>
+                                            <th class="py-2 px-4 border">Description</th>
+                                            <th class="py-2 px-4 border">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($earnings as $earning): ?>
+                                        <tr class="border-b">
+                                            <td class="py-2 px-4 border">
+                                                <?php echo htmlspecialchars($earning['allow_id']); ?>
+                                            </td>
+                                            <td class="py-2 px-4 border">
+                                                <?php echo htmlspecialchars($earning['edDesc']); ?>
+                                            </td>
+                                            <td class="py-2 px-4 border text-right">
+                                                ₦<?php echo number_format($earning['value']); ?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Calculated Allowances</label>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200" id="calculatedTable">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="py-2 px-4 border">Code</th>
+                                            <th class="py-2 px-4 border">Description</th>
+                                            <th class="py-2 px-4 border">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b">
+                                            <td class="py-2 px-4 border text-center text-gray-500" colspan="3">
+                                                Click Calculate to see prorated values...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Calculated Value</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Total Calculated Value</label>
                         <div id="getProrateValue"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 min-h-[40px]">
-                            <div class="text-gray-500 text-sm">Enter number of days and tab out to calculate...</div>
+                            <div class="text-gray-500 text-sm">Click Calculate to see total prorated value...</div>
                         </div>
                     </div>
 
@@ -1084,7 +1122,7 @@ try {
                     <button type="button"
                         class="close-modal px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
                     <button type="button" id="calculate-prorate-btn"
-                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Calculate</button>
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
                 </div>
             </div>
         </div>
@@ -1100,20 +1138,20 @@ try {
                 </button>
             </div>
             <form id="gradeStepForm" method="POST" autocomplete="off">
-                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID); ?>">
-                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade); ?>">
-                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep); ?>">
+                <input type="hidden" name="curremployee" value="<?php echo htmlspecialchars($staffID ?? ''); ?>">
+                <input type="hidden" name="grade_level" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>">
+                <input type="hidden" name="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>">
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Grade</label>
-                    <input type="text" name="grade" id="grade" value="<?php echo htmlspecialchars($empGrade); ?>"
+                    <input type="text" name="grade" id="grade" value="<?php echo htmlspecialchars($empGrade ?? ''); ?>"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-gray-100"
                         readonly>
                 </div>
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Current Step</label>
-                    <input type="text" name="step" id="step" value="<?php echo htmlspecialchars($empStep); ?>"
+                    <input type="text" name="step" id="step" value="<?php echo htmlspecialchars($empStep ?? ''); ?>"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-gray-100"
                         readonly>
                 </div>
@@ -1216,12 +1254,30 @@ try {
                     targets: 4
                 } // Disable sorting on Actions column
             ],
+            createdRow: function(row, data, dataIndex) {
+                // Preserve badge styling when DataTable creates rows
+                var $typeCell = $(row).find('td:first-child span');
+                if ($typeCell.text().trim() === 'Earning') {
+                    $typeCell.addClass('px-2 py-1 bg-green-100 text-green-800 rounded text-sm');
+                } else if ($typeCell.text().trim() === 'Deduction') {
+                    $typeCell.addClass('px-2 py-1 bg-red-100 text-red-800 rounded text-sm');
+                }
+            },
             drawCallback: function() {
-                // Re-apply badges after DataTable redraws
-                $('.badge-earning').removeClass('badge-earning').addClass(
-                    'px-2 py-1 bg-green-100 text-green-800 rounded text-sm');
-                $('.badge-deduction').removeClass('badge-deduction').addClass(
-                    'px-2 py-1 bg-red-100 text-red-800 rounded text-sm');
+                // Ensure badges are properly styled after each draw
+                $('#earningsTable tbody tr').each(function() {
+                    var $row = $(this);
+                    var $typeCell = $row.find('td:first-child span');
+                    var cellText = $typeCell.text().trim();
+
+                    if (cellText === 'Earning') {
+                        $typeCell.addClass(
+                            'px-2 py-1 bg-green-100 text-green-800 rounded text-sm');
+                    } else if (cellText === 'Deduction') {
+                        $typeCell.addClass(
+                            'px-2 py-1 bg-red-100 text-red-800 rounded text-sm');
+                    }
+                });
             }
         });
 
@@ -1431,11 +1487,11 @@ try {
                     url: 'classes/getSalaryValue.php',
                     type: 'POST',
                     data: {
-                        curremployee: '<?php echo htmlspecialchars($staffID); ?>',
-                        grade_level: '<?php echo htmlspecialchars($empGrade); ?>',
-                        step: '<?php echo htmlspecialchars($empStep); ?>',
-                        callType: '<?php echo htmlspecialchars($callType); ?>',
-                        HARZAD_TYPE: '<?php echo htmlspecialchars($HARZAD_TYPE); ?>',
+                        curremployee: '<?php echo htmlspecialchars($staffID ?? ''); ?>',
+                        grade_level: '<?php echo htmlspecialchars($empGrade ?? ''); ?>',
+                        step: '<?php echo htmlspecialchars($empStep ?? ''); ?>',
+                        callType: '<?php echo htmlspecialchars($callType ?? ''); ?>',
+                        HARZAD_TYPE: '<?php echo htmlspecialchars($HARZAD_TYPE ?? ''); ?>',
                         newearningcode: selectedValue,
                         earningamount: '',
                         code: code
@@ -1472,85 +1528,54 @@ try {
 
         // Deduction type change - Auto-populate amount
         $('#newdeductioncode').change(function() {
-            var deductionCode = $(this).val();
+            var code = $(this).find(':selected').data("code");
+            var selectedValue = $(this).val();
 
-            if (deductionCode) {
-                if (deductionCode == 50) { // Pension
-                    $.ajax({
-                        url: 'classes/getPensionValue.php',
-                        type: 'POST',
-                        data: {
-                            curremployee: '<?php echo htmlspecialchars($staffID); ?>',
-                            grade_level: '<?php echo htmlspecialchars($empGrade); ?>',
-                            step: '<?php echo htmlspecialchars($empStep); ?>',
-                            newdeductioncode: deductionCode
-                        },
-                        success: function(response) {
-                            console.log('Pension Response:', response); // Debug log
+            if (selectedValue) {
+                $.ajax({
+                    url: 'classes/getSalaryValue.php',
+                    type: 'POST',
+                    data: {
+                        curremployee: '<?php echo htmlspecialchars($staffID ?? ''); ?>',
+                        grade_level: '<?php echo htmlspecialchars($empGrade ?? ''); ?>',
+                        step: '<?php echo htmlspecialchars($empStep ?? ''); ?>',
+                        callType: '<?php echo htmlspecialchars($callType ?? ''); ?>',
+                        HARZAD_TYPE: '<?php echo htmlspecialchars($HARZAD_TYPE ?? ''); ?>',
+                        newearningcode: selectedValue,
+                        earningamount: '',
+                        code: code
+                    },
+                    success: function(response) {
+                        console.log('Response:', response); // Debug log
 
-                            // The backend directly outputs the value, so we handle the response directly
-                            response = $.trim(response);
+                        // The backend directly outputs the value, so we handle the response directly
+                        response = $.trim(response);
 
-                            if (response == '0') {
-                                $("#deductionamount").val('');
-                                $("#deductionamount").attr('readonly', false);
-                            } else {
-                                // Remove commas from the response for number input
-                                var cleanValue = response.replace(/,/g, '');
-                                $("#deductionamount").val(cleanValue);
-                                $("#deductionamount").attr('readonly', false);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.log('Pension Error:', error); // Debug log
-                            console.log('Pension Status:', status); // Debug log
-                            console.log('Pension Response:', xhr.responseText); // Debug log
-                            Swal.fire('Error',
-                                'An error occurred while getting pension value', 'error'
-                            );
+                        if (response == 'manual') {
+                            $("#deductionamount").val('');
+                            $("#deductionamount").attr('readonly', false);
+                        } else if (response && response != '0' && response != '') {
+                            // Remove commas from the response for number input
+                            var cleanValue = response.replace(/,/g, '');
+                            $("#deductionamount").val(cleanValue);
+                            $("#deductionamount").attr('readonly', true);
+                        } else {
+                            $("#deductionamount").val('');
+                            $("#deductionamount").attr('readonly', false);
                         }
-                    });
-                } else if (deductionCode == 41) { // Tax
-                    $.ajax({
-                        url: 'classes/getTaxValue.php',
-                        type: 'POST',
-                        data: {
-                            curremployee: '<?php echo htmlspecialchars($staffID); ?>',
-                            grade_level: '<?php echo htmlspecialchars($empGrade); ?>',
-                            step: '<?php echo htmlspecialchars($empStep); ?>',
-                            newdeductioncode: deductionCode
-                        },
-                        success: function(response) {
-                            console.log('Tax Response:', response); // Debug log
+                    },
 
-                            // The backend directly outputs the value, so we handle the response directly
-                            response = $.trim(response);
 
-                            if (response == '0') {
-                                $("#deductionamount").val('');
-                                $("#deductionamount").attr('readonly', false);
-                            } else {
-                                // Remove commas from the response for number input
-                                var cleanValue = response.replace(/,/g, '');
-                                $("#deductionamount").val(cleanValue);
-                                $("#deductionamount").attr('readonly', false);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.log('Tax Error:', error); // Debug log
-                            console.log('Tax Status:', status); // Debug log
-                            console.log('Tax Response:', xhr.responseText); // Debug log
-                            Swal.fire('Error', 'An error occurred while getting tax value',
-                                'error');
-                        }
-                    });
-                } else {
-                    $("#deductionamount").val('');
-                    $("#deductionamount").attr('readonly', false);
-                }
+                    error: function(xhr, status, error) {
+                        console.log('Error:', error); // Debug log
+                        console.log('Status:', status); // Debug log
+                        console.log('Response:', xhr.responseText); // Debug log
+                        Swal.fire('Error', 'An error occurred while getting salary value',
+                            'error');
+                    }
+                });
             }
         });
-
         // Form submissions
         $('#earningForm').submit(function(event) {
             event.preventDefault();
@@ -1616,17 +1641,17 @@ try {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
-                        text: 'Deduction added successfully',
+                        text: 'Earning added successfully',
                         timer: 2000,
                         showConfirmButton: false
                     });
                     setTimeout(function() {
-                        location.reload();
+                        // location.reload();
                     }, 1500);
                 },
                 error: function() {
                     removeLoadingState(submitBtn);
-                    Swal.fire('Error', 'An error occurred while adding the deduction',
+                    Swal.fire('Error', 'An error occurred while adding the earning',
                         'error');
                 }
             });
@@ -1654,7 +1679,8 @@ try {
                     }, 1500);
                 },
                 error: function() {
-                    Swal.fire('Error', 'An error occurred while adding the loan', 'error');
+                    Swal.fire('Error', 'An error occurred while adding the loan',
+                        'error');
                 }
             });
         });
@@ -1687,23 +1713,89 @@ try {
             });
         });
 
-        // Prorate calculation on blur of days input
+        // Calculate on blur of days to calculate field
         $('#daysToCal').blur(function() {
             var daysToCal = $(this).val();
             var noDays = $('#no_days').val();
 
-            if (daysToCal == '0' || daysToCal == '') {
-                Swal.fire('Warning', 'No of Days to Calculate cannot be 0', 'warning');
-                return false;
-            } else if (parseInt(daysToCal) > parseInt(noDays)) {
-                Swal.fire('Warning',
-                    'No of Days to Calculate cannot be greater than No of Days in the month',
-                    'warning');
-                return false;
+            if (!daysToCal || daysToCal <= 0) {
+                return; // Don't show error, just return
+            }
+
+            if (parseInt(daysToCal) > parseInt(noDays)) {
+                Swal.fire('Error', 'Days to calculate cannot exceed total days in period', 'error');
+                return;
+            }
+
+            // Get current allowances from the table
+            var totalCalculated = 0;
+            var calculatedRows = '';
+
+            // Loop through current allowances table and calculate prorated values
+            $('#prorateModal table:first tbody tr').each(function() {
+                var $row = $(this);
+                var code = $row.find('td:first').text().trim();
+                var description = $row.find('td:eq(1)').text().trim();
+                var amountText = $row.find('td:last').text().trim();
+
+                // Extract numeric value from amount (remove ₦ and commas)
+                var amount = parseFloat(amountText.replace(/[₦,]/g, '')) || 0;
+
+                if (amount > 0) {
+                    // Calculate prorated amount
+                    var proratedAmount = (amount / parseInt(noDays)) * parseInt(daysToCal);
+                    totalCalculated += proratedAmount;
+
+                    // Build calculated row
+                    calculatedRows += '<tr class="border-b">' +
+                        '<td class="py-2 px-4 border">' + code + '</td>' +
+                        '<td class="py-2 px-4 border">' + description + '</td>' +
+                        '<td class="py-2 px-4 border text-right">₦' + proratedAmount
+                        .toLocaleString('en-NG', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }) + '</td>' +
+                        '</tr>';
+                }
+            });
+
+            // Update calculated table
+            if (calculatedRows === '') {
+                $('#calculatedTable tbody').html(
+                    '<tr class="border-b"><td class="py-2 px-4 border text-center text-gray-500" colspan="3">No allowances found to calculate</td></tr>'
+                );
+                $('#getProrateValue').html(
+                    '<div class="text-gray-500 text-sm">No allowances to calculate</div>');
+            } else {
+                $('#calculatedTable tbody').html(calculatedRows);
+                // Update total calculated value
+                $('#getProrateValue').html('<div class="text-lg font-semibold text-green-600">₦' +
+                    totalCalculated.toLocaleString('en-NG', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + '</div>');
+            }
+
+            // Show calculation complete message
+            $('#getProrateValue').append(
+                '<div class="text-green-600 text-sm mt-2">✓ Calculation complete - Click Save to apply</div>'
+            );
+        });
+
+        // Save prorate button
+        $('#calculate-prorate-btn').click(function(e) {
+            console.log('Save button clicked!'); // Debug log
+            e.preventDefault(); // Prevent form submission
+            e.stopPropagation(); // Stop event bubbling
+
+            var daysToCal = $('#daysToCal').val();
+            if (!daysToCal || daysToCal <= 0) {
+                Swal.fire('Error', 'Please enter a valid number of days to calculate', 'error');
+                return;
             }
 
             // Show loading state
-            $('#calculate-prorate-btn').prop('disabled', true).text('Calculating...');
+            $('#calculate-prorate-btn').prop('disabled', true).text('Saving...');
 
             var formData = $('#prorateForm').serialize();
 
@@ -1711,59 +1803,38 @@ try {
                 url: 'classes/getProrate.php',
                 type: 'POST',
                 data: formData,
+                dataType: 'json',
                 success: function(response) {
-                    $('#getProrateValue').html(response);
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
 
-                    // Change button to Save
-                    $('#calculate-prorate-btn')
-                        .prop('disabled', false)
-                        .text('Save')
-                        .removeClass('bg-green-600 hover:bg-green-700')
-                        .addClass('bg-blue-600 hover:bg-blue-700')
-                        .attr('id', 'save-prorate-btn')
-                        .show(); // Ensure button is visible
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Calculation Complete',
-                        text: 'Prorate calculation completed. Click Save to apply changes.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                        // Close modal and reload page
+                        setTimeout(function() {
+                            $('#prorateModal').addClass('hidden').removeClass(
+                                'flex');
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        $('#calculate-prorate-btn').prop('disabled', false).text(
+                            'Save');
+                        Swal.fire('Error', response.message ||
+                            'An error occurred while saving prorate allowances',
+                            'error'
+                        );
+                    }
                 },
-                error: function() {
-                    $('#calculate-prorate-btn').prop('disabled', false).text('Calculate');
-                    Swal.fire('Error', 'An error occurred while calculating prorate',
-                        'error');
-                }
-            });
-        });
-
-        // Save prorate button (dynamically created)
-        $(document).on('click', '#save-prorate-btn', function() {
-            var formData = $('#prorateForm').serialize();
-
-            $.ajax({
-                url: 'classes/getProrate.php',
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Prorate allowances saved successfully',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-
-                    // Close modal and reload page
-                    setTimeout(function() {
-                        $('#prorateModal').addClass('hidden').removeClass('flex');
-                        location.reload();
-                    }, 1500);
-                },
-                error: function() {
-                    Swal.fire('Error', 'An error occurred while saving prorate allowances',
+                error: function(xhr, status, error) {
+                    $('#calculate-prorate-btn').prop('disabled', false).text('Save');
+                    console.error('AJAX Error:', xhr.responseText);
+                    Swal.fire('Error',
+                        'An error occurred while saving prorate allowances: ' +
+                        error,
                         'error');
                 }
             });
@@ -1936,7 +2007,8 @@ try {
                         },
                         error: function() {
                             // Re-enable button on error
-                            $('#delete-payslip-btn').prop('disabled', false).html(`
+                            $('#delete-payslip-btn').prop('disabled', false)
+                                .html(`
                                 <i class="fas fa-trash-alt text-2xl mb-2"></i>
                                 <div class="text-sm">Delete Payslip</div>
                             `);
@@ -1966,7 +2038,8 @@ try {
         function loadPayslipContent() {
             // Update employee info in header
             $('#payslipEmployeeInfo').text(
-                '<?php echo htmlspecialchars($empfname); ?> - <?php echo htmlspecialchars($staffID); ?>');
+                '<?php echo htmlspecialchars($empfname); ?> - <?php echo htmlspecialchars($staffID); ?>'
+            );
 
             // Show loading state
             $('#payslipContent').html(`
@@ -2004,7 +2077,8 @@ try {
                     } else {
                         // Enable action buttons
                         $('#downloadPayslipBtn, #emailPayslipBtn, #printPayslipBtn').prop(
-                            'disabled', false).removeClass('opacity-50 cursor-not-allowed');
+                            'disabled', false).removeClass(
+                            'opacity-50 cursor-not-allowed');
 
                         // Add success notification
                         Swal.fire({
@@ -2022,7 +2096,8 @@ try {
                     console.error('Response:', xhr.responseText);
 
                     // Disable action buttons on error
-                    $('#downloadPayslipBtn, #emailPayslipBtn, #printPayslipBtn').prop('disabled',
+                    $('#downloadPayslipBtn, #emailPayslipBtn, #printPayslipBtn').prop(
+                        'disabled',
                         true).addClass('opacity-50 cursor-not-allowed');
 
                     $('#payslipContent').html(`
@@ -2041,7 +2116,7 @@ try {
             });
         }
 
-        // Print payslip
+        // Print payslipd
         $('#printPayslipBtn').click(function() {
             const printContent = $('#payslipContent').html();
             const printWindow = window.open('', '_blank');
@@ -2440,7 +2515,8 @@ try {
                 preConfirm: () => {
                     const email = document.getElementById('emailAddress').value;
                     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        Swal.showValidationMessage('Please enter a valid email address');
+                        Swal.showValidationMessage(
+                            'Please enter a valid email address');
                         return false;
                     }
                     return email || null;
@@ -2509,46 +2585,7 @@ try {
         });
 
         // Auto-save draft functionality
-        let autoSaveTimer;
-        $('input, select, textarea').on('input change', function() {
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(function() {
-                // Save form data to localStorage
-                $('form').each(function() {
-                    const formId = $(this).attr('id');
-                    if (formId) {
-                        const formData = $(this).serialize();
-                        localStorage.setItem('form_draft_' + formId, formData);
-                    }
-                });
-            }, 2000);
-        });
 
-        // Restore form data on page load
-        $('form').each(function() {
-            const formId = $(this).attr('id');
-            if (formId) {
-                const savedData = localStorage.getItem('form_draft_' + formId);
-                if (savedData) {
-                    // Parse and restore form data
-                    const params = new URLSearchParams(savedData);
-                    params.forEach(function(value, key) {
-                        const field = $(this).find('[name="' + key + '"]');
-                        if (field.length) {
-                            field.val(value);
-                        }
-                    }.bind(this));
-                }
-            }
-        });
-
-        // Clear saved data on successful form submission
-        $('form').on('submit', function() {
-            const formId = $(this).attr('id');
-            if (formId) {
-                localStorage.removeItem('form_draft_' + formId);
-            }
-        });
 
         // Enhanced tooltips
         $('[title]').each(function() {
