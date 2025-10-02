@@ -31,6 +31,7 @@ if ($period != -1) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,7 +44,7 @@ if ($period != -1) {
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('../sidebar.php'); ?>
+        <?php include('report_sidebar_modern.php'); ?>
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
             <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
@@ -52,7 +53,8 @@ if ($period != -1) {
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-piggy-bank"></i> PFA List Report
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Generate pension fund administrator reports with employee contributions.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate pension fund administrator reports with
+                            employee contributions.</p>
                     </div>
                 </div>
 
@@ -70,7 +72,9 @@ if ($period != -1) {
                                     <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
                                     </label>
-                                    <select name="period" id="period" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         try {
@@ -91,7 +95,9 @@ if ($period != -1) {
                                     <label for="pfa" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-university mr-2 text-green-600"></i>Pension Fund Administrator
                                     </label>
-                                    <select name="pfa" id="pfa" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="pfa" id="pfa"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select PFA</option>
                                         <option value="-1" <?php echo $pfa == -1 ? 'selected' : ''; ?>>All PFA</option>
                                         <?php
@@ -109,15 +115,18 @@ if ($period != -1) {
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-wrap gap-3">
-                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button" id="download-excel-button" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="download-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Download Excel
                                 </button>
-                                <button type="button" id="download-pdf-button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="download-pdf-button"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-pdf"></i> Download PDF
                                 </button>
                             </div>
@@ -126,34 +135,47 @@ if ($period != -1) {
                 </div>
 
                 <?php if ($month != '' && $pfa != '') { ?>
-                    <!-- Report Header -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                <?php echo htmlspecialchars($pfaName); ?> Pension Report for the Month of: <?php echo htmlspecialchars($month); ?>
-                            </p>
-                        </div>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            <?php echo htmlspecialchars($pfaName); ?> Pension Report for the Month of:
+                            <?php echo htmlspecialchars($month); ?>
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Report Table -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
-                                <thead class="bg-blue-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">S/No.</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Staff No.</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">PFA</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">PIN</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        S/No.</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Staff No.</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        PFA</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        PIN</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
                                     if ($period != -1 && $pfa != '') {
                                         try {
                                             $sql = $pfa != -1
@@ -213,31 +235,31 @@ if ($period != -1) {
                                         echo '</tr>';
                                     }
                                     ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Footer -->
-                        <div class="bg-gray-50 px-6 py-4 border-t">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
-                                    <p><strong>Date:</strong> <?php 
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
                                         $today = date('y:m:d');
                                         $formattedDate = date('l, F d, Y', strtotime($today));
                                         echo $formattedDate;
                                     ?></p>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>PFA:</strong> <?php echo htmlspecialchars($pfaName); ?></p>
-                                    <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
-                                    <?php if (isset($sumTotal) && $sumTotal > 0): ?>
-                                        <p><strong>Total Contribution:</strong> ₦<?php echo number_format($sumTotal, 2); ?></p>
-                                    <?php endif; ?>
-                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>PFA:</strong> <?php echo htmlspecialchars($pfaName); ?></p>
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
+                                <?php if (isset($sumTotal) && $sumTotal > 0): ?>
+                                <p><strong>Total Contribution:</strong> ₦<?php echo number_format($sumTotal, 2); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -287,12 +309,16 @@ if ($period != -1) {
                     try {
                         if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
                             console.error('Received HTML error page instead of data');
-                            alert('Server error occurred. Please try again or contact administrator.');
+                            alert(
+                                'Server error occurred. Please try again or contact administrator.'
+                            );
                             return;
                         }
 
                         var downloadLink = document.createElement('a');
-                        downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                        downloadLink.href =
+                            'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                            response;
                         downloadLink.download = 'PFA_Report_' + '<?php echo $month; ?>' + '.xlsx';
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
@@ -306,7 +332,9 @@ if ($period != -1) {
                     $('#ajax-loader').hide();
                     console.error('AJAX Error:', status, error);
                     if (status === 'timeout') {
-                        alert('Request timed out. The report may be too large. Please try with fewer records or contact administrator.');
+                        alert(
+                            'Request timed out. The report may be too large. Please try with fewer records or contact administrator.'
+                        );
                     } else {
                         alert('Error downloading Excel file. Please try again.');
                     }
@@ -344,4 +372,5 @@ if ($period != -1) {
     });
     </script>
 </body>
+
 </html>
