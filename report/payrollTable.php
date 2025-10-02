@@ -1,44 +1,14 @@
 <?php
 session_start();
 ini_set('max_execution_time', '0');
+
+require_once('../Connections/paymaster.php');
 include_once('../classes/model.php');
-require_once('Connections/paymaster.php');
-
-// Check session
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-    header("location: ../index.php");
-    exit();
-}
-
-// Get SQL Value String function
-if (!function_exists("GetSQLValueString")) {
-    function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-    {
-        global $con;
-        $theValue = function_exists("mysql_real_escape_string") ?
-            mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
-
-        switch ($theType) {
-            case "text":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "long":
-            case "int":
-                $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-                break;
-            case "double":
-                $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-                break;
-            case "date":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "defined":
-                $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-                break;
-        }
-        return $theValue;
-    }
-}
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
 
 // Function to get default period
 function getDefaultPeriod($conn) {
@@ -57,11 +27,12 @@ function getDefaultPeriod($conn) {
 
 // Get default period
 $defaultPeriod = getDefaultPeriod($conn);
-$periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : $defaultPeriod['periodId'];
-$periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : $defaultPeriod['periodId'];
+$periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : ($defaultPeriod['periodId'] ?? '');
+$periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : ($defaultPeriod['periodId'] ?? '');
 
 // Get period description for display
 function getPeriodDescription($conn, $periodId) {
+    if (empty($periodId)) return '';
     $query = $conn->prepare("
         SELECT CONCAT(description,' - ', periodYear) as description
         FROM payperiods 
@@ -77,354 +48,337 @@ $periodToDesc = getPeriodDescription($conn, $periodTo);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Payroll Report Generator</title>
-    <?php include('../header1.php'); ?>
-    <style>
-        .report-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-section {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        .email-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-        }
-        .hidden-print {
-            margin-bottom: 20px;
-        }
-        .total-column {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
-        .validation-error {
-            color: red;
-            display: none;
-            margin-top: 5px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Report Generator - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body data-color="grey" class="flat">
-<div class="modal fade hidden-print" id="myModal"></div>
-<div id="wrapper">
-    <!-- Header Section -->
-    <div id="header" class="hidden-print">
-        <h1>
-            <a href="../index.php">
-                <img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt="">
-            </a>
-        </h1>
-        <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-        <div class="clear"></div>
-    </div>
-
-    <!-- User Navigation -->
-    <div id="user-nav" class="hidden-print hidden-xs">
-        <ul class="btn-group">
-            <li class="btn hidden-xs">
-                <a title="" href="switch_user" data-toggle="modal" data-target="#myModal">
-                    <i class="icon fa fa-user fa-2x"></i>
-                    <span class="text">Welcome <b><?php echo $_SESSION['SESS_FIRST_NAME']; ?></b></span>
-                </a>
-            </li>
-            <li class="btn hidden-xs disabled">
-                <a title="" href="/" onclick="return false;">
-                    <i class="icon fa fa-clock-o fa-2x"></i>
-                    <span class="text">
-                            <?php
-                            $Today = date('y:m:d', time());
-                            $new = date('l, F d, Y', strtotime($Today));
-                            echo $new;
-                            ?>
-                        </span>
-                </a>
-            </li>
-            <li class="btn">
-                <a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a>
-            </li>
-            <li class="btn">
-                <a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-            </li>
-        </ul>
-    </div>
-
-    <?php include("report_sidebar.php"); ?>
-
-    <!-- Main Content -->
-    <div id="content" class="clearfix sales_content_minibar">
-        <div id="content-header" class="hidden-print">
-            <h1><i class="fa fa-beaker"></i> Payroll Report Generator</h1>
-            <span id="ajax-loader" style="display: none;">
-                    <img src="img/ajax-loader.gif" alt="Loading..." />
-                </span>
-        </div>
-
-        <div id="breadcrumb" class="hidden-print">
-            <a href="../home.php"><i class="fa fa-home"></i> Dashboard</a>
-            <a href="index.php">Reports</a>
-            <a class="current" href="#">Generate Payroll Report</a>
-        </div>
-
-        <!-- Main Form Section -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="widget-box">
-                    <div class="widget-title">
-                        <span class="icon"><i class="fa fa-align-justify"></i></span>
-                        <h5>Generate Payroll Report</h5>
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('../sidebar.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i> Payroll Report Generator
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive payroll reports with email delivery options.</p>
                     </div>
+                </div>
 
-                    <div class="widget-content">
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
                         <!-- Organization Header -->
-                        <div class="report-header">
-                            <img src="img/oouth_logo.gif" width="10%" height="10%" alt="OOUTH Logo">
-                            <h2>OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL</h2>
-                            <h3>Payroll Report Generator</h3>
+                        <div class="text-center mb-8">
+                            <img src="img/oouth_logo.gif" alt="OOUTH Logo" class="h-16 mx-auto mb-4">
+                            <h3 class="text-lg font-bold text-blue-800">OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL</h3>
+                            <p class="text-blue-600 font-medium">Payroll Report Generator</p>
                         </div>
 
-                        <!-- Form Section -->
-                        <div class="form-section">
-                            <form class="form-horizontal" method="GET" action="payroll_report.php" id="payrollForm">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="control-label">Period From:</label>
-                                            <select name="periodFrom" id="periodFrom" class="form-control" required>
-                                                <option value="">Select Pay Period</option>
-                                                <?php
-                                                try {
-                                                    $query = $conn->prepare('
-                                                            SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
-                                                            FROM payperiods 
-                                                            WHERE payrollRun = ? 
-                                                            ORDER BY periodId DESC
-                                                        ');
-                                                    $query->execute(['1']);
-                                                    while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                                                        $selected = ($row['periodId'] == $periodFrom) ? 'selected="selected"' : '';
-                                                        echo sprintf(
-                                                            '<option value="%s" %s>%s - %s</option>',
-                                                            $row['periodId'],
-                                                            $selected,
-                                                            $row['description'],
-                                                            $row['periodYear']
-                                                        );
-                                                    }
-                                                } catch (PDOException $e) {
-                                                    echo "Error: " . $e->getMessage();
-                                                }
-                                                ?>
-                                            </select>
-                                            <div class="validation-error" id="periodFromError">
-                                                Please select a starting period
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="control-label">Period To:</label>
-                                            <select name="periodTo" id="periodTo" class="form-control" required>
-                                                <option value="">Select Pay Period</option>
-                                                <?php
-                                                try {
-                                                    $query = $conn->prepare('
-                                                            SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
-                                                            FROM payperiods 
-                                                            WHERE payrollRun = ? 
-                                                            ORDER BY periodId DESC
-                                                        ');
-                                                    $query->execute(['1']);
-                                                    while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-                                                        $selected = ($row['periodId'] == $periodTo) ? 'selected="selected"' : '';
-                                                        echo sprintf(
-                                                            '<option value="%s" %s>%s - %s</option>',
-                                                            $row['periodId'],
-                                                            $selected,
-                                                            $row['description'],
-                                                            $row['periodYear']
-                                                        );
-                                                    }
-                                                } catch (PDOException $e) {
-                                                    echo "Error: " . $e->getMessage();
-                                                }
-                                                ?>
-                                            </select>
-                                            <div class="validation-error" id="periodToError">
-                                                Please select an ending period
-                                            </div>
-                                        </div>
+                        <form method="GET" action="payroll_report.php" id="payrollForm" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="periodFrom" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period From
+                                    </label>
+                                    <select name="periodFrom" id="periodFrom" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                        <option value="">Select Starting Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('
+                                                SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
+                                                FROM payperiods 
+                                                WHERE payrollRun = ? 
+                                                ORDER BY periodId DESC
+                                            ');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodFrom) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <div id="periodFromError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please select a starting period
                                     </div>
                                 </div>
 
-                                <!-- Email Section -->
-                                <div class="email-section">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="send_email" id="send_email"
-                                                           onchange="toggleEmailField()">
-                                                    Send Excel file via email
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group" id="email_field" style="display: none;">
-                                                <label class="control-label">Email Address:</label>
-                                                <input type="email" name="email_address" class="form-control"
-                                                       placeholder="Enter email address">
-                                                <div class="validation-error" id="emailError">
-                                                    Please enter a valid email address
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div>
+                                    <label for="periodTo" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period To
+                                    </label>
+                                    <select name="periodTo" id="periodTo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                        <option value="">Select Ending Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('
+                                                SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
+                                                FROM payperiods 
+                                                WHERE payrollRun = ? 
+                                                ORDER BY periodId DESC
+                                            ');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodTo) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <div id="periodToError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please select an ending period
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Submit Button -->
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary btn-large" id="submitButton">
-                                        Generate Report
-                                    </button>
+                            <!-- Email Section -->
+                            <div class="border-t pt-6">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="send_email" id="send_email" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2" onchange="toggleEmailField()">
+                                        <label for="send_email" class="ml-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-envelope mr-2 text-blue-600"></i>Send Excel file via email
+                                        </label>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                                
+                                <div id="email_field" class="hidden">
+                                    <label for="email_address" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-at mr-2 text-blue-600"></i>Email Address
+                                    </label>
+                                    <input type="email" name="email_address" id="email_address" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" placeholder="Enter email address">
+                                    <div id="emailError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please enter a valid email address
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 pt-4">
+                                <button type="submit" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2" id="submitButton">
+                                    <i class="fas fa-file-excel"></i> Generate Report
+                                </button>
+                                <button type="button" onclick="window.history.back()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="bg-blue-50 rounded-xl p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> Instructions
+                    </h3>
+                    <div class="text-sm text-blue-700 space-y-2">
+                        <p><strong>1. Select Period Range:</strong> Choose the starting and ending pay periods for your report.</p>
+                        <p><strong>2. Email Option:</strong> Check the email option to receive the report via email instead of downloading directly.</p>
+                        <p><strong>3. Generate Report:</strong> Click "Generate Report" to create your payroll report.</p>
+                        <p><strong>Note:</strong> Large reports may take a few minutes to process. Please be patient.</p>
+                    </div>
+                </div>
+
+                <!-- Loading Overlay -->
+                <div id="loading-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+                        <i class="fas fa-spinner fa-spin text-blue-600 text-3xl mb-4"></i>
+                        <p class="text-gray-700 font-medium">Generating report...</p>
+                        <p class="text-sm text-gray-500 mt-2">Please wait while we process your request</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Footer -->
-    <div id="footer" class="col-md-12 hidden-print">
-        Please visit our <a href="http://www.oouth.com/" target="_blank">website</a>
-        to learn more about our organization.
-        <span class="text-info"><span class="label label-info">14.1</span></span>
-    </div>
-</div>
-
-<script type="text/javascript">
-    function toggleEmailField() {
-        const emailField = document.getElementById('email_field');
-        const emailCheckbox = document.getElementById('send_email');
-        emailField.style.display = emailCheckbox.checked ? 'block' : 'none';
-    }
-
-    document.getElementById('payrollForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        let isValid = true;
-
-        // Reset error messages
-        document.querySelectorAll('.validation-error').forEach(error => {
-            error.style.display = 'none';
-        });
-
-        // Validate period selections
-        if (!document.getElementById('periodFrom').value) {
-            document.getElementById('periodFromError').style.display = 'block';
-            isValid = false;
-        }
-
-        if (!document.getElementById('periodTo').value) {
-            document.getElementById('periodToError').style.display = 'block';
-            isValid = false;
-        }
-
-        // Validate email if checkbox is checked
-        const emailCheckbox = document.getElementById('send_email');
-        const emailInput = document.querySelector('input[name="email_address"]');
-
-        if (emailCheckbox.checked) {
-            if (!emailInput.value || !emailInput.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                document.getElementById('emailError').style.display = 'block';
-                isValid = false;
+    <script type="text/javascript">
+        function toggleEmailField() {
+            const emailField = document.getElementById('email_field');
+            const emailCheckbox = document.getElementById('send_email');
+            
+            if (emailCheckbox.checked) {
+                emailField.classList.remove('hidden');
+                emailField.classList.add('block');
+            } else {
+                emailField.classList.add('hidden');
+                emailField.classList.remove('block');
             }
         }
 
-        if (!isValid) {
-            return false;
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
         }
 
-        // Show loading indicator
-        document.getElementById('ajax-loader').style.display = 'block';
-        document.getElementById('submitButton').disabled = true;
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.classList.add('hidden');
+        }
 
-        // If send_email is checked, use AJAX for JSON response
-        if (emailCheckbox.checked) {
-            const form = this;
-            const formData = new FormData(form);
-            const url = form.action;
-            const queryString = new URLSearchParams(formData).toString();
+        function hideAllErrors() {
+            hideError('periodFromError');
+            hideError('periodToError');
+            hideError('emailError');
+        }
 
-            fetch(url + '?' + queryString, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        document.getElementById('payrollForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let isValid = true;
+            hideAllErrors();
+
+            // Validate period selections
+            const periodFrom = document.getElementById('periodFrom').value;
+            const periodTo = document.getElementById('periodTo').value;
+
+            if (!periodFrom) {
+                showError('periodFromError', 'Please select a starting period');
+                isValid = false;
+            }
+
+            if (!periodTo) {
+                showError('periodToError', 'Please select an ending period');
+                isValid = false;
+            }
+
+            // Validate email if checkbox is checked
+            const emailCheckbox = document.getElementById('send_email');
+            const emailInput = document.getElementById('email_address');
+
+            if (emailCheckbox.checked) {
+                if (!emailInput.value) {
+                    showError('emailError', 'Please enter an email address');
+                    isValid = false;
+                } else if (!validateEmail(emailInput.value)) {
+                    showError('emailError', 'Please enter a valid email address');
+                    isValid = false;
                 }
-            })
-                .then(response => response.text()) // Get response as text to handle any Content-Type
+            }
+
+            if (!isValid) {
+                // Scroll to first error
+                const firstError = document.querySelector('.text-red-500:not(.hidden)');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return false;
+            }
+
+            // Show loading overlay
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('loading-overlay').classList.add('flex');
+            document.getElementById('submitButton').disabled = true;
+
+            // If send_email is checked, use AJAX for JSON response
+            if (emailCheckbox.checked) {
+                const form = this;
+                const formData = new FormData(form);
+                const url = form.action;
+                const queryString = new URLSearchParams(formData).toString();
+
+                fetch(url + '?' + queryString, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.text())
                 .then(text => {
                     try {
-                        // Attempt to parse as JSON
                         const data = JSON.parse(text);
-                        // Hide loading indicator
-                        document.getElementById('ajax-loader').style.display = 'none';
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('loading-overlay').classList.remove('flex');
                         document.getElementById('submitButton').disabled = false;
 
-                        // Display the message in an alert
-                        alert(data.message);
-
-                        // Create and append a Back button
-                        const formSection = document.querySelector('.form-section');
-                        const backButton = document.createElement('button');
-                        backButton.type = 'button';
-                        backButton.className = 'btn btn-secondary';
-                        backButton.innerText = 'Back';
-                        backButton.onclick = function() {
-                            window.history.back();
-                        };
-                        formSection.appendChild(backButton);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Report Sent!',
+                            text: data.message,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
                     } catch (e) {
-                        // If JSON parsing fails, show a generic success message
-                        document.getElementById('ajax-loader').style.display = 'none';
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('loading-overlay').classList.remove('flex');
                         document.getElementById('submitButton').disabled = false;
-                        alert('Report has been sent successfully to ' + emailInput.value);
-
-                        // Append Back button
-                        const formSection = document.querySelector('.form-section');
-                        const backButton = document.createElement('button');
-                        backButton.type = 'button';
-                        backButton.className = 'btn btn-secondary';
-                        backButton.innerText = 'Back';
-                        backButton.onclick = function() {
-                            window.history.back();
-                        };
-                        // formSection.appendChild(backButton);
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Report Sent!',
+                            text: 'Report has been sent successfully to ' + emailInput.value,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
                     }
                 })
                 .catch(error => {
-                    // Handle network or other errors
-                    document.getElementById('ajax-loader').style.display = 'none';
+                    document.getElementById('loading-overlay').classList.add('hidden');
                     document.getElementById('submitButton').disabled = false;
-                    alert('An error occurred, but the report may have been sent. Please check your email.');
+                    
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Report May Have Been Sent',
+                        text: 'An error occurred, but the report may have been sent. Please check your email.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
                 });
-        } else {
-            // For download, submit the form traditionally
-            document.getElementById('ajax-loader').style.display = 'none';
-            document.getElementById('submitButton').disabled = false;
-            this.submit();
-        }
-    });
-</script>
+            } else {
+                // For download, submit the form traditionally
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('submitButton').disabled = false;
+                this.submit();
+            }
+        });
+
+        // Auto-focus first empty field
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodFrom = document.getElementById('periodFrom');
+            const periodTo = document.getElementById('periodTo');
+            
+            if (!periodFrom.value) {
+                periodFrom.focus();
+            } else if (!periodTo.value) {
+                periodTo.focus();
+            }
+        });
+    </script>
 </body>
 </html>
