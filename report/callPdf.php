@@ -47,7 +47,7 @@ try {
 
 	//$message = '';
 	do {
-		$percent = intval($j / $total * 100) . "%";
+		$percent = $total > 0 ? intval($j / $total * 100) . "%" : "0%";
 
 		echo $message = generateAndSendPayslip($row_masterTransaction['staff_id'], $period);
 

@@ -25,6 +25,10 @@ $period = filter_input(INPUT_POST, 'period', FILTER_SANITIZE_FULL_SPECIAL_CHARS)
 $bank = filter_input(INPUT_POST, 'bank', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: -1;
 $period_text = filter_input(INPUT_POST, 'period_text', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?: 'Unknown Period';
 
+// Define date variable for footer
+$Today = date('y:m:d', time());
+$new = date('l, F d, Y', strtotime($Today));
+
 // Fetch bank name for the title
 $bankName = '';
 try {

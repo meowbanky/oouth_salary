@@ -8,7 +8,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 try {
     // Get the selected periodId from the request
-    $periodId = $_GET['periodId'];
+    $periodId = isset($_GET['periodId']) ? $_GET['periodId'] : null;
+    
+    if (!$periodId) {
+        die("Period ID is required.");
+    }
 
     // Fetch the period description and year
     $period_sql = "SELECT CONCAT(LEFT(description, 3), '-', periodYear) as period FROM payperiods WHERE periodId = ?";

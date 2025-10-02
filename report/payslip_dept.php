@@ -423,14 +423,14 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                                         $fin = $query->execute(array('1', $thisemployee, $period));
                                                                         //$res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                                         $res = $query->fetch();
-                                                                        if ($query->rowCount() > 0) {
+                                                                        if ($query->rowCount() > 0 && $res) {
                                                                             $consolidated = $res['allow'];
                                                                         } else {
                                                                             $consolidated = 0;
                                                                         }
 
 
-                                                                        echo number_format($res['allow']);
+                                                                        echo $res ? number_format($res['allow']) : '0';
                                                                     } catch (PDOException $e) {
                                                                         echo $e->getMessage();
                                                                     }

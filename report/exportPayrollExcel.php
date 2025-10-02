@@ -145,7 +145,8 @@ try {
         }
     }
 } catch (PDOException $e) {
-    echo $e->getMessage();
+    error_log($e->getMessage());
+    die('Database error occurred. Please try again.');
 }
 
 // Write all data to the spreadsheet in bulk

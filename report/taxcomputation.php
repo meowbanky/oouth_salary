@@ -172,8 +172,7 @@ foreach ($employees as $employee) {
 // Set headers to force download
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment;filename="' . $fullPeriod . ' taxExport.xlsx"');
-header('Cache 
-Control: max-age=0');
+header('Cache-Control: max-age=0');
 
 // Output the Excel file to the browser
 $writer = new Xlsx($spreadsheet);

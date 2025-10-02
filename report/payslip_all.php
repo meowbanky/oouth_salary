@@ -443,11 +443,11 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) ==
                                                     //$res = $query->fetchAll(PDO::FETCH_ASSOC);
                                                     $res_consolidated = $query->fetch();
                                                     //print_r($res);
-                                                    $consolidated = $res_consolidated['allow'];
+                                                    $consolidated = $res_consolidated ? $res_consolidated['allow'] : 0;
 
 
 
-                                                    $conso = number_format($res_consolidated['allow']);
+                                                    $conso = $res_consolidated ? number_format($res_consolidated['allow']) : '0';
                                                 } catch (PDOException $e) {
                                                     echo $e->getMessage();
                                                 }
