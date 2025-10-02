@@ -9,6 +9,7 @@ checkPermission();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,8 @@ checkPermission();
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-university"></i> Bank Summary Report
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive bank-wise salary summary reports.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive bank-wise salary summary
+                            reports.</p>
                     </div>
                 </div>
 
@@ -48,7 +50,9 @@ checkPermission();
                                     <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
                                     </label>
-                                    <select name="period" id="period" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         global $conn;
@@ -75,15 +79,18 @@ checkPermission();
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-wrap gap-3">
-                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button" id="export-pdf-button" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="export-pdf-button"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
-                                <button type="button" id="download-excel-button" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" id="download-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Download Excel
                                 </button>
                             </div>
@@ -108,31 +115,37 @@ checkPermission();
                 ?>
 
                 <?php if ($month != '') { ?>
-                    <!-- Report Header -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                Bank Summary for the Month of: <?php echo htmlspecialchars($month); ?>
-                            </p>
-                        </div>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Bank Summary for the Month of: <?php echo htmlspecialchars($month); ?>
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Report Table -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
-                                <thead class="bg-blue-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Bank Name</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">No. of Employees</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Total Net Pay</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Bank Name</th>
+                                    <th
+                                        class="px-6 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        No. of Employees</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Total Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
                                     if (!isset($_POST['period'])) {
                                         $period = -1;
                                     } else {
@@ -187,28 +200,27 @@ checkPermission();
                                         echo '</tr>';
                                     }
                                     ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Footer -->
-                        <div class="bg-gray-50 px-6 py-4 border-t">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
-                                    <p><strong>Date:</strong> <?php 
-                                        $Today = date('y:m:d', time());
-                                        $new = date('l, F d, Y', strtotime($Today));
-                                        echo $new; 
-                                    ?></p>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Total Banks:</strong> <?php echo $numberofstaff; ?></p>
-                                    <p><strong>Total Net Pay:</strong> ₦<?php echo isset($sumTotal) ? number_format($sumTotal) : '0'; ?></p>
-                                </div>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
+                                        echo date('l, F d, Y');
+                                ?></p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Total Banks:</strong> <?php echo $numberofstaff; ?></p>
+                                <p><strong>Total Net Pay:</strong>
+                                    ₦<?php echo isset($sumTotal) ? number_format($sumTotal) : '0'; ?></p>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -282,7 +294,9 @@ checkPermission();
                 $('#ajax-loader').hide();
                 try {
                     var downloadLink = document.createElement('a');
-                    downloadLink.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + response;
+                    downloadLink.href =
+                        'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                        response;
                     downloadLink.download = 'Bank_Summary_' + '<?php echo $month; ?>' + '.xlsx';
                     document.body.appendChild(downloadLink);
                     downloadLink.click();
@@ -305,4 +319,5 @@ checkPermission();
     }
     </script>
 </body>
+
 </html>
