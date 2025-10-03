@@ -23,6 +23,7 @@ $adminItems = [
     ['href' => 'payperiods.php', 'icon' => 'fas fa-calendar', 'label' => 'Pay Periods'],
     ['href' => 'edit_conhess_conmess.php', 'icon' => 'fas fa-table', 'label' => 'Salary Table'],
     ['href' => 'users.php', 'icon' => 'fas fa-users', 'label' => 'Users'],
+    ['href' => 'permissions.php', 'icon' => 'fas fa-shield-alt', 'label' => 'Permissions'],
     ['href' => 'payprocess.php', 'icon' => 'fas fa-cog', 'label' => 'Proces'],
     ['href' => 'multiAdjustment.php', 'icon' => 'fas fa-shopping-cart', 'label' => 'Periodic Payments'],
     ['href' => 'departments.php', 'icon' => 'fas fa-home', 'label' => 'Department'],
