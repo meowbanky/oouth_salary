@@ -183,8 +183,8 @@ $bankId = $_POST['bank'] ?? -1;
                             OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
                         </h2>
                         <p class="text-center text-blue-700 font-medium mt-2">
-                            Bank Report for <?php echo htmlspecialchars($bankName); ?> for the Month of:
-                            <?php echo htmlspecialchars($month); ?>
+                            Bank Report for <?php echo htmlspecialchars($bankName ?? ''); ?> for the Month of:
+                            <?php echo htmlspecialchars($month ?? ''); ?>
                         </p>
                     </div>
                 </div>
@@ -238,10 +238,10 @@ $bankId = $_POST['bank'] ?? -1;
                                                 foreach ($res as $link) {
                                                     echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
                                                     echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $i . '</td>';
-                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . htmlspecialchars($link['staff_id']) . '</td>';
-                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['NAME']) . '</td>';
-                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['ACCTNO']) . '</td>';
-                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['BNAME']) . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . htmlspecialchars($link['staff_id'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['NAME'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['ACCTNO'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($link['BNAME'] ?? '') . '</td>';
                                                     echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($link['net']) . '</td>';
                                                     $sumTotal += floatval($link['net']);
                                                     $i++;
@@ -283,8 +283,8 @@ $bankId = $_POST['bank'] ?? -1;
                                 ?></p>
                             </div>
                             <div class="text-sm text-gray-600">
-                                <p><strong>Bank:</strong> <?php echo htmlspecialchars($bankName); ?></p>
-                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
+                                <p><strong>Bank:</strong> <?php echo htmlspecialchars($bankName ?? ''); ?></p>
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month ?? ''); ?></p>
                                 <?php if (isset($sumTotal) && $sumTotal > 0): ?>
                                 <p><strong>Total Net Pay:</strong> ₦<?php echo number_format($sumTotal); ?></p>
                                 <?php endif; ?>

@@ -6,6 +6,24 @@ $App = new App();
 $App->checkAuthentication();
 require_once('../libs/middleware.php');
 checkPermission();
+
+// Initialize variables
+$month = '';
+$period = isset($_POST['period']) ? $_POST['period'] : (isset($_GET['period']) ? $_GET['period'] : -1);
+
+// Get period information
+if ($period != -1) {
+    try {
+        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear FROM payperiods WHERE periodId = ?');
+        $query->execute([$period]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            $month = $result['description'] . '-' . $result['periodYear'];
+        }
+    } catch (PDOException $e) {
+        $month = '';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,11 +40,15 @@ checkPermission();
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('report_sidebar_modern.php'); ?>                <!-- Breadcrumb Navigation -->
+        <?php include('report_sidebar_modern.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Breadcrumb Navigation -->
                 <nav class="flex mb-4" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
-                            <a href="../home.php" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <a href="../home.php"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                                 <i class="fas fa-home w-4 h-4 mr-2"></i>
                                 Dashboard
                             </a>
@@ -34,7 +56,8 @@ checkPermission();
                         <li>
                             <div class="flex items-center">
                                 <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                                <a href="index.php" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                                <a href="index.php"
+                                    class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
                             </div>
                         </li>
                         <li aria-current="page">
@@ -46,9 +69,6 @@ checkPermission();
                     </ol>
                 </nav>
 
-
-        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
-            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
