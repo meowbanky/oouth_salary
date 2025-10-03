@@ -1,158 +1,115 @@
-<?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
-//Start session
-session_start();
+require_once('Connections/paymaster.php');
+include_once('classes/model.php');
+require_once('libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('libs/middleware.php');
+checkPermission();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
-   header("location: index.php");
-   exit();
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == '' || $_SESSION['role'] != 'Admin') {
+    header("location: index.php");
+    exit();
 }
-
-if (!function_exists("GetSQLValueString")) {
-   function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-   {
-
-      global $paymaster;
-      $theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($paymaster, $theValue) : mysqli_escape_string($paymaster, $theValue);
-
-      switch ($theType) {
-         case "text":
-            $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-            break;
-         case "long":
-         case "int":
-            $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-            break;
-         case "double":
-            $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-            break;
-         case "date":
-            $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-            break;
-         case "defined":
-            $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-            break;
-      }
-      return $theValue;
-   }
-}
-
-
 ?>
 <!DOCTYPE html>
-<html>
-<?php include('header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat" style="zoom: 1;">
-   <div class="modal fade hidden-print" id="myModal"></div>
-   <div id="wrapper">
-      <div id="header" class="hidden-print">
-         <h1>
-            <a href="index.php">
-               <img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt="">
-            </a>
-         </h1>
-         <a id="menu-trigger" href="#">
-            <i class="fa fa-bars fa fa-2x"></i>
-         </a>
-         <div class="clear"></div>
-      </div>
-      <?php include('header.php'); ?>
-      <?php include('sidebar.php'); ?>
-      <div id="content" class="clearfix sales_content_minibar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permissions Management - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
-         <div id="content-header" class="hidden-print">
-            <h1>
-               <i class="icon fa fa-user"></i>
-               Employee Earnings
-            </h1>
-         </div>
-         <div id="breadcrumb" class="hidden-print">
-            <a href="home.php">
-               <i class="fa fa-home"></i> Dashboard
-            </a>
-            <a class="current" href="permissions.php">Permissions</a>
-         </div>
-         <div class="clear"></div>
-         <div id="datatable_wrapper"></div>
-         <div class=" pull-right">
-            <div class="row">
-               <div id="datatable_wrapper"></div>
-               <div class="col-md-12 center" style="text-align: center;">
-                  <div class="btn-group  "></div>
-               </div>
+<body class="bg-gray-100 min-h-screen">
+    <?php include('header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('sidebar.php'); ?>
+        
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="home.php"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-home w-4 h-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Permissions</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-shield-alt"></i> Permissions Management
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Manage user roles and page access permissions across the system.</p>
+                    </div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="flex-1">
+                    <div id="loadContent">
+                        <!-- Loading Skeleton -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="h-6 bg-gray-200 rounded w-48"></div>
+                                <div class="h-10 bg-gray-200 rounded w-20"></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="h-4 bg-gray-200 rounded w-full"></div>
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="mt-auto pt-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                        <p class="text-gray-600 text-sm">
+                            Please visit our
+                            <a href="http://www.oouth.com/" target="_blank"
+                                class="text-blue-600 hover:text-blue-800 transition-colors font-medium">
+                                website
+                            </a>
+                            to learn the latest information about the project.
+                        </p>
+                        <div class="mt-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Version 14.1
+                            </span>
+                        </div>
+                    </div>
+                </footer>
             </div>
-         </div>
-         <div class="row"></div>
-         <div class="row">
-             <div id="loadContent">
-                 <div class="flex animate-pulse">
-                     <div class="flex-shrink-0">
-                         <span class="w-12 h-12 block bg-gray-200 rounded-full dark:bg-gray-700"></span>
-                     </div>
+        </main>
+    </div>
 
-                     <div class="ms-4 mt-2 w-full">
-                         <h3 class="h-4 bg-gray-200 rounded-md dark:bg-gray-700" style="width: 40%;"></h3>
-                         <ul class="mt-5 space-y-3">
-                             <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
-                             <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
-                             <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
-                             <li class="w-full h-4 bg-gray-200 rounded-md dark:bg-gray-700"></li>
-                         </ul>
-                     </div>
-                 </div>
-             </div>
-         </div>
-
-   <div id="footer" class="col-md-12 hidden-print">
-      Please visit our
-      <a href="#" target="_blank">
-         website </a>
-      to learn the latest information about the project.
-      <span class="text-info">
-         <span class="label label-info"> 14.1</span>
-      </span>
-   </div>
-
-   <ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
-          <script>
-              $(document).ready(function() {
-
-                  $('#loadContent').load('view/view_permissions.php');
-                  // $("#search").focus();
-                  // $("#search").select();
-                  // $("#search").autocomplete({
-                  //     source: 'libs/searchstaff.php',
-                  //     type: 'POST',
-                  //     delay: 10,
-                  //     autoFocus: false,
-                  //     minLength: 3,
-                  //     select: function (event, ui) {
-                  //         event.preventDefault();
-                  //         $("#staff_id").val(ui.item.value);
-                  //         $('#employee_name').val(ui.item.label);
-                  //         $('#email').val(ui.item.EMAIL);
-                  //
-                  //         $('#searchform').ajaxSubmit({
-                  //             url: 'view/view_users.php', // URL for form submission
-                  //             type: 'POST', // Method for form submission
-                  //             success: function(response) {
-                  //                 $('#loadContent').html(response);
-                  //             },
-                  //             error: function(xhr, status, error) {
-                  //                 // Handle the error response here
-                  //                 console.log(error);
-                  //             }
-                  //         });
-                  //
-                  //     }
-                  // });
-
-
-              })
-          </script>
+    <script>
+    $(document).ready(function() {
+        // Load permissions content
+        $('#loadContent').load('view/view_permissions.php');
+    });
+    </script>
 </body>
+
 </html>
 
