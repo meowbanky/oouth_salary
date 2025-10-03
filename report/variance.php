@@ -8,6 +8,10 @@ $App->checkAuthentication();
 require_once('../libs/middleware.php');
 checkPermission();
 
+// Initialize variables
+$monthFrom = '';
+$monthTo = '';
+
 if (!function_exists("GetSQLValueString")) {
     function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
     {
@@ -38,6 +42,7 @@ if (!function_exists("GetSQLValueString")) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,29 +55,32 @@ if (!function_exists("GetSQLValueString")) {
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('report_sidebar_modern.php'); ?>                <!-- Breadcrumb Navigation -->
-                <nav class="flex mb-4" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="../home.php" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                                <i class="fas fa-home w-4 h-4 mr-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                                <a href="index.php" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
-                            </div>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                                <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Variance Report</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
+        <?php include('report_sidebar_modern.php'); ?>
+        <!-- Breadcrumb Navigation -->
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="../home.php"
+                        class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-home w-4 h-4 mr-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                        <a href="index.php"
+                            class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Variance Report</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
 
 
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
@@ -83,7 +91,8 @@ if (!function_exists("GetSQLValueString")) {
                         <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
                             <i class="fas fa-chart-line"></i> Payroll Variance Report
                         </h1>
-                        <p class="text-sm text-blue-700/70 mt-1">Compare payroll data between different periods to identify variances.</p>
+                        <p class="text-sm text-blue-700/70 mt-1">Compare payroll data between different periods to
+                            identify variances.</p>
                     </div>
                 </div>
 
@@ -101,7 +110,9 @@ if (!function_exists("GetSQLValueString")) {
                                     <label for="periodFrom" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-check mr-2 text-green-600"></i>Current Month
                                     </label>
-                                    <select name="periodFrom" id="periodFrom" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="periodFrom" id="periodFrom"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         $periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : -1;
@@ -123,7 +134,9 @@ if (!function_exists("GetSQLValueString")) {
                                     <label for="periodTo" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-calendar-minus mr-2 text-red-600"></i>Previous Month
                                     </label>
-                                    <select name="periodTo" id="periodTo" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm" required>
+                                    <select name="periodTo" id="periodTo"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
                                         <option value="">Select Pay Period</option>
                                         <?php
                                         $periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : -1;
@@ -141,18 +154,24 @@ if (!function_exists("GetSQLValueString")) {
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="flex flex-wrap gap-3">
-                                <button name="generate_report" type="submit" id="generate_report" class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button" onclick="exportAll('xls','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button"
+                                    onclick="exportAll('xls','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Export XLS
                                 </button>
-                                <button type="button" onclick="exportAll('csv','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button"
+                                    onclick="exportAll('csv','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-csv"></i> Export CSV
                                 </button>
-                                <button type="button" onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <button type="button" onclick="window.print()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-print"></i> Print
                                 </button>
                             </div>
@@ -191,34 +210,47 @@ if (!function_exists("GetSQLValueString")) {
                 ?>
 
                 <?php if ($monthFrom != '' && $monthTo != '') { ?>
-                    <!-- Report Header -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div class="bg-blue-50 px-6 py-4 border-b">
-                            <h2 class="text-lg font-semibold text-blue-800 text-center">
-                                OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
-                            </h2>
-                            <p class="text-center text-blue-700 font-medium mt-2">
-                                Payroll Variance Between the Month of <?php echo htmlspecialchars($monthFrom); ?> AND <?php echo htmlspecialchars($monthTo); ?>
-                            </p>
-                        </div>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Payroll Variance Between the Month of <?php echo htmlspecialchars($monthFrom); ?> AND
+                            <?php echo htmlspecialchars($monthTo); ?>
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Report Table -->
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200" id="sample_1">
-                                <thead class="bg-blue-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">S/N</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Staff No</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider"><?php echo htmlspecialchars($monthFrom); ?></th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider"><?php echo htmlspecialchars($monthTo); ?></th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">Variance</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        S/N</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Staff No</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        <?php echo htmlspecialchars($monthFrom); ?></th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        <?php echo htmlspecialchars($monthTo); ?></th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Variance</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
                                     if ($periodFrom != -1 && $periodTo != -1) {
                                         try {
                                             $query = $conn->prepare('SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ? UNION SELECT staff_id,ANY_VALUE(master_staff.`NAME`) AS `NAME` FROM master_staff WHERE period = ? ORDER BY staff_id;');
@@ -281,31 +313,33 @@ if (!function_exists("GetSQLValueString")) {
                                         echo '</tr>';
                                     }
                                     ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- Report Footer -->
-                        <div class="bg-gray-50 px-6 py-4 border-t">
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
-                                    <p><strong>Date:</strong> <?php 
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
                                         $Today = date('y:m:d', time());
                                         $new = date('l, F d, Y', strtotime($Today));
                                         echo $new;
                                     ?></p>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <p><strong>Current Month:</strong> <?php echo htmlspecialchars($monthFrom); ?></p>
-                                    <p><strong>Previous Month:</strong> <?php echo htmlspecialchars($monthTo); ?></p>
-                                    <?php if (isset($totalVariance)): ?>
-                                        <p><strong>Overall Variance:</strong> <span class="<?php echo $totalVariance >= 0 ? 'text-green-600' : 'text-red-600'; ?>">₦<?php echo number_format($totalVariance); ?></span></p>
-                                    <?php endif; ?>
-                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Current Month:</strong> <?php echo htmlspecialchars($monthFrom); ?></p>
+                                <p><strong>Previous Month:</strong> <?php echo htmlspecialchars($monthTo); ?></p>
+                                <?php if (isset($totalVariance)): ?>
+                                <p><strong>Overall Variance:</strong> <span
+                                        class="<?php echo $totalVariance >= 0 ? 'text-green-600' : 'text-red-600'; ?>">₦<?php echo number_format($totalVariance); ?></span>
+                                </p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
+                </div>
                 <?php } ?>
             </div>
         </main>
@@ -317,10 +351,12 @@ if (!function_exists("GetSQLValueString")) {
         $('#generate_report').click(function(e) {
             if (!$('#periodFrom').val() || !$('#periodTo').val()) {
                 e.preventDefault();
-                alert('Please select both Current Month and Previous Month before generating the report.');
+                alert(
+                    'Please select both Current Month and Previous Month before generating the report.');
             }
         });
     });
     </script>
 </body>
+
 </html>
