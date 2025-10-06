@@ -37,6 +37,8 @@
             padding-left: 10px;
         }
     </style>
+    <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="../js/theme-manager.js"></script>
 </head>
 <body>
 <table id="sample_1" class="table_without">

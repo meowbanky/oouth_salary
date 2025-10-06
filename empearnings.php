@@ -151,6 +151,7 @@ try {
     <title>Employee Earnings - Salary Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/dark-mode.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
@@ -158,6 +159,7 @@ try {
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
+    <script src="js/theme-manager.js"></script>
 
     <style>
     .swal2-container {
@@ -393,6 +395,23 @@ try {
     .form-success {
         border-color: #10b981 !important;
         box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    }
+
+    /* Ensure badge styling is persistent */
+    .badge-earning, .badge-deduction {
+        display: inline-block !important;
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    .badge-earning {
+        background-color: #dcfce7 !important;
+        color: #166534 !important;
+    }
+    
+    .badge-deduction {
+        background-color: #fee2e2 !important;
+        color: #991b1b !important;
     }
 
     /* Tooltip styles */
@@ -801,7 +820,7 @@ try {
                             <?php foreach ($earnings as $earning): ?>
                             <tr class="border-b hover:bg-green-50">
                                 <td class="py-2 px-4"><span
-                                        class="badge-earning px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Earning</span>
+                                        class="badge-earning px-2 py-1 rounded text-sm font-medium">Earning</span>
                                 </td>
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($earning['allow_id']); ?></td>
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($earning['edDesc']); ?></td>
@@ -820,7 +839,7 @@ try {
                             <?php foreach ($deductions as $deduction): ?>
                             <tr class="border-b hover:bg-red-50">
                                 <td class="py-2 px-4"><span
-                                        class="badge-deduction px-2 py-1 bg-red-100 text-red-800 rounded text-sm">Deduction</span>
+                                        class="badge-deduction px-2 py-1 rounded text-sm font-medium">Deduction</span>
                                 </td>
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($deduction['allow_id']); ?></td>
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($deduction['edDesc']); ?></td>
@@ -961,7 +980,7 @@ try {
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                         required>
                         <option value="">Select Deduction/Allowance</option>
-                        <?php foreach ($earningOptions as $option): ?>
+                        <?php foreach ($deductionOptions  as $option): ?>
                         <?php if ($option['edType'] == '4'): ?>
                         <option value="<?php echo htmlspecialchars($option['ed_id']); ?>">
                             <?php echo htmlspecialchars($option['ed']); ?> -
@@ -1258,9 +1277,9 @@ try {
                 // Preserve badge styling when DataTable creates rows
                 var $typeCell = $(row).find('td:first-child span');
                 if ($typeCell.text().trim() === 'Earning') {
-                    $typeCell.addClass('px-2 py-1 bg-green-100 text-green-800 rounded text-sm');
+                    $typeCell.addClass('badge-earning px-2 py-1 rounded text-sm font-medium');
                 } else if ($typeCell.text().trim() === 'Deduction') {
-                    $typeCell.addClass('px-2 py-1 bg-red-100 text-red-800 rounded text-sm');
+                    $typeCell.addClass('badge-deduction px-2 py-1 rounded text-sm font-medium');
                 }
             },
             drawCallback: function() {
@@ -1270,12 +1289,14 @@ try {
                     var $typeCell = $row.find('td:first-child span');
                     var cellText = $typeCell.text().trim();
 
+                    // Remove any existing badge classes first
+                    $typeCell.removeClass('badge-earning badge-deduction px-2 py-1 bg-green-100 text-green-800 bg-red-100 text-red-800 rounded text-sm font-medium');
+                    
+                    // Add appropriate badge classes based on content
                     if (cellText === 'Earning') {
-                        $typeCell.addClass(
-                            'px-2 py-1 bg-green-100 text-green-800 rounded text-sm');
+                        $typeCell.addClass('badge-earning px-2 py-1 rounded text-sm font-medium');
                     } else if (cellText === 'Deduction') {
-                        $typeCell.addClass(
-                            'px-2 py-1 bg-red-100 text-red-800 rounded text-sm');
+                        $typeCell.addClass('badge-deduction px-2 py-1 rounded text-sm font-medium');
                     }
                 });
             }
@@ -1317,10 +1338,11 @@ try {
             return isValid;
         }
 
-        // Auto-remove success/error classes after 3 seconds
+        // Auto-remove success/error classes after 3 seconds (but preserve badge classes)
         function autoRemoveValidationClasses() {
             setTimeout(function() {
-                $('.form-success, .form-error').removeClass('form-success form-error');
+                // Only remove validation classes from form inputs, not badge elements
+                $('input.form-success, input.form-error, select.form-success, select.form-error, textarea.form-success, textarea.form-error').removeClass('form-success form-error');
             }, 3000);
         }
 

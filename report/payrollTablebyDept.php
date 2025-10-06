@@ -52,39 +52,43 @@ if ($dept != -1) {
     <title>Departmental Payroll Table - OOUTH Salary Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/theme-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
-        <?php include('report_sidebar_modern.php'); ?>                <!-- Breadcrumb Navigation -->
-                <nav class="flex mb-4" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="../home.php" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                                <i class="fas fa-home w-4 h-4 mr-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                                <a href="index.php" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
-                            </div>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                                <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Payroll Table by Dept</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-
-
+        <?php include('report_sidebar_modern.php'); ?>
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="../home.php"
+                        class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-home w-4 h-4 mr-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                        <a href="index.php"
+                            class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Payroll Table by Dept</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
             <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -245,9 +249,9 @@ if ($dept != -1) {
                                             'dept' => $dept
                                         ];
                                         ?>
-                                        <?php $pageClasses = $page == $i ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-800 border-gray-300 hover:bg-blue-100'; ?>
-                                        <a href="?<?php echo http_build_query($queryParams); ?>"
-                                           class="px-3 py-2 border rounded text-sm font-semibold transition <?php echo $pageClasses; ?>">
+                            <?php $pageClasses = $page == $i ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-800 border-gray-300 hover:bg-blue-100'; ?>
+                            <a href="?<?php echo http_build_query($queryParams); ?>"
+                                class="px-3 py-2 border rounded text-sm font-semibold transition <?php echo $pageClasses; ?>">
                                 <?php echo $i; ?>
                             </a>
                             <?php endfor; ?>

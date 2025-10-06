@@ -154,7 +154,9 @@ class Ebulksms {
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>EbulkSMS Send SMS API Sample</title>
-    </head>
+        <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="../js/theme-manager.js"></script>
+</head>
  
     <body>
         <h2 style="text-align: center">Ebulk SMS Integration Sample Code</h2>

@@ -32,6 +32,10 @@
   --error-text: #dc2626;
   --info-bg: #dbeafe;
   --info-text: #1d4ed8;
+
+  /* Text Color Variables */
+  --gray-200: #e5e7eb;
+  --gray-700: #374151;
 }
 
 /* Dark Theme Colors */
@@ -65,6 +69,10 @@
   --error-text: #fca5a5;
   --info-bg: #1e3a8a;
   --info-text: #93c5fd;
+
+  /* Text Color Variables for Dark Mode */
+  --gray-200: #374151;
+  --gray-700: #e5e7eb;
 }
 
 /* Base Dark Mode Styles */
@@ -186,6 +194,19 @@
 
 [data-theme="dark"] .bg-gray-200:hover {
   background-color: var(--bg-hover) !important;
+}
+
+/* Fix text visibility in dark mode */
+[data-theme="dark"] .text-gray-700 {
+  color: var(--gray-700) !important;
+}
+
+[data-theme="dark"] .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-gray-500 {
+  color: var(--text-muted) !important;
 }
 
 /* Table Dark Mode */
