@@ -78,18 +78,18 @@ foreach ($rows as $r) {
         . '<td width="10%">' . $sn . '</td>'
         . '<td width="15%">' . htmlspecialchars($r['staff_id'] ?? '') . '</td>'
         . '<td width="35%">' . htmlspecialchars($r['NAME'] ?? '') . '</td>'
-        . '<td width="15%">₦' . number_format($current) . '</td>'
-        . '<td width="15%">₦' . number_format($previous) . '</td>'
-        . '<td width="10%">₦' . number_format($variance) . '</td>'
+        . '<td width="15%">NGN ' . number_format($current) . '</td>'
+        . '<td width="15%">NGN ' . number_format($previous) . '</td>'
+        . '<td width="10%">NGN ' . number_format($variance) . '</td>'
         . '</tr>';
     $sumCurrent += $current; $sumPrevious += $previous; $sn++;
 }
 $totalVariance = $sumCurrent - $sumPrevious;
 $html .= '<tr>'
     . '<td colspan="3"><b>TOTAL</b></td>'
-    . '<td><b>₦' . number_format($sumCurrent) . '</b></td>'
-    . '<td><b>₦' . number_format($sumPrevious) . '</b></td>'
-    . '<td><b>₦' . number_format($totalVariance) . '</b></td>'
+    . '<td><b>NGN ' . number_format($sumCurrent) . '</b></td>'
+    . '<td><b>NGN ' . number_format($sumPrevious) . '</b></td>'
+    . '<td><b>NGN ' . number_format($totalVariance) . '</b></td>'
     . '</tr>';
 $html .= '</tbody></table>';
 
