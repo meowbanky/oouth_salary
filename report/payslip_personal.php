@@ -31,18 +31,79 @@ if (isset($_GET['period'])) {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
     /* Printable area styling with watermark */
-    .printMe { position: relative; }
+    .printMe {
+        position: relative;
+    }
+
     .watermark {
         position: absolute;
         inset: 0;
         background: url('img/oouth_logo.png') center center no-repeat;
         background-size: 60%;
-        opacity: 0.05; /* very faint */
+        opacity: 0.05;
+        /* very faint */
         pointer-events: none;
     }
+
     @media print {
-        .watermark { opacity: 0.07; }
-        .printMe { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .watermark {
+            opacity: 0.07;
+        }
+
+        .printMe {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Compact layout for single page */
+        .printMe .p-6 {
+            padding: 0.75rem !important;
+        }
+
+        .printMe .mb-6 {
+            margin-bottom: 0.75rem !important;
+        }
+
+        .printMe .mb-4 {
+            margin-bottom: 0.5rem !important;
+        }
+
+        .printMe .py-2 {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
+
+        .printMe .py-4 {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .printMe .text-lg {
+            font-size: 1rem !important;
+        }
+
+        .printMe .text-xl {
+            font-size: 1.125rem !important;
+        }
+
+        .printMe .text-2xl {
+            font-size: 1.25rem !important;
+        }
+
+        .printMe .grid-cols-2 {
+            display: block !important;
+        }
+
+        .printMe .grid-cols-2>div {
+            margin-bottom: 0.25rem !important;
+        }
+
+        /* Force single page */
+        .printMe {
+            page-break-inside: avoid;
+            max-height: 100vh;
+            overflow: hidden;
+        }
     }
     </style>
 </head>
@@ -216,10 +277,10 @@ if (isset($_GET['period'])) {
                                         echo '<div id="printThis" class="printMe">';
                                         // Watermark layer
                                         echo '<div class="watermark"></div>';
-                                        // Include employee information inside printable area too
-                                        echo '<div class="bg-gray-50 rounded-lg p-6 mb-6 relative">';
-                                        echo '<h3 class="text-lg font-semibold text-gray-800 mb-4">Employee Information</h3>';
-                                        echo '<div class="grid md:grid-cols-2 gap-4">';
+                                        // Include employee information inside printable area too (compact)
+                                        echo '<div class="bg-gray-50 rounded-lg p-4 mb-4 relative">';
+                                        echo '<h3 class="text-base font-semibold text-gray-800 mb-2">Employee Information</h3>';
+                                        echo '<div class="grid md:grid-cols-2 gap-2 text-sm">';
                                         echo '<div><strong>Name:</strong> ' . htmlspecialchars($out['NAME']) . '</div>';
                                         echo '<div><strong>Staff No:</strong> ' . htmlspecialchars($out['staff_id']) . '</div>';
                                         echo '<div><strong>Department:</strong> ' . htmlspecialchars($out['dept']) . '</div>';
@@ -242,11 +303,11 @@ if (isset($_GET['period'])) {
                                             $consolidated = 0;
                                         }
                                         
-                                        echo '<div class="bg-white border rounded-lg p-6 mb-6">';
-                                        echo '<h4 class="text-lg font-semibold text-blue-800 mb-4">CONSOLIDATED SALARY</h4>';
-                                        echo '<div class="flex justify-between items-center py-2 border-b">';
-                                        echo '<span>Consolidated Salary:</span>';
-                                        echo '<span class="font-semibold">₦' . number_format($consolidated) . '</span>';
+                                        echo '<div class="bg-white border rounded-lg p-4 mb-4">';
+                                        echo '<h4 class="text-base font-semibold text-blue-800 mb-2">CONSOLIDATED SALARY</h4>';
+                                        echo '<div class="flex justify-between items-center py-1 border-b">';
+                                        echo '<span class="text-sm">Consolidated Salary:</span>';
+                                        echo '<span class="font-semibold text-sm">₦' . number_format($consolidated) . '</span>';
                                         echo '</div>';
                                         echo '</div>';
                                         
@@ -258,14 +319,14 @@ if (isset($_GET['period'])) {
                                             $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                             
                                             if (count($res) > 0) {
-                                                echo '<div class="bg-white border rounded-lg p-6 mb-6">';
-                                                echo '<h4 class="text-lg font-semibold text-green-800 mb-4">ALLOWANCES</h4>';
+                                                echo '<div class="bg-white border rounded-lg p-4 mb-4">';
+                                                echo '<h4 class="text-base font-semibold text-green-800 mb-2">ALLOWANCES</h4>';
                                                 
                                                 foreach ($res as $link) {
                                                     $totalAllow += floatval($link['allow']);
-                                                    echo '<div class="flex justify-between items-center py-2 border-b">';
-                                                    echo '<span>' . htmlspecialchars($link['ed']) . ':</span>';
-                                                    echo '<span class="font-semibold">₦' . number_format($link['allow']) . '</span>';
+                                                    echo '<div class="flex justify-between items-center py-1 border-b">';
+                                                    echo '<span class="text-sm">' . htmlspecialchars($link['ed']) . ':</span>';
+                                                    echo '<span class="font-semibold text-sm">₦' . number_format($link['allow']) . '</span>';
                                                     echo '</div>';
                                                 }
                                                 echo '</div>';
@@ -276,10 +337,10 @@ if (isset($_GET['period'])) {
                                         
                                         // Gross Salary
                                         $grossSalary = $totalAllow + $consolidated;
-                                        echo '<div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">';
+                                        echo '<div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">';
                                         echo '<div class="flex justify-between items-center">';
-                                        echo '<span class="text-lg font-semibold text-green-800">Gross Salary:</span>';
-                                        echo '<span class="text-lg font-bold text-green-800">₦' . number_format($grossSalary) . '</span>';
+                                        echo '<span class="text-base font-semibold text-green-800">Gross Salary:</span>';
+                                        echo '<span class="text-base font-bold text-green-800">₦' . number_format($grossSalary) . '</span>';
                                         echo '</div>';
                                         echo '</div>';
                                         
@@ -291,20 +352,20 @@ if (isset($_GET['period'])) {
                                             $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                             
                                             if (count($res) > 0) {
-                                                echo '<div class="bg-white border rounded-lg p-6 mb-6">';
-                                                echo '<h4 class="text-lg font-semibold text-red-800 mb-4">DEDUCTIONS</h4>';
+                                                echo '<div class="bg-white border rounded-lg p-4 mb-4">';
+                                                echo '<h4 class="text-base font-semibold text-red-800 mb-2">DEDUCTIONS</h4>';
                                                 
                                                 foreach ($res as $link) {
                                                     $totalDeduction += floatval($link['deduc']);
-                                                    echo '<div class="flex justify-between items-center py-2 border-b">';
-                                                    echo '<span>' . htmlspecialchars($link['ed']) . ':</span>';
-                                                    echo '<span class="font-semibold">₦' . number_format($link['deduc']) . '</span>';
+                                                    echo '<div class="flex justify-between items-center py-1 border-b">';
+                                                    echo '<span class="text-sm">' . htmlspecialchars($link['ed']) . ':</span>';
+                                                    echo '<span class="font-semibold text-sm">₦' . number_format($link['deduc']) . '</span>';
                                                     echo '</div>';
                                                 }
                                                 
-                                                echo '<div class="flex justify-between items-center py-2 mt-4 bg-red-50 rounded">';
-                                                echo '<span class="font-semibold text-red-800">Total Deductions:</span>';
-                                                echo '<span class="font-bold text-red-800">₦' . number_format($totalDeduction) . '</span>';
+                                                echo '<div class="flex justify-between items-center py-1 mt-2 bg-red-50 rounded">';
+                                                echo '<span class="font-semibold text-red-800 text-sm">Total Deductions:</span>';
+                                                echo '<span class="font-bold text-red-800 text-sm">₦' . number_format($totalDeduction) . '</span>';
                                                 echo '</div>';
                                                 echo '</div>';
                                             }
@@ -314,10 +375,10 @@ if (isset($_GET['period'])) {
                                         
                                         // Net Pay
                                         $netPay = $grossSalary - $totalDeduction;
-                                        echo '<div class="bg-blue-50 border border-blue-200 rounded-lg p-6">';
+                                        echo '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">';
                                         echo '<div class="flex justify-between items-center">';
-                                        echo '<span class="text-xl font-bold text-blue-800">Net Pay:</span>';
-                                        echo '<span class="text-2xl font-bold text-blue-800">₦' . number_format($netPay) . '</span>';
+                                        echo '<span class="text-base font-bold text-blue-800">Net Pay:</span>';
+                                        echo '<span class="text-lg font-bold text-blue-800">₦' . number_format($netPay) . '</span>';
                                         echo '</div>';
                                         echo '</div>';
                                         
