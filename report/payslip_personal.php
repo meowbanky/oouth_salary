@@ -29,6 +29,22 @@ if (isset($_GET['period'])) {
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-form@4.3.0/dist/jquery.form.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+    /* Printable area styling with watermark */
+    .printMe { position: relative; }
+    .watermark {
+        position: absolute;
+        inset: 0;
+        background: url('img/oouth_logo.png') center center no-repeat;
+        background-size: 60%;
+        opacity: 0.05; /* very faint */
+        pointer-events: none;
+    }
+    @media print {
+        .watermark { opacity: 0.07; }
+        .printMe { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -196,8 +212,22 @@ if (isset($_GET['period'])) {
                                         echo '</div>';
                                         echo '</div>';
                                         
-                                        // Payslip Details
+                                        // Payslip Details (printable area)
                                         echo '<div id="printThis" class="printMe">';
+                                        // Watermark layer
+                                        echo '<div class="watermark"></div>';
+                                        // Include employee information inside printable area too
+                                        echo '<div class="bg-gray-50 rounded-lg p-6 mb-6 relative">';
+                                        echo '<h3 class="text-lg font-semibold text-gray-800 mb-4">Employee Information</h3>';
+                                        echo '<div class="grid md:grid-cols-2 gap-4">';
+                                        echo '<div><strong>Name:</strong> ' . htmlspecialchars($out['NAME']) . '</div>';
+                                        echo '<div><strong>Staff No:</strong> ' . htmlspecialchars($out['staff_id']) . '</div>';
+                                        echo '<div><strong>Department:</strong> ' . htmlspecialchars($out['dept']) . '</div>';
+                                        echo '<div><strong>Bank:</strong> ' . htmlspecialchars($out['BNAME']) . '</div>';
+                                        echo '<div><strong>Account No:</strong> ' . htmlspecialchars($out['ACCTNO']) . '</div>';
+                                        echo '<div><strong>Grade/Step:</strong> ' . htmlspecialchars($out['GRADE'] . '/' . $out['STEP']) . '</div>';
+                                        echo '</div>';
+                                        echo '</div>';
                                         
                                         // Consolidated Salary
                                         $consolidated = 0;
@@ -464,6 +494,7 @@ if (isset($_GET['period'])) {
     // Print functionality
     $(document).ready(function() {
         $('#btnPrint').click(function() {
+            // Ensure the printable content includes the watermark and personal details
             $('.printMe').printElem();
         });
     });
