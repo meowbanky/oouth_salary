@@ -88,9 +88,9 @@ foreach ($rows as $r) {
         $sn,
         $r['staff_id'] ?? '',
         $r['NAME'] ?? '',
-        $current,
-        $previous,
-        $variance,
+        'NGN ' . number_format($current ?: 0),
+        'NGN ' . number_format($previous ?: 0),
+        'NGN ' . number_format($variance ?: 0),
     ], null, 'A' . $row);
 
     $sumCurrent += $current;
@@ -99,7 +99,7 @@ foreach ($rows as $r) {
 }
 
 $totalVariance = $sumCurrent - $sumPrevious;
-$sheet->fromArray(['TOTAL', '', '', $sumCurrent, $sumPrevious, $totalVariance], null, 'A' . $row);
+$sheet->fromArray(['TOTAL', '', '', 'NGN ' . number_format($sumCurrent ?: 0), 'NGN ' . number_format($sumPrevious ?: 0), 'NGN ' . number_format($totalVariance ?: 0)], null, 'A' . $row);
 
 foreach (range('A','F') as $col) { $sheet->getColumnDimension($col)->setAutoSize(true); }
 
