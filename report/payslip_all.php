@@ -53,9 +53,11 @@ $total_pages = ceil($total_row['Total'] / $results_per_page);
     <title>Payslip All Report - OOUTH Salary Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-form@4.3.0/dist/jquery.form.min.js"></script>
+    <script src="../js/theme-manager.js"></script>
     <style>
         @media print {
             .no-print { display: none !important; }

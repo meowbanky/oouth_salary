@@ -26,7 +26,9 @@ if (!$currentPeriod || !$previousPeriod || $currentPeriod <= 0 || $previousPerio
             body { font-family: Arial, sans-serif; margin: 50px; }
             .error { background: #fee; border: 1px solid #fcc; padding: 20px; border-radius: 5px; }
         </style>
-    </head>
+        <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="js/theme-manager.js"></script>
+</head>
     <body>
         <div class="error">
             <h2>Export Error</h2>
@@ -297,7 +299,9 @@ if (empty($reportData['employee_changes']['new']) &&
             body { font-family: Arial, sans-serif; margin: 50px; }
             .error { background: #fee; border: 1px solid #fcc; padding: 20px; border-radius: 5px; }
         </style>
-    </head>
+        <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="js/theme-manager.js"></script>
+</head>
     <body>
         <div class="error">
             <h2>Export Error</h2>

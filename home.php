@@ -25,6 +25,62 @@ try {
     $_SESSION['currentactiveperiod'] = null;
     $_SESSION['activeperiodDescription'] = 'Error';
 }
+
+// Fetch dashboard analytics data
+$dashboardData = [
+    'total_employees' => 0,
+    'total_payroll' => 0,
+    'active_periods' => 0,
+    'departments' => [],
+    'recent_transactions' => [],
+    'payroll_trend' => []
+];
+
+try {
+    // Total employees
+    $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM master_staff WHERE period = ?');
+    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $dashboardData['total_employees'] = $query->fetchColumn() ?: 0;
+
+    // Total payroll amount
+    $query = $conn->prepare('SELECT SUM(netpay) as total FROM master_staff WHERE period = ?');
+    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $dashboardData['total_payroll'] = $query->fetchColumn() ?: 0;
+
+    // Active periods count
+    $query = $conn->prepare('SELECT COUNT(*) as total FROM payperiods WHERE active = ?');
+    $query->execute([1]);
+    $dashboardData['active_periods'] = $query->fetchColumn() ?: 0;
+
+    // Department breakdown
+    $query = $conn->prepare('
+        SELECT d.dept, COUNT(DISTINCT ms.staff_id) as employee_count, SUM(ms.netpay) as total_payroll
+        FROM master_staff ms
+        INNER JOIN tbl_dept d ON d.dept_id = ms.DEPTCD
+        WHERE ms.period = ?
+        GROUP BY d.dept_id, d.dept
+        ORDER BY employee_count DESC
+        LIMIT 10
+    ');
+    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $dashboardData['departments'] = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    // Recent payroll periods for trend
+    $query = $conn->prepare('
+        SELECT p.description, p.periodYear, SUM(ms.netpay) as total_payroll
+        FROM payperiods p
+        LEFT JOIN master_staff ms ON ms.period = p.periodId
+        WHERE p.payrollRun = 1
+        GROUP BY p.periodId, p.description, p.periodYear
+        ORDER BY p.periodId DESC
+        LIMIT 6
+    ');
+    $query->execute();
+    $dashboardData['payroll_trend'] = array_reverse($query->fetchAll(PDO::FETCH_ASSOC));
+
+} catch (PDOException $e) {
+    error_log("Error fetching dashboard data: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,6 +94,7 @@ try {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/dark-mode.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/theme-manager.js"></script>
     <style>
@@ -116,6 +173,133 @@ try {
                 </h1>
                 <h3 class="text-xl font-semibold text-blue-600 mb-8 text-center">Welcome to Salary Management System
                 </h3>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Employees -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Employees</p>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    <?php echo number_format($dashboardData['total_employees']); ?></p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Payroll -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Payroll</p>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    ₦<?php echo number_format($dashboardData['total_payroll']); ?></p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Periods -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Active Periods</p>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    <?php echo $dashboardData['active_periods']; ?></p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <i class="fas fa-calendar-alt text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Period -->
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Current Period</p>
+                                <p class="text-sm font-bold text-gray-900 truncate">
+                                    <?php echo htmlspecialchars($_SESSION['activeperiodDescription']); ?></p>
+                            </div>
+                            <div class="bg-purple-100 p-3 rounded-full">
+                                <i class="fas fa-clock text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Payroll Trend Chart -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-line mr-2 text-blue-600"></i>
+                            Payroll Trend (Last 6 Periods)
+                        </h3>
+                        <div class="relative" style="height: 300px;">
+                            <canvas id="payrollTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Department Distribution -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-pie mr-2 text-green-600"></i>
+                            Department Distribution
+                        </h3>
+                        <div class="relative" style="height: 300px;">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Stats Table -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-building mr-2 text-purple-600"></i>
+                        Department Statistics
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Department</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Employees</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total Payroll</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Avg. Salary</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($dashboardData['departments'] as $dept): ?>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <?php echo htmlspecialchars($dept['dept']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <?php echo number_format($dept['employee_count']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        ₦<?php echo number_format($dept['total_payroll']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        ₦<?php echo number_format($dept['employee_count'] > 0 ? $dept['total_payroll'] / $dept['employee_count'] : 0); ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- Quick Actions -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -238,6 +422,114 @@ try {
                             text: 'Failed to delete transactions.'
                         });
                     });
+            }
+        });
+    });
+
+    // Dashboard Charts Initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart.js configuration for dark mode
+        const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDarkMode ? '#e5e7eb' : '#374151';
+        const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
+
+        // Payroll Trend Chart
+        const payrollTrendCtx = document.getElementById('payrollTrendChart').getContext('2d');
+        const payrollTrendData = <?php echo json_encode($dashboardData['payroll_trend']); ?>;
+
+        new Chart(payrollTrendCtx, {
+            type: 'line',
+            data: {
+                labels: payrollTrendData.map(item => item.description + ' ' + item.periodYear),
+                datasets: [{
+                    label: 'Total Payroll (₦)',
+                    data: payrollTrendData.map(item => item.total_payroll || 0),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: textColor
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: textColor,
+                            callback: function(value) {
+                                return '₦' + value.toLocaleString();
+                            }
+                        },
+                        grid: {
+                            color: gridColor
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: textColor,
+                            maxRotation: 45
+                        },
+                        grid: {
+                            color: gridColor
+                        }
+                    }
+                }
+            }
+        });
+
+        // Department Distribution Chart
+        const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+        const departmentData = <?php echo json_encode($dashboardData['departments']); ?>;
+
+        new Chart(departmentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: departmentData.map(item => item.dept),
+                datasets: [{
+                    data: departmentData.map(item => item.employee_count),
+                    backgroundColor: [
+                        '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+                        '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
+                    ],
+                    borderWidth: 2,
+                    borderColor: isDarkMode ? '#1f2937' : '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 1,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: textColor,
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' employees (' +
+                                    percentage + '%)';
+                            }
+                        }
+                    }
+                }
             }
         });
     });

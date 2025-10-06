@@ -229,6 +229,8 @@ function getChangesAfterSubmission($periodId, $submissionDate) {
     <title>Abeokuta Variance Tracking</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="js/theme-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 

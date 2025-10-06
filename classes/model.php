@@ -1,11 +1,6 @@
 <?php
-//session_start();
-/*if (!defined('DIRECTACC')) {
-        header('Status: 200');
-        header('Location: ../../index.php');
-	}*/
 
-include_once('../Connections/paymaster.php');
+include_once('/home/oouthsal/public_html/Connections/paymaster.php');
 
 //$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

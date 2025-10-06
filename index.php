@@ -14,9 +14,11 @@ unset($_SESSION['SESS_MEMBER_ID'], $_SESSION['SESS_PRICE_AJUSTMENT'], $_SESSION[
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.4/dist/full.css" rel="stylesheet" type="text/css" />
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="css/dark-mode.css" rel="stylesheet">
     <!-- jQuery & jquery.form -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/jquery.form.js"></script>
+    <script src="js/theme-manager.js"></script>
     <style>
         body {
             background: linear-gradient(120deg, #4868b1 0%, #9ad1e6 90%);

@@ -42,7 +42,7 @@ $pages = $App->getPages();
 </div>
 
 <div id="editModal" class="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 hidden">
-    <div class="scrollable-content bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg w-full p-6">
+    <div class="scrollable-content bg-white rounded-lg overflow-hidden shadow-xl transform transition-all w-full p-6 sm:max-w-3xl max-h-[80vh] overflow-y-auto">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold">Edit Permissions</h2>
             <button id="closeModalButton" class="closeModalButton text-gray-500 hover:text-gray-700">
@@ -63,7 +63,7 @@ $pages = $App->getPages();
             </div>
             <div class="mb-4">
                 <h6 class="text-sm mb-2">Pages</h6>
-                <div id="pages-container" class="grid grid-cols-2 gap-4">
+                <div id="pages-container" class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
                     <?php if ($pages) {
                         foreach ($pages as $page) {
                             ?>
@@ -146,10 +146,24 @@ $pages = $App->getPages();
                 success: function(response) {
                     if(response.status == 'success') {
                         $('#editModal').addClass('hidden');
-                        displayAlert(response.message,'center', 'success');
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message || 'Permissions updated successfully.',
+                                confirmButtonColor: '#2563eb'
+                            });
+                        }
                         $('#loadContent', window.parent.document).load('view/view_permissions.php');
                     } else {
-                        displayAlert(response.message,'center', 'error');
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message || 'Failed to update permissions.',
+                                confirmButtonColor: '#2563eb'
+                            });
+                        }
                     }
                 },
                 error: function(xhr, status, error) {

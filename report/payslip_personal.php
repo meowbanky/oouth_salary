@@ -35,34 +35,66 @@ if (isset($_GET['period'])) {
     /* Printable area styling with watermark */
     .printMe {
         position: relative;
+        background: white;
     }
 
     .watermark {
         position: absolute;
-        inset: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: url('img/oouth_logo.png') center center no-repeat;
-        background-size: 60%;
-        opacity: 0.05;
-        /* very faint */
+        background-size: 50%;
+        opacity: 0.08;
         pointer-events: none;
+        z-index: 1;
+    }
+
+    .printMe>* {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Ensure watermark shows in both light and dark mode for browser preview */
+    [data-theme="dark"] .watermark {
+        background-image: url('img/oouth_logo.png') !important;
+        background-repeat: no-repeat !important;
+        background-position: center center !important;
+        background-size: 50% !important;
+        opacity: 0.08 !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+        background-color: transparent !important;
     }
 
     @media print {
         .watermark {
-            opacity: 0.07;
+            opacity: 0.1;
+            background-size: 45%;
         }
 
         .printMe {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            background: white !important;
         }
 
-        /* Balanced compact layout for single page */
+        /* Compact layout for single page - slightly more readable */
         .printMe .p-4 {
-            padding: 0.5rem !important;
+            padding: 0.75rem !important;
         }
 
         .printMe .p-6 {
+            padding: 0.75rem !important;
+        }
+
+        .printMe .p-3 {
             padding: 0.5rem !important;
         }
 
@@ -71,10 +103,14 @@ if (isset($_GET['period'])) {
         }
 
         .printMe .mb-4 {
-            margin-bottom: 0.25rem !important;
+            margin-bottom: 0.375rem !important;
         }
 
         .printMe .mb-6 {
+            margin-bottom: 0.375rem !important;
+        }
+
+        .printMe .mb-3 {
             margin-bottom: 0.25rem !important;
         }
 
@@ -87,23 +123,23 @@ if (isset($_GET['period'])) {
         }
 
         .printMe .py-1 {
-            padding-top: 0.125rem !important;
-            padding-bottom: 0.125rem !important;
-        }
-
-        .printMe .py-2 {
-            padding-top: 0.125rem !important;
-            padding-bottom: 0.125rem !important;
-        }
-
-        .printMe .py-4 {
             padding-top: 0.25rem !important;
             padding-bottom: 0.25rem !important;
         }
 
+        .printMe .py-2 {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
+
+        .printMe .py-4 {
+            padding-top: 0.375rem !important;
+            padding-bottom: 0.375rem !important;
+        }
+
         .printMe .py-0 {
-            padding-top: 0.0625rem !important;
-            padding-bottom: 0.0625rem !important;
+            padding-top: 0.125rem !important;
+            padding-bottom: 0.125rem !important;
         }
 
         .printMe .text-base {
@@ -127,7 +163,7 @@ if (isset($_GET['period'])) {
         }
 
         .printMe .text-xs {
-            font-size: 0.75rem !important;
+            font-size: 0.6875rem !important;
         }
 
         .printMe .grid-cols-2 {
@@ -180,6 +216,70 @@ if (isset($_GET['period'])) {
         /* Balanced line height for readability */
         .printMe * {
             line-height: 1.2 !important;
+        }
+
+        /* Ensure watermark shows in print */
+        @page {
+            margin: 0.5in;
+        }
+
+        /* Override dark mode print styles for payslip */
+        [data-theme="dark"] .printMe,
+        [data-theme="dark"] .printMe *:not(.watermark) {
+            background: white !important;
+            color: black !important;
+            box-shadow: none !important;
+        }
+
+        /* Special override for watermark - ensure it's never affected by dark mode */
+        [data-theme="dark"] .printMe .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: 45% !important;
+            opacity: 0.1 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            z-index: 1 !important;
+            background-color: transparent !important;
+        }
+
+        /* Ensure watermark is visible in print regardless of theme */
+        .watermark,
+        [data-theme="dark"] .watermark,
+        [data-theme="light"] .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: 45% !important;
+            opacity: 0.1 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            z-index: 1 !important;
+            background-color: transparent !important;
+        }
+
+        /* Ensure print content is above watermark */
+        [data-theme="dark"] .printMe>*:not(.watermark) {
+            position: relative !important;
+            z-index: 2 !important;
+            background: white !important;
+            color: black !important;
+        }
+
+        /* Override the global dark mode print CSS specifically for watermark */
+        [data-theme="dark"] .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-color: transparent !important;
+            opacity: 0.1 !important;
         }
     }
     </style>
@@ -354,10 +454,17 @@ if (isset($_GET['period'])) {
                                         echo '<div id="printThis" class="printMe">';
                                         // Watermark layer
                                         echo '<div class="watermark"></div>';
-                                        // Include employee information inside printable area too (balanced)
-                                        echo '<div class="bg-gray-50 rounded p-3 mb-3 relative">';
-                                        echo '<h3 class="text-sm font-semibold text-gray-800 mb-2">Employee Information</h3>';
-                                        echo '<div class="grid md:grid-cols-2 gap-2 text-sm">';
+                                        
+                                        // Hospital Header for Print
+                                        echo '<div class="text-center mb-4 pb-2 border-b-2 border-blue-800">';
+                                        echo '<h1 class="text-lg font-bold text-blue-800">OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL</h1>';
+                                        echo '<p class="text-sm text-blue-700 font-medium">Payslip for ' . htmlspecialchars($fullPeriod) . '</p>';
+                                        echo '</div>';
+                                        
+                                        // Employee Information for Print
+                                        echo '<div class="bg-gray-50 rounded p-3 mb-3 border">';
+                                        echo '<h3 class="text-sm font-semibold text-gray-800 mb-2 border-b pb-1">Employee Information</h3>';
+                                        echo '<div class="grid grid-cols-2 gap-2 text-sm">';
                                         echo '<div><strong>Name:</strong> ' . htmlspecialchars($out['NAME']) . '</div>';
                                         echo '<div><strong>Staff No:</strong> ' . htmlspecialchars($out['staff_id']) . '</div>';
                                         echo '<div><strong>Department:</strong> ' . htmlspecialchars($out['dept']) . '</div>';
@@ -646,13 +753,17 @@ if (isset($_GET['period'])) {
                 printSection = $('<div id="printSection"></div>');
                 $('body').append(printSection);
             }
-            printSection.append(cloned);
+            printSection.html(cloned);
             var toggleBody = $('body *:visible');
             toggleBody.hide();
             $('#printSection, #printSection *').show();
-            window.print();
-            printSection.remove();
-            toggleBody.show();
+
+            // Ensure watermark shows in print
+            setTimeout(function() {
+                window.print();
+                printSection.remove();
+                toggleBody.show();
+            }, 100);
         }
     });
     </script>
