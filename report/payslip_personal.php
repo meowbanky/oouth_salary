@@ -24,11 +24,13 @@ if (isset($_GET['period'])) {
     <title>Personal Payslip - OOUTH Salary Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery-form@4.3.0/dist/jquery.form.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/theme-manager.js"></script>
     <style>
     /* Printable area styling with watermark */
     .printMe {
@@ -39,7 +41,7 @@ if (isset($_GET['period'])) {
         position: absolute;
         inset: 0;
         background: url('img/oouth_logo.png') center center no-repeat;
-        background-size: 40%;
+        background-size: 60%;
         opacity: 0.05;
         /* very faint */
         pointer-events: none;

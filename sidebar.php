@@ -41,13 +41,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
 }
 ?>
 
-<aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 hidden md:block">
+<aside id="sidebar" class="w-64 min-h-screen p-4 hidden md:block" style="background-color: var(--bg-secondary); color: var(--text-primary);">
     <h2 class="text-xl font-bold mb-6">Menu</h2>
     <ul class="space-y-2">
         <?php foreach ($menuItems as $item): ?>
         <li>
             <a href="<?php echo $item['href']; ?>"
-                class="flex items-center py-2 px-4 rounded hover:bg-gray-700 <?php echo $currentPage === $item['href'] ? 'bg-blue-600' : ''; ?>">
+                class="flex items-center py-2 px-4 rounded transition-colors duration-200"
+                style="background-color: <?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'transparent'; ?>; color: var(--text-primary);"
+                onmouseover="this.style.backgroundColor='<?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'var(--bg-hover)'; ?>'"
+                onmouseout="this.style.backgroundColor='<?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'transparent'; ?>'">
                 <i class="<?php echo $item['icon']; ?> mr-3 text-lg"></i>
                 <span><?php echo $item['label']; ?></span>
             </a>
