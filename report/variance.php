@@ -56,34 +56,35 @@ if (!function_exists("GetSQLValueString")) {
     <?php include('../header.php'); ?>
     <div class="flex min-h-screen">
         <?php include('report_sidebar_modern.php'); ?>
-        <!-- Breadcrumb Navigation -->
-        <nav class="flex mb-4" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="../home.php"
-                        class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-home w-4 h-4 mr-2"></i>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                        <a href="index.php"
-                            class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Variance Report</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
-
-
         <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="../home.php"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-home w-4 h-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <a href="index.php"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Variance Report</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+
+
             <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
                 <!-- Header Section -->
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -160,15 +161,13 @@ if (!function_exists("GetSQLValueString")) {
                                     class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-search"></i> Generate Report
                                 </button>
-                                <button type="button"
-                                    onclick="exportAll('xls','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')"
+                                <button type="button" onclick="exportAll('excel')"
                                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Export XLS
                                 </button>
-                                <button type="button"
-                                    onclick="exportAll('csv','variance btw <?php echo $monthTo; ?> AND <?php echo $monthFrom; ?>')"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
-                                    <i class="fas fa-file-csv"></i> Export CSV
+                                <button type="button" onclick="exportAll('pdf')"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
                                 <button type="button" onclick="window.print()"
                                     class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
@@ -352,9 +351,75 @@ if (!function_exists("GetSQLValueString")) {
             if (!$('#periodFrom').val() || !$('#periodTo').val()) {
                 e.preventDefault();
                 alert(
-                    'Please select both Current Month and Previous Month before generating the report.');
+                    'Please select both Current Month and Previous Month before generating the report.'
+                );
             }
         });
+
+        window.exportAll = function(type) {
+            const periodFrom = $('#periodFrom').val();
+            const periodTo = $('#periodTo').val();
+            if (!periodFrom || !periodTo) {
+                alert('Please select both Current Month and Previous Month before exporting.');
+                return;
+            }
+
+            const fromText = $('#periodFrom option:selected').text();
+            const toText = $('#periodTo option:selected').text();
+            const reportTitle = `variance btw ${toText} AND ${fromText}`;
+
+            if (type === 'excel') {
+                $.ajax({
+                    url: 'variance_export_excel.php',
+                    type: 'POST',
+                    data: {
+                        periodFrom: periodFrom,
+                        periodTo: periodTo,
+                        title: reportTitle
+                    },
+                    success: function(base64) {
+                        try {
+                            const link = document.createElement('a');
+                            link.href =
+                                'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                                base64;
+                            link.download = `Variance_Report_${fromText}_vs_${toText}.xlsx`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        } catch (e) {
+                            alert('Failed to download Excel.');
+                        }
+                    },
+                    error: function() {
+                        alert('Failed to generate Excel.');
+                    }
+                });
+            } else if (type === 'pdf') {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'variance_export_pdf.php';
+                form.target = '_blank';
+                const f1 = document.createElement('input');
+                f1.type = 'hidden';
+                f1.name = 'periodFrom';
+                f1.value = periodFrom;
+                form.appendChild(f1);
+                const f2 = document.createElement('input');
+                f2.type = 'hidden';
+                f2.name = 'periodTo';
+                f2.value = periodTo;
+                form.appendChild(f2);
+                const f3 = document.createElement('input');
+                f3.type = 'hidden';
+                f3.name = 'title';
+                f3.value = reportTitle;
+                form.appendChild(f3);
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            }
+        }
     });
     </script>
 </body>
