@@ -37,22 +37,39 @@ $dashboardData = [
 ];
 
 try {
-    // Total employees
+    // Debug: Check if we have an active period
+    $currentPeriod = $_SESSION['currentactiveperiod'] ?? 0;
+    
+    // Total employees - try multiple approaches
     $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM master_staff WHERE period = ?');
-    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $query->execute([$currentPeriod]);
     $dashboardData['total_employees'] = $query->fetchColumn() ?: 0;
+    
+    // If no data for current period, try latest period
+    if ($dashboardData['total_employees'] == 0) {
+        $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM master_staff ORDER BY period DESC LIMIT 1');
+        $query->execute();
+        $dashboardData['total_employees'] = $query->fetchColumn() ?: 0;
+    }
 
-    // Total payroll amount
+    // Total payroll amount - try multiple approaches
     $query = $conn->prepare('SELECT SUM(netpay) as total FROM master_staff WHERE period = ?');
-    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $query->execute([$currentPeriod]);
     $dashboardData['total_payroll'] = $query->fetchColumn() ?: 0;
+    
+    // If no data for current period, try latest period
+    if ($dashboardData['total_payroll'] == 0) {
+        $query = $conn->prepare('SELECT SUM(netpay) as total FROM master_staff ORDER BY period DESC LIMIT 1');
+        $query->execute();
+        $dashboardData['total_payroll'] = $query->fetchColumn() ?: 0;
+    }
 
     // Active periods count
     $query = $conn->prepare('SELECT COUNT(*) as total FROM payperiods WHERE active = ?');
     $query->execute([1]);
     $dashboardData['active_periods'] = $query->fetchColumn() ?: 0;
 
-    // Department breakdown
+    // Department breakdown - try multiple approaches
     $query = $conn->prepare('
         SELECT d.dept, COUNT(DISTINCT ms.staff_id) as employee_count, SUM(ms.netpay) as total_payroll
         FROM master_staff ms
@@ -62,8 +79,23 @@ try {
         ORDER BY employee_count DESC
         LIMIT 10
     ');
-    $query->execute([$_SESSION['currentactiveperiod'] ?? 0]);
+    $query->execute([$currentPeriod]);
     $dashboardData['departments'] = $query->fetchAll(PDO::FETCH_ASSOC);
+    
+    // If no data for current period, try latest period
+    if (empty($dashboardData['departments'])) {
+        $query = $conn->prepare('
+            SELECT d.dept, COUNT(DISTINCT ms.staff_id) as employee_count, SUM(ms.netpay) as total_payroll
+            FROM master_staff ms
+            INNER JOIN tbl_dept d ON d.dept_id = ms.DEPTCD
+            WHERE ms.period = (SELECT MAX(period) FROM master_staff)
+            GROUP BY d.dept_id, d.dept
+            ORDER BY employee_count DESC
+            LIMIT 10
+        ');
+        $query->execute();
+        $dashboardData['departments'] = $query->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     // Recent payroll periods for trend
     $query = $conn->prepare('
@@ -80,6 +112,16 @@ try {
 
 } catch (PDOException $e) {
     error_log("Error fetching dashboard data: " . $e->getMessage());
+    
+    // Fallback data if database queries fail
+    $dashboardData = [
+        'total_employees' => 0,
+        'total_payroll' => 0,
+        'active_periods' => 0,
+        'departments' => [],
+        'recent_transactions' => [],
+        'payroll_trend' => []
+    ];
 }
 ?>
 
@@ -173,6 +215,19 @@ try {
                 </h1>
                 <h3 class="text-xl font-semibold text-blue-600 mb-8 text-center">Welcome to Salary Management System
                 </h3>
+
+                <!-- Debug Info (remove in production) -->
+                <?php if (isset($_GET['debug'])): ?>
+                <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+                    <strong>Debug Info:</strong><br>
+                    Current Period: <?php echo $currentPeriod; ?><br>
+                    Active Period Description: <?php echo htmlspecialchars($_SESSION['activeperiodDescription']); ?><br>
+                    Total Employees: <?php echo $dashboardData['total_employees']; ?><br>
+                    Total Payroll: <?php echo $dashboardData['total_payroll']; ?><br>
+                    Departments Count: <?php echo count($dashboardData['departments']); ?><br>
+                    Payroll Trend Count: <?php echo count($dashboardData['payroll_trend']); ?>
+                </div>
+                <?php endif; ?>
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
