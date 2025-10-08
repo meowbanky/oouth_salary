@@ -76,6 +76,11 @@ switch ($resource) {
         require_once __DIR__ . '/test.php';
         break;
         
+    case 'debug':
+        // Debug endpoint (no auth required)
+        require_once __DIR__ . '/debug.php';
+        break;
+        
     case 'auth':
         // Authentication endpoints (no JWT required)
         // Set PATH_INFO for the authenticate handler
