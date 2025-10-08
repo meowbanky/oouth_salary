@@ -173,24 +173,22 @@ class PayrollAPI {
             $limit = min(MAX_PAGE_SIZE, max(1, (int)($_GET['limit'] ?? DEFAULT_PAGE_SIZE)));
             $offset = ($page - 1) * $limit;
             
-            // Count total records
-            $countStmt = $this->prepareStatement('SELECT COUNT(*) FROM payperiods WHERE payrollRun = 1');
+            // Count total records (all periods, not just payrollRun=1)
+            $countStmt = $this->prepareStatement('SELECT COUNT(*) FROM payperiods');
             if (!$countStmt) {
                 apiError('INTERNAL_ERROR', 'Database error', null, 500);
             }
             $countStmt->execute();
             $totalRecords = $countStmt->fetchColumn();
             
-            // Get periods
+            // Get periods (all periods)
             $stmt = $this->prepareStatement('
                 SELECT 
                     periodId as period_id,
                     description,
                     periodYear as year,
-                    payrollRun as is_active,
-                    remark
+                    payrollRun as is_active
                 FROM payperiods
-                WHERE payrollRun = 1
                 ORDER BY periodId DESC
                 LIMIT ? OFFSET ?
             ');
@@ -235,10 +233,9 @@ class PayrollAPI {
                     periodId as period_id,
                     description,
                     periodYear as year,
-                    payrollRun as is_active,
-                    remark
+                    payrollRun as is_active
                 FROM payperiods
-                WHERE periodId = ? AND payrollRun = 1
+                WHERE periodId = ?
                 LIMIT 1
             ');
             
@@ -287,10 +284,8 @@ class PayrollAPI {
                     periodId as period_id,
                     description,
                     periodYear as year,
-                    payrollRun as is_active,
-                    remark
+                    payrollRun as is_active
                 FROM payperiods
-                WHERE payrollRun = 1
                 ORDER BY periodId DESC
                 LIMIT 1
             ');
@@ -348,8 +343,8 @@ class PayrollAPI {
             $periodId = $_GET['period'] ?? null;
             
             if (!$periodId) {
-                // Get active period
-                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                // Get active period (most recent period)
+                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods ORDER BY periodId DESC LIMIT 1');
                 if (!$stmt) {
                     apiError('INTERNAL_ERROR', 'Database error', null, 500);
                 }
@@ -366,7 +361,7 @@ class PayrollAPI {
             // Get period details
             $periodStmt = $this->prepareStatement('
                 SELECT periodId as id, description, periodYear as year
-                FROM payperiods WHERE periodId = ? AND payrollRun = 1 LIMIT 1
+                FROM payperiods WHERE periodId = ? LIMIT 1
             ');
             if (!$periodStmt) {
                 apiError('INTERNAL_ERROR', 'Database error', null, 500);
@@ -465,8 +460,8 @@ class PayrollAPI {
             $periodId = $_GET['period'] ?? null;
             
             if (!$periodId) {
-                // Get active period
-                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                // Get active period (most recent period)
+                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods ORDER BY periodId DESC LIMIT 1');
                 if (!$stmt) {
                     apiError('INTERNAL_ERROR', 'Database error', null, 500);
                 }
@@ -483,7 +478,7 @@ class PayrollAPI {
             // Get period details
             $periodStmt = $this->prepareStatement('
                 SELECT periodId as id, description, periodYear as year
-                FROM payperiods WHERE periodId = ? AND payrollRun = 1 LIMIT 1
+                FROM payperiods WHERE periodId = ? LIMIT 1
             ');
             if (!$periodStmt) {
                 apiError('INTERNAL_ERROR', 'Database error', null, 500);
