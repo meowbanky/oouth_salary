@@ -22,6 +22,7 @@ The OOUTH Salary API provides secure, rate-limited access to payroll data for th
 ### 1. Installation
 
 Import the database schema:
+
 ```bash
 mysql -u username -p database_name < api/schema/api_tables.sql
 ```
@@ -29,6 +30,7 @@ mysql -u username -p database_name < api/schema/api_tables.sql
 ### 2. Generate API Key (Admin Only)
 
 API keys are generated through the admin dashboard:
+
 ```
 Format: oouth_{org_id}_{allow|deduc}_{ed_id}_{16-char-hash}
 Example: oouth_001_allow_5_a8f3c9d2e1b4f6e7
@@ -48,6 +50,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -72,28 +75,29 @@ X-API-Key: oouth_001_allow_5_a8f3c9d2e1b4f6e7
 
 ### Authentication
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/auth/token` | POST | Generate JWT token |
-| `/api/v1/auth/refresh` | POST | Refresh JWT token |
-| `/api/v1/auth/revoke` | POST | Revoke JWT token |
+| Endpoint               | Method | Description        |
+| ---------------------- | ------ | ------------------ |
+| `/api/v1/auth/token`   | POST   | Generate JWT token |
+| `/api/v1/auth/refresh` | POST   | Refresh JWT token  |
+| `/api/v1/auth/revoke`  | POST   | Revoke JWT token   |
 
 ### Payroll Periods
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/payroll/periods` | GET | List all periods |
-| `/api/v1/payroll/periods/{id}` | GET | Get specific period |
-| `/api/v1/payroll/periods/active` | GET | Get current active period |
+| Endpoint                         | Method | Description               |
+| -------------------------------- | ------ | ------------------------- |
+| `/api/v1/payroll/periods`        | GET    | List all periods          |
+| `/api/v1/payroll/periods/{id}`   | GET    | Get specific period       |
+| `/api/v1/payroll/periods/active` | GET    | Get current active period |
 
 ### Allowances & Deductions
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/payroll/allowances/{id}` | GET | Get allowance data |
-| `/api/v1/payroll/deductions/{id}` | GET | Get deduction data |
+| Endpoint                          | Method | Description        |
+| --------------------------------- | ------ | ------------------ |
+| `/api/v1/payroll/allowances/{id}` | GET    | Get allowance data |
+| `/api/v1/payroll/deductions/{id}` | GET    | Get deduction data |
 
 Query Parameters:
+
 - `period` - Period ID (defaults to active period)
 - `page` - Page number for pagination
 - `limit` - Records per page (max 1000)
@@ -101,14 +105,14 @@ Query Parameters:
 
 ### Webhooks
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/v1/webhooks` | GET | List webhooks |
-| `/api/v1/webhooks/register` | POST | Register webhook |
-| `/api/v1/webhooks/{id}` | GET | Get webhook details |
-| `/api/v1/webhooks/{id}` | PUT | Update webhook |
-| `/api/v1/webhooks/{id}` | DELETE | Delete webhook |
-| `/api/v1/webhooks/{id}/test` | POST | Test webhook delivery |
+| Endpoint                     | Method | Description           |
+| ---------------------------- | ------ | --------------------- |
+| `/api/v1/webhooks`           | GET    | List webhooks         |
+| `/api/v1/webhooks/register`  | POST   | Register webhook      |
+| `/api/v1/webhooks/{id}`      | GET    | Get webhook details   |
+| `/api/v1/webhooks/{id}`      | PUT    | Update webhook        |
+| `/api/v1/webhooks/{id}`      | DELETE | Delete webhook        |
+| `/api/v1/webhooks/{id}/test` | POST   | Test webhook delivery |
 
 ## 📊 Response Formats
 
@@ -121,7 +125,7 @@ Query Parameters:
     {
       "staff_id": "EMP001",
       "name": "John Doe",
-      "amount": 50000.00
+      "amount": 50000.0
     }
   ],
   "metadata": {
@@ -132,7 +136,7 @@ Query Parameters:
     },
     "allowance_name": "Housing Allowance",
     "total_records": 150,
-    "total_amount": 7500000.00
+    "total_amount": 7500000.0
   }
 }
 ```
@@ -192,6 +196,7 @@ X-RateLimit-Reset: 1696780800
 ```
 
 When exceeded:
+
 ```json
 {
   "success": false,
@@ -253,6 +258,7 @@ if (hash_equals($expectedSignature, $signature)) {
 Access API management at: `/api_management.php`
 
 Features:
+
 - Generate API keys
 - View usage statistics
 - Monitor rate limits
@@ -282,6 +288,7 @@ define('JWT_EXPIRATION', 900); // 15 minutes
 ## 🔧 Maintenance
 
 ### Clean up old logs
+
 ```php
 // Run daily via cron
 php -r "require 'api/utils/logger.php'; ApiLogger::cleanup();"
@@ -289,6 +296,7 @@ php -r "require 'api/auth/jwt_handler.php'; JWTHandler::cleanupExpiredTokens();"
 ```
 
 ### Monitor API Health
+
 ```php
 $stats = ApiLogger::getStatistics($orgId, 7); // Last 7 days
 echo "Total Requests: " . $stats['total_requests'];
@@ -298,18 +306,18 @@ echo "Error Rate: " . ($stats['error_count'] / $stats['total_requests'] * 100) .
 
 ## ❌ Error Codes
 
-| Code | HTTP | Description |
-|------|------|-------------|
-| `INVALID_API_KEY` | 401 | API key invalid or inactive |
-| `EXPIRED_API_KEY` | 401 | API key has expired |
-| `INVALID_SIGNATURE` | 401 | HMAC signature verification failed |
-| `INVALID_TIMESTAMP` | 401 | Timestamp outside acceptable range |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
-| `UNAUTHORIZED` | 401 | Authentication failed |
-| `FORBIDDEN` | 403 | Access denied |
-| `NOT_FOUND` | 404 | Resource not found |
-| `BAD_REQUEST` | 400 | Invalid request parameters |
-| `INTERNAL_ERROR` | 500 | Server error |
+| Code                  | HTTP | Description                        |
+| --------------------- | ---- | ---------------------------------- |
+| `INVALID_API_KEY`     | 401  | API key invalid or inactive        |
+| `EXPIRED_API_KEY`     | 401  | API key has expired                |
+| `INVALID_SIGNATURE`   | 401  | HMAC signature verification failed |
+| `INVALID_TIMESTAMP`   | 401  | Timestamp outside acceptable range |
+| `RATE_LIMIT_EXCEEDED` | 429  | Too many requests                  |
+| `UNAUTHORIZED`        | 401  | Authentication failed              |
+| `FORBIDDEN`           | 403  | Access denied                      |
+| `NOT_FOUND`           | 404  | Resource not found                 |
+| `BAD_REQUEST`         | 400  | Invalid request parameters         |
+| `INTERNAL_ERROR`      | 500  | Server error                       |
 
 ## 📞 Support
 
@@ -318,4 +326,3 @@ For API support, contact: api-support@oouth.edu.ng
 ## 📄 License
 
 Copyright © 2025 OOUTH. All rights reserved.
-

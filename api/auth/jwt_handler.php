@@ -98,6 +98,9 @@ class JWTHandler {
     public function storeToken($apiKey, $token, $refreshToken, $expiresAt) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return false;
+            }
             
             $tokenHash = hash('sha256', $token);
             $ipAddress = $_SERVER['REMOTE_ADDR'];
@@ -106,6 +109,10 @@ class JWTHandler {
                 INSERT INTO api_jwt_tokens (api_key, token_hash, refresh_token, expires_at, ip_address)
                 VALUES (?, ?, ?, ?, ?)
             ');
+            
+            if (!$stmt) {
+                return false;
+            }
             
             return $stmt->execute([
                 $apiKey,
@@ -127,6 +134,9 @@ class JWTHandler {
     public function revokeToken($token) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return false;
+            }
             
             $tokenHash = hash('sha256', $token);
             
@@ -135,6 +145,10 @@ class JWTHandler {
                 SET is_revoked = 1, revoked_at = NOW()
                 WHERE token_hash = ?
             ');
+            
+            if (!$stmt) {
+                return false;
+            }
             
             return $stmt->execute([$tokenHash]);
             
@@ -150,6 +164,9 @@ class JWTHandler {
     private function isTokenRevoked($token) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return false;
+            }
             
             $tokenHash = hash('sha256', $token);
             
@@ -158,6 +175,10 @@ class JWTHandler {
                 WHERE token_hash = ?
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                return false;
+            }
             
             $stmt->execute([$tokenHash]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -176,6 +197,9 @@ class JWTHandler {
     public function refreshToken($refreshToken) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return ['success' => false, 'error' => 'INTERNAL_ERROR', 'message' => 'Database connection failed'];
+            }
             
             $stmt = $conn->prepare('
                 SELECT jt.api_key, ak.org_id, ak.ed_id, ak.ed_type
@@ -186,6 +210,10 @@ class JWTHandler {
                   AND jt.expires_at > NOW()
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                return ['success' => false, 'error' => 'INTERNAL_ERROR', 'message' => 'Failed to prepare statement'];
+            }
             
             $stmt->execute([$refreshToken]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -228,11 +256,18 @@ class JWTHandler {
     public static function cleanupExpiredTokens() {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return 0;
+            }
             
             $stmt = $conn->prepare('
                 DELETE FROM api_jwt_tokens 
                 WHERE expires_at < NOW() OR is_revoked = 1
             ');
+            
+            if (!$stmt) {
+                return 0;
+            }
             
             $stmt->execute();
             

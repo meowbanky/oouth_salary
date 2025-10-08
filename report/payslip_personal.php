@@ -226,7 +226,7 @@ if (isset($_GET['period'])) {
         /* Override dark mode print styles for payslip */
         [data-theme="dark"] .printMe,
         [data-theme="dark"] .printMe *:not(.watermark) {
-            background: white !important;
+            background: #fff0 !important;
             color: black !important;
             box-shadow: none !important;
         }
@@ -271,7 +271,7 @@ if (isset($_GET['period'])) {
         [data-theme="dark"] .printMe>*:not(.watermark) {
             position: relative !important;
             z-index: 2 !important;
-            background: white !important;
+            background: #fff0 !important;
             color: black !important;
         }
 

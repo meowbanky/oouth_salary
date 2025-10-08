@@ -40,26 +40,37 @@ try {
     // Debug: Check if we have an active period
     $currentPeriod = $_SESSION['currentactiveperiod'] ?? 0;
     
-    // Total employees - try multiple approaches
-    $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM master_staff WHERE period = ?');
+    // Total employees - use tbl_master table (the main payroll table)
+    $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM tbl_master WHERE period = ? AND type = "1"');
     $query->execute([$currentPeriod]);
     $dashboardData['total_employees'] = $query->fetchColumn() ?: 0;
     
     // If no data for current period, try latest period
     if ($dashboardData['total_employees'] == 0) {
-        $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM master_staff ORDER BY period DESC LIMIT 1');
+        $query = $conn->prepare('SELECT COUNT(DISTINCT staff_id) as total FROM tbl_master WHERE type = "1" ORDER BY period DESC LIMIT 1');
         $query->execute();
         $dashboardData['total_employees'] = $query->fetchColumn() ?: 0;
     }
 
-    // Total payroll amount - try multiple approaches
-    $query = $conn->prepare('SELECT SUM(netpay) as total FROM master_staff WHERE period = ?');
+    // Total payroll amount - calculate from tbl_master (allowances - deductions)
+    $query = $conn->prepare('
+        SELECT 
+            SUM(CASE WHEN type = "1" THEN allow ELSE 0 END) - 
+            SUM(CASE WHEN type = "2" THEN deduc ELSE 0 END) as total_payroll
+        FROM tbl_master WHERE period = ?
+    ');
     $query->execute([$currentPeriod]);
     $dashboardData['total_payroll'] = $query->fetchColumn() ?: 0;
     
     // If no data for current period, try latest period
     if ($dashboardData['total_payroll'] == 0) {
-        $query = $conn->prepare('SELECT SUM(netpay) as total FROM master_staff ORDER BY period DESC LIMIT 1');
+        $query = $conn->prepare('
+            SELECT 
+                SUM(CASE WHEN type = "1" THEN allow ELSE 0 END) - 
+                SUM(CASE WHEN type = "2" THEN deduc ELSE 0 END) as total_payroll
+            FROM tbl_master 
+            WHERE period = (SELECT MAX(period) FROM tbl_master)
+        ');
         $query->execute();
         $dashboardData['total_payroll'] = $query->fetchColumn() ?: 0;
     }
@@ -69,12 +80,17 @@ try {
     $query->execute([1]);
     $dashboardData['active_periods'] = $query->fetchColumn() ?: 0;
 
-    // Department breakdown - try multiple approaches
+    // Department breakdown - use tbl_master and employee tables
     $query = $conn->prepare('
-        SELECT d.dept, COUNT(DISTINCT ms.staff_id) as employee_count, SUM(ms.netpay) as total_payroll
-        FROM master_staff ms
-        INNER JOIN tbl_dept d ON d.dept_id = ms.DEPTCD
-        WHERE ms.period = ?
+        SELECT 
+            d.dept, 
+            COUNT(DISTINCT tm.staff_id) as employee_count,
+            SUM(CASE WHEN tm.type = "1" THEN tm.allow ELSE 0 END) - 
+            SUM(CASE WHEN tm.type = "2" THEN tm.deduc ELSE 0 END) as total_payroll
+        FROM tbl_master tm
+        INNER JOIN employee e ON e.staff_id = tm.staff_id
+        INNER JOIN tbl_dept d ON d.dept_id = e.DEPTCD
+        WHERE tm.period = ?
         GROUP BY d.dept_id, d.dept
         ORDER BY employee_count DESC
         LIMIT 10
@@ -85,10 +101,15 @@ try {
     // If no data for current period, try latest period
     if (empty($dashboardData['departments'])) {
         $query = $conn->prepare('
-            SELECT d.dept, COUNT(DISTINCT ms.staff_id) as employee_count, SUM(ms.netpay) as total_payroll
-            FROM master_staff ms
-            INNER JOIN tbl_dept d ON d.dept_id = ms.DEPTCD
-            WHERE ms.period = (SELECT MAX(period) FROM master_staff)
+            SELECT 
+                d.dept, 
+                COUNT(DISTINCT tm.staff_id) as employee_count,
+                SUM(CASE WHEN tm.type = "1" THEN tm.allow ELSE 0 END) - 
+                SUM(CASE WHEN tm.type = "2" THEN tm.deduc ELSE 0 END) as total_payroll
+            FROM tbl_master tm
+            INNER JOIN employee e ON e.staff_id = tm.staff_id
+            INNER JOIN tbl_dept d ON d.dept_id = e.DEPTCD
+            WHERE tm.period = (SELECT MAX(period) FROM tbl_master)
             GROUP BY d.dept_id, d.dept
             ORDER BY employee_count DESC
             LIMIT 10
@@ -97,18 +118,24 @@ try {
         $dashboardData['departments'] = $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Recent payroll periods for trend
-    $query = $conn->prepare('
-        SELECT p.description, p.periodYear, SUM(ms.netpay) as total_payroll
-        FROM payperiods p
-        LEFT JOIN master_staff ms ON ms.period = p.periodId
-        WHERE p.payrollRun = 1
-        GROUP BY p.periodId, p.description, p.periodYear
-        ORDER BY p.periodId DESC
-        LIMIT 6
-    ');
-    $query->execute();
-    $dashboardData['payroll_trend'] = array_reverse($query->fetchAll(PDO::FETCH_ASSOC));
+            // Recent payroll periods for trend (Gross vs Net)
+            $query = $conn->prepare('
+                SELECT 
+                    p.description, 
+                    p.periodYear,
+                    SUM(CASE WHEN tm.type = "1" THEN tm.allow ELSE 0 END) as gross_pay,
+                    SUM(CASE WHEN tm.type = "2" THEN tm.deduc ELSE 0 END) as total_deductions,
+                    SUM(CASE WHEN tm.type = "1" THEN tm.allow ELSE 0 END) - 
+                    SUM(CASE WHEN tm.type = "2" THEN tm.deduc ELSE 0 END) as net_pay
+                FROM payperiods p
+                LEFT JOIN tbl_master tm ON tm.period = p.periodId
+                WHERE p.payrollRun = 1
+                GROUP BY p.periodId, p.description, p.periodYear
+                ORDER BY p.periodId DESC
+                LIMIT 6
+            ');
+            $query->execute();
+            $dashboardData['payroll_trend'] = array_reverse($query->fetchAll(PDO::FETCH_ASSOC));
 
 } catch (PDOException $e) {
     error_log("Error fetching dashboard data: " . $e->getMessage());
@@ -225,7 +252,8 @@ try {
                     Total Employees: <?php echo $dashboardData['total_employees']; ?><br>
                     Total Payroll: <?php echo $dashboardData['total_payroll']; ?><br>
                     Departments Count: <?php echo count($dashboardData['departments']); ?><br>
-                    Payroll Trend Count: <?php echo count($dashboardData['payroll_trend']); ?>
+                    Payroll Trend Count: <?php echo count($dashboardData['payroll_trend']); ?><br>
+                    Sample Trend Data: <?php echo json_encode(array_slice($dashboardData['payroll_trend'], 0, 2)); ?>
                 </div>
                 <?php endif; ?>
 
@@ -294,7 +322,7 @@ try {
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <i class="fas fa-chart-line mr-2 text-blue-600"></i>
-                            Payroll Trend (Last 6 Periods)
+                            Payroll Trend: Gross vs Net (Last 6 Periods)
                         </h3>
                         <div class="relative" style="height: 300px;">
                             <canvas id="payrollTrendChart"></canvas>
@@ -488,7 +516,7 @@ try {
         const textColor = isDarkMode ? '#e5e7eb' : '#374151';
         const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
 
-        // Payroll Trend Chart
+        // Payroll Trend Chart (Gross vs Net)
         const payrollTrendCtx = document.getElementById('payrollTrendChart').getContext('2d');
         const payrollTrendData = <?php echo json_encode($dashboardData['payroll_trend']); ?>;
 
@@ -497,12 +525,20 @@ try {
             data: {
                 labels: payrollTrendData.map(item => item.description + ' ' + item.periodYear),
                 datasets: [{
-                    label: 'Total Payroll (₦)',
-                    data: payrollTrendData.map(item => item.total_payroll || 0),
-                    borderColor: '#3b82f6',
+                    label: 'Gross Pay (₦)',
+                    data: payrollTrendData.map(item => parseFloat(item.gross_pay) || 0),
+                    borderColor: '#22c55e', // Green for gross
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4
+                }, {
+                    label: 'Net Pay (₦)',
+                    data: payrollTrendData.map(item => parseFloat(item.net_pay) || 0),
+                    borderColor: '#3b82f6', // Blue for net
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     borderWidth: 3,
-                    fill: true,
+                    fill: false,
                     tension: 0.4
                 }]
             },
@@ -514,6 +550,15 @@ try {
                     legend: {
                         labels: {
                             color: textColor
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = '₦' + context.parsed.y.toLocaleString();
+                                return label + ': ' + value;
+                            }
                         }
                     }
                 },

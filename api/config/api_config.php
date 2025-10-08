@@ -126,7 +126,7 @@ define('SECURITY_HEADERS', [
 
 // Database Connection (use existing connection from main app)
 function getApiDatabaseConnection() {
-    require_once dirname(__DIR__, 2) . '/includes/dbConnection.php';
+    require_once dirname(__DIR__, 2) . '/Connections/paymaster.php';
     return $conn ?? null;
 }
 

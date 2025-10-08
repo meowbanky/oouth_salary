@@ -26,6 +26,23 @@ class PayrollAPI {
     }
     
     /**
+     * Check if database connection is valid
+     */
+    private function hasConnection() {
+        return $this->conn !== null;
+    }
+    
+    /**
+     * Prepare statement with error handling
+     */
+    private function prepareStatement($sql) {
+        if (!$this->hasConnection()) {
+            return false;
+        }
+        return $this->conn->prepare($sql);
+    }
+    
+    /**
      * Authenticate request
      */
     private function authenticate() {
@@ -154,12 +171,15 @@ class PayrollAPI {
             $offset = ($page - 1) * $limit;
             
             // Count total records
-            $countStmt = $this->conn->prepare('SELECT COUNT(*) FROM payperiods WHERE payrollRun = 1');
+            $countStmt = $this->prepareStatement('SELECT COUNT(*) FROM payperiods WHERE payrollRun = 1');
+            if (!$countStmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             $countStmt->execute();
             $totalRecords = $countStmt->fetchColumn();
             
             // Get periods
-            $stmt = $this->conn->prepare('
+            $stmt = $this->prepareStatement('
                 SELECT 
                     periodId as period_id,
                     description,
@@ -171,6 +191,10 @@ class PayrollAPI {
                 ORDER BY periodId DESC
                 LIMIT ? OFFSET ?
             ');
+            
+            if (!$stmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             
             $stmt->execute([$limit, $offset]);
             $periods = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -203,7 +227,7 @@ class PayrollAPI {
      */
     private function getPeriod($periodId) {
         try {
-            $stmt = $this->conn->prepare('
+            $stmt = $this->prepareStatement('
                 SELECT 
                     periodId as period_id,
                     description,
@@ -214,6 +238,10 @@ class PayrollAPI {
                 WHERE periodId = ? AND payrollRun = 1
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             
             $stmt->execute([$periodId]);
             $period = $stmt->fetch(PDO::FETCH_ASSOC);
