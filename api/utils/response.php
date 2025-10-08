@@ -145,10 +145,8 @@ class ApiResponse {
      */
     private function arrayToXml($data, &$xml) {
         foreach ($data as $key => $value) {
-            // Handle numeric keys
-            if (is_numeric($key)) {
-                $key = 'record';
-            }
+            // Sanitize key for valid XML tag names
+            $key = $this->sanitizeXmlKey($key);
             
             if (is_array($value)) {
                 $subnode = $xml->addChild($key);
@@ -157,6 +155,27 @@ class ApiResponse {
                 $xml->addChild($key, htmlspecialchars((string)$value));
             }
         }
+    }
+    
+    /**
+     * Sanitize key for valid XML tag names
+     * XML tag names cannot contain: spaces, /, :, and must start with a letter
+     */
+    private function sanitizeXmlKey($key) {
+        // Handle numeric keys
+        if (is_numeric($key)) {
+            return 'item_' . $key;
+        }
+        
+        // Replace invalid characters with underscores
+        $key = preg_replace('/[^a-zA-Z0-9_-]/', '_', $key);
+        
+        // Ensure it starts with a letter
+        if (!preg_match('/^[a-zA-Z]/', $key)) {
+            $key = 'item_' . $key;
+        }
+        
+        return $key;
     }
     
     /**
