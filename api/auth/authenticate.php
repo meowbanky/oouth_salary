@@ -31,6 +31,11 @@ class AuthenticationHandler {
         // Remove leading slash
         $pathInfo = ltrim($pathInfo, '/');
         
+        // Default to 'token' if no path specified
+        if (empty($pathInfo)) {
+            $pathInfo = 'token';
+        }
+        
         switch ($pathInfo) {
             case 'token':
                 if ($method === 'POST') {
@@ -57,7 +62,7 @@ class AuthenticationHandler {
                 break;
                 
             default:
-                apiError('NOT_FOUND', 'Endpoint not found', null, 404);
+                apiError('NOT_FOUND', 'Auth endpoint not found', "Valid endpoints: /auth/token, /auth/refresh, /auth/revoke", 404);
         }
     }
     
@@ -192,18 +197,7 @@ class AuthenticationHandler {
     }
 }
 
-// Handle HTTPS requirement
-if (REQUIRE_HTTPS && (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on')) {
-    apiError('FORBIDDEN', 'HTTPS is required', null, 403);
-}
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-// Handle request
+// Handle request (HTTPS and OPTIONS already checked in main router)
 $handler = new AuthenticationHandler();
 $handler->handle();
 
