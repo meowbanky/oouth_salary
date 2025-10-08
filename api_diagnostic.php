@@ -130,4 +130,3 @@ foreach ($diagnostics['checks'] as $check) {
 $diagnostics['overall_status'] = $allPassed ? 'ready' : 'needs_setup';
 
 echo json_encode($diagnostics, JSON_PRETTY_PRINT);
-
