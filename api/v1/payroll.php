@@ -34,12 +34,15 @@ class PayrollAPI {
     
     /**
      * Prepare statement with error handling
+     * @return \PDOStatement|false
      */
     private function prepareStatement($sql) {
         if (!$this->hasConnection()) {
             return false;
         }
-        return $this->conn->prepare($sql);
+        /** @var \PDO $conn */
+        $conn = $this->conn;
+        return $conn->prepare($sql);
     }
     
     /**
@@ -279,7 +282,7 @@ class PayrollAPI {
      */
     private function getActivePeriod() {
         try {
-            $stmt = $this->conn->prepare('
+            $stmt = $this->prepareStatement('
                 SELECT 
                     periodId as period_id,
                     description,
@@ -291,6 +294,10 @@ class PayrollAPI {
                 ORDER BY periodId DESC
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             
             $stmt->execute();
             $period = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -342,7 +349,10 @@ class PayrollAPI {
             
             if (!$periodId) {
                 // Get active period
-                $stmt = $this->conn->prepare('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                if (!$stmt) {
+                    apiError('INTERNAL_ERROR', 'Database error', null, 500);
+                }
                 $stmt->execute();
                 $periodId = $stmt->fetchColumn();
                 
@@ -354,10 +364,13 @@ class PayrollAPI {
             }
             
             // Get period details
-            $periodStmt = $this->conn->prepare('
+            $periodStmt = $this->prepareStatement('
                 SELECT periodId as id, description, periodYear as year
                 FROM payperiods WHERE periodId = ? AND payrollRun = 1 LIMIT 1
             ');
+            if (!$periodStmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             $periodStmt->execute([$periodId]);
             $period = $periodStmt->fetch(PDO::FETCH_ASSOC);
             
@@ -368,7 +381,10 @@ class PayrollAPI {
             }
             
             // Get allowance name
-            $nameStmt = $this->conn->prepare('SELECT ed_name FROM tbl_earning_deduction WHERE ed_id = ? LIMIT 1');
+            $nameStmt = $this->prepareStatement('SELECT ed FROM tbl_earning_deduction WHERE ed_id = ? LIMIT 1');
+            if (!$nameStmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             $nameStmt->execute([$allowanceId]);
             $allowanceName = $nameStmt->fetchColumn();
             
@@ -379,7 +395,7 @@ class PayrollAPI {
             }
             
             // Get allowance data for all staff
-            $stmt = $this->conn->prepare('
+            $stmt = $this->prepareStatement('
                 SELECT 
                     ms.staff_id,
                     ms.NAME as name,
@@ -392,6 +408,10 @@ class PayrollAPI {
                 WHERE ms.period = ?
                 ORDER BY ms.NAME
             ');
+            
+            if (!$stmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             
             $stmt->execute([$allowanceId, $periodId, $periodId]);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -446,7 +466,10 @@ class PayrollAPI {
             
             if (!$periodId) {
                 // Get active period
-                $stmt = $this->conn->prepare('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                $stmt = $this->prepareStatement('SELECT periodId FROM payperiods WHERE payrollRun = 1 ORDER BY periodId DESC LIMIT 1');
+                if (!$stmt) {
+                    apiError('INTERNAL_ERROR', 'Database error', null, 500);
+                }
                 $stmt->execute();
                 $periodId = $stmt->fetchColumn();
                 
@@ -458,10 +481,13 @@ class PayrollAPI {
             }
             
             // Get period details
-            $periodStmt = $this->conn->prepare('
+            $periodStmt = $this->prepareStatement('
                 SELECT periodId as id, description, periodYear as year
                 FROM payperiods WHERE periodId = ? AND payrollRun = 1 LIMIT 1
             ');
+            if (!$periodStmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             $periodStmt->execute([$periodId]);
             $period = $periodStmt->fetch(PDO::FETCH_ASSOC);
             
@@ -472,7 +498,10 @@ class PayrollAPI {
             }
             
             // Get deduction name
-            $nameStmt = $this->conn->prepare('SELECT ed_name FROM tbl_earning_deduction WHERE ed_id = ? LIMIT 1');
+            $nameStmt = $this->prepareStatement('SELECT ed FROM tbl_earning_deduction WHERE ed_id = ? LIMIT 1');
+            if (!$nameStmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             $nameStmt->execute([$deductionId]);
             $deductionName = $nameStmt->fetchColumn();
             
@@ -483,7 +512,7 @@ class PayrollAPI {
             }
             
             // Get deduction data for all staff
-            $stmt = $this->conn->prepare('
+            $stmt = $this->prepareStatement('
                 SELECT 
                     ms.staff_id,
                     ms.NAME as name,
@@ -496,6 +525,10 @@ class PayrollAPI {
                 WHERE ms.period = ?
                 ORDER BY ms.NAME
             ');
+            
+            if (!$stmt) {
+                apiError('INTERNAL_ERROR', 'Database error', null, 500);
+            }
             
             $stmt->execute([$deductionId, $periodId, $periodId]);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
