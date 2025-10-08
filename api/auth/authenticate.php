@@ -22,18 +22,19 @@ if (!class_exists('AuthenticationHandler')) {
      * Handle authentication request
      */
     public function handle() {
+        global $authAction;
+        
         $method = $_SERVER['REQUEST_METHOD'];
-        $pathInfo = $_SERVER['PATH_INFO'] ?? '';
         
-        // Remove leading slash
-        $pathInfo = ltrim($pathInfo, '/');
+        // Get action from global variable (set by router) or PATH_INFO
+        $action = $authAction ?? ltrim($_SERVER['PATH_INFO'] ?? '', '/');
         
-        // Default to 'token' if no path specified
-        if (empty($pathInfo)) {
-            $pathInfo = 'token';
+        // Default to 'token' if no action specified
+        if (empty($action)) {
+            $action = 'token';
         }
         
-        switch ($pathInfo) {
+        switch ($action) {
             case 'token':
                 if ($method === 'POST') {
                     $this->generateToken();

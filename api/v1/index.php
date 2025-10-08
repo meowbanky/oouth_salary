@@ -83,8 +83,9 @@ switch ($resource) {
         
     case 'auth':
         // Authentication endpoints (no JWT required)
-        // Set PATH_INFO for the authenticate handler
-        $_SERVER['PATH_INFO'] = '/' . ($segments[1] ?? '');
+        // Pass the auth action to the handler via global variable
+        global $authAction;
+        $authAction = $segments[1] ?? 'token';
         require_once dirname(__DIR__) . '/auth/authenticate.php';
         break;
         
