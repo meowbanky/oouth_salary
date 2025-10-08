@@ -126,8 +126,39 @@ define('SECURITY_HEADERS', [
 
 // Database Connection (use existing connection from main app)
 function getApiDatabaseConnection() {
-    require_once dirname(__DIR__, 2) . '/Connections/paymaster.php';
-    return $conn ?? null;
+    static $connection = null;
+    
+    if ($connection === null) {
+        require_once dirname(__DIR__, 2) . '/Connections/paymaster.php';
+        // $conn is defined in paymaster.php but not in this scope
+        // We need to access it from global scope or recreate connection
+        global $conn;
+        
+        if (!isset($conn) || $conn === null) {
+            // Create connection if global not available
+            $hostname_salary = "localhost";
+            $database_salary = "oouthsal_salary3";
+            $username_salary = "oouthsal_root";
+            $password_salary = "Oluwaseyi@7980";
+            
+            try {
+                $connection = new PDO(
+                    "mysql:host=$hostname_salary;dbname=$database_salary", 
+                    $username_salary, 
+                    $password_salary,
+                    array(PDO::ATTR_PERSISTENT => true)
+                );
+                $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            } catch (PDOException $e) {
+                error_log("API Database Connection Failed: " . $e->getMessage());
+                return null;
+            }
+        } else {
+            $connection = $conn;
+        }
+    }
+    
+    return $connection;
 }
 
 // Timezone Configuration
