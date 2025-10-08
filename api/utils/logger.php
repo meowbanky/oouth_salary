@@ -30,7 +30,9 @@ class ApiLogger {
         try {
             $responseTime = round((microtime(true) - $this->startTime) * 1000); // milliseconds
             
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 INSERT INTO api_request_logs (
                     request_id,
                     org_id,
@@ -89,6 +91,10 @@ class ApiLogger {
     public static function getStatistics($orgId = null, $days = 7) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return null;
+            }
+            
             $cutoffDate = date('Y-m-d H:i:s', strtotime("-$days days"));
             
             $query = '
@@ -111,7 +117,12 @@ class ApiLogger {
                 $params[] = $orgId;
             }
             
-            $stmt = $conn->prepare($query);
+            /** @var \PDO $pdo */
+            $pdo = $conn;
+            $stmt = $pdo->prepare($query);
+            if (!$stmt) {
+                return null;
+            }
             $stmt->execute($params);
             
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -128,6 +139,10 @@ class ApiLogger {
     public static function getTopEndpoints($orgId = null, $days = 7, $limit = 10) {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return [];
+            }
+            
             $cutoffDate = date('Y-m-d H:i:s', strtotime("-$days days"));
             
             $query = '
@@ -149,7 +164,12 @@ class ApiLogger {
             
             $query .= ' GROUP BY endpoint ORDER BY request_count DESC LIMIT ' . (int)$limit;
             
-            $stmt = $conn->prepare($query);
+            /** @var \PDO $pdo */
+            $pdo = $conn;
+            $stmt = $pdo->prepare($query);
+            if (!$stmt) {
+                return [];
+            }
             $stmt->execute($params);
             
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -166,12 +186,22 @@ class ApiLogger {
     public static function cleanup() {
         try {
             $conn = getApiDatabaseConnection();
+            if (!$conn) {
+                return 0;
+            }
+            
             $cutoffDate = date('Y-m-d H:i:s', strtotime('-' . LOG_RETENTION_DAYS . ' days'));
             
-            $stmt = $conn->prepare('
+            /** @var \PDO $pdo */
+            $pdo = $conn;
+            $stmt = $pdo->prepare('
                 DELETE FROM api_request_logs 
                 WHERE request_timestamp < ?
             ');
+            
+            if (!$stmt) {
+                return 0;
+            }
             
             $stmt->execute([$cutoffDate]);
             
@@ -187,4 +217,3 @@ class ApiLogger {
         }
     }
 }
-

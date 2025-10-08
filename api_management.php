@@ -5,7 +5,7 @@
  */
 
 session_start();
-require_once 'includes/dbConnection.php';
+require_once 'Connections/paymaster.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['SESS_MEMBER_ID']) || $_SESSION['role'] !== 'Admin') {
@@ -489,15 +489,284 @@ try {
         const tableId = tableMap[tabName];
         if (!tableId || initializedTables[tableId]) return;
 
-        // Initialize the table (data will be loaded via AJAX in next phase)
+        // Destroy existing table if it exists
+        if ($.fn.DataTable.isDataTable(`#${tableId}`)) {
+            $(`#${tableId}`).DataTable().destroy();
+        }
+
+        // Initialize the table with AJAX data source
         $(`#${tableId}`).DataTable({
+            ajax: {
+                url: 'api_management_data.php?action=' + tabName,
+                dataSrc: 'data',
+                error: function(xhr, error, thrown) {
+                    console.error('DataTable AJAX error:', error, thrown);
+                }
+            },
+            columns: getColumnsForTable(tableId),
             pageLength: 25,
             order: [
                 [0, 'desc']
-            ]
+            ],
+            responsive: true,
+            language: {
+                emptyTable: "No data available",
+                loadingRecords: "Loading...",
+                processing: "Processing..."
+            }
         });
 
         initializedTables[tableId] = true;
+    }
+
+    // Column configurations for each table
+    function getColumnsForTable(tableId) {
+        const configs = {
+            organizationsTable: [{
+                    data: 'org_name',
+                    title: 'Organization'
+                },
+                {
+                    data: 'org_code',
+                    title: 'Code'
+                },
+                {
+                    data: 'contact_email',
+                    title: 'Email'
+                },
+                {
+                    data: 'rate_limit_per_min',
+                    title: 'Rate Limit'
+                },
+                {
+                    data: 'is_active',
+                    title: 'Status',
+                    render: function(data) {
+                        return data == 1 ?
+                            '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Active</span>' :
+                            '<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">Inactive</span>';
+                    }
+                },
+                {
+                    data: 'created_at',
+                    title: 'Created',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleDateString() : 'N/A';
+                    }
+                },
+                {
+                    data: null,
+                    title: 'Actions',
+                    orderable: false,
+                    render: function(data) {
+                        return '<button class="text-blue-600 hover:text-blue-800"><i class="fas fa-edit"></i></button>';
+                    }
+                }
+            ],
+            apiKeysTable: [{
+                    data: 'api_key',
+                    title: 'API Key'
+                },
+                {
+                    data: 'org_name',
+                    title: 'Organization'
+                },
+                {
+                    data: 'ed_name',
+                    title: 'Resource'
+                },
+                {
+                    data: 'resource_type',
+                    title: 'Type'
+                },
+                {
+                    data: 'is_active',
+                    title: 'Status',
+                    render: function(data) {
+                        return data == 1 ?
+                            '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Active</span>' :
+                            '<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">Inactive</span>';
+                    }
+                },
+                {
+                    data: 'total_requests',
+                    title: 'Requests'
+                },
+                {
+                    data: 'last_used_at',
+                    title: 'Last Used',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleString() : 'Never';
+                    }
+                },
+                {
+                    data: null,
+                    title: 'Actions',
+                    orderable: false,
+                    render: function(data) {
+                        return '<button class="text-blue-600 hover:text-blue-800"><i class="fas fa-eye"></i></button>';
+                    }
+                }
+            ],
+            webhooksTable: [{
+                    data: 'webhook_name',
+                    title: 'Name'
+                },
+                {
+                    data: 'org_name',
+                    title: 'Organization'
+                },
+                {
+                    data: 'url',
+                    title: 'URL'
+                },
+                {
+                    data: 'events',
+                    title: 'Events',
+                    render: function(data) {
+                        try {
+                            const events = typeof data === 'string' ? JSON.parse(data) : data;
+                            return Array.isArray(events) ? events.length + ' events' : '0 events';
+                        } catch (e) {
+                            return '0 events';
+                        }
+                    }
+                },
+                {
+                    data: 'is_active',
+                    title: 'Status',
+                    render: function(data) {
+                        return data == 1 ?
+                            '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Active</span>' :
+                            '<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">Inactive</span>';
+                    }
+                },
+                {
+                    data: 'success_rate',
+                    title: 'Success Rate',
+                    render: function(data) {
+                        return data + '%';
+                    }
+                },
+                {
+                    data: 'last_delivery_at',
+                    title: 'Last Delivery',
+                    render: function(data) {
+                        return data ? new Date(data).toLocaleString() : 'Never';
+                    }
+                },
+                {
+                    data: null,
+                    title: 'Actions',
+                    orderable: false,
+                    render: function(data) {
+                        return '<button class="text-blue-600 hover:text-blue-800"><i class="fas fa-paper-plane"></i></button>';
+                    }
+                }
+            ],
+            logsTable: [{
+                    data: 'request_id',
+                    title: 'Request ID'
+                },
+                {
+                    data: 'org_name',
+                    title: 'Organization'
+                },
+                {
+                    data: 'endpoint',
+                    title: 'Endpoint'
+                },
+                {
+                    data: 'method',
+                    title: 'Method'
+                },
+                {
+                    data: 'response_status',
+                    title: 'Status',
+                    render: function(data) {
+                        const colorClass = data < 300 ? 'green' : data < 400 ? 'blue' : 'red';
+                        return `<span class="px-2 py-1 bg-${colorClass}-100 text-${colorClass}-800 rounded text-sm">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'response_time_ms',
+                    title: 'Time',
+                    render: function(data) {
+                        return data + ' ms';
+                    }
+                },
+                {
+                    data: 'ip_address',
+                    title: 'IP Address'
+                },
+                {
+                    data: 'request_timestamp',
+                    title: 'Timestamp',
+                    render: function(data) {
+                        return new Date(data).toLocaleString();
+                    }
+                }
+            ],
+            alertsTable: [{
+                    data: 'severity',
+                    title: 'Severity',
+                    render: function(data) {
+                        const colors = {
+                            low: 'blue',
+                            medium: 'yellow',
+                            high: 'orange',
+                            critical: 'red'
+                        };
+                        const color = colors[data] || 'gray';
+                        return `<span class="px-2 py-1 bg-${color}-100 text-${color}-800 rounded text-sm uppercase">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'alert_type',
+                    title: 'Type'
+                },
+                {
+                    data: 'org_name',
+                    title: 'Organization'
+                },
+                {
+                    data: 'description',
+                    title: 'Description'
+                },
+                {
+                    data: 'ip_address',
+                    title: 'IP Address'
+                },
+                {
+                    data: 'status',
+                    title: 'Status',
+                    render: function(data) {
+                        return data === 'Resolved' ?
+                            '<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Resolved</span>' :
+                            '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">Pending</span>';
+                    }
+                },
+                {
+                    data: 'created_at',
+                    title: 'Created',
+                    render: function(data) {
+                        return new Date(data).toLocaleString();
+                    }
+                },
+                {
+                    data: null,
+                    title: 'Actions',
+                    orderable: false,
+                    render: function(data) {
+                        return data.status === 'Pending' ?
+                            '<button class="text-green-600 hover:text-green-800"><i class="fas fa-check"></i></button>' :
+                            '';
+                    }
+                }
+            ]
+        };
+
+        return configs[tableId] || [];
     }
 
     // Initialize first table on load
@@ -507,20 +776,285 @@ try {
 
     // Modal functions
     function openModal(modalId) {
-        Swal.fire({
-            title: 'Coming Soon',
-            text: 'This feature will be implemented in Phase 2',
-            icon: 'info'
-        });
+        if (modalId === 'newOrganizationModal') {
+            showNewOrganizationModal();
+        } else if (modalId === 'newApiKeyModal') {
+            showNewApiKeyModal();
+        } else {
+            Swal.fire({
+                title: 'Coming Soon',
+                text: 'This feature will be implemented in a future update',
+                icon: 'info'
+            });
+        }
     }
 
     function refreshLogs() {
+        if ($.fn.DataTable.isDataTable('#logsTable')) {
+            $('#logsTable').DataTable().ajax.reload();
+            Swal.fire({
+                title: 'Refreshed!',
+                text: 'Latest request logs loaded',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+    }
+    
+    // Show new organization modal
+    function showNewOrganizationModal() {
         Swal.fire({
-            title: 'Refreshing...',
-            text: 'Loading latest request logs',
-            icon: 'info',
-            timer: 1500,
-            showConfirmButton: false
+            title: '<i class="fas fa-building mr-2"></i>New Organization',
+            html: `
+                <div class="text-left">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Organization Name *</label>
+                        <input type="text" id="org_name" class="w-full border rounded-lg px-3 py-2" placeholder="e.g., Finance Department">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Organization Code *</label>
+                        <input type="text" id="org_code" class="w-full border rounded-lg px-3 py-2" placeholder="e.g., FIN_DEPT" style="text-transform: uppercase;">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Email *</label>
+                        <input type="email" id="contact_email" class="w-full border rounded-lg px-3 py-2" placeholder="email@example.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                        <input type="text" id="contact_phone" class="w-full border rounded-lg px-3 py-2" placeholder="+234...">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rate Limit (requests/min)</label>
+                        <input type="number" id="rate_limit" class="w-full border rounded-lg px-3 py-2" value="500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allowed IPs (optional, comma-separated)</label>
+                        <input type="text" id="allowed_ips" class="w-full border rounded-lg px-3 py-2" placeholder="192.168.1.1, 10.0.0.1">
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Create Organization',
+            confirmButtonColor: '#3b82f6',
+            width: '600px',
+            preConfirm: () => {
+                const orgName = $('#org_name').val();
+                const orgCode = $('#org_code').val();
+                const contactEmail = $('#contact_email').val();
+                
+                if (!orgName || !orgCode || !contactEmail) {
+                    Swal.showValidationMessage('Please fill in all required fields');
+                    return false;
+                }
+                
+                return {
+                    org_name: orgName,
+                    org_code: orgCode.toUpperCase(),
+                    contact_email: contactEmail,
+                    contact_phone: $('#contact_phone').val(),
+                    rate_limit: $('#rate_limit').val(),
+                    allowed_ips: $('#allowed_ips').val()
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                createOrganization(result.value);
+            }
+        });
+    }
+    
+    // Create organization
+    function createOrganization(data) {
+        $.ajax({
+            url: 'api_management_actions.php',
+            method: 'POST',
+            data: { action: 'create_organization', ...data },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.message,
+                        icon: 'success'
+                    }).then(() => {
+                        // Reload organizations table
+                        if ($.fn.DataTable.isDataTable('#organizationsTable')) {
+                            $('#organizationsTable').DataTable().ajax.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', response.error, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire('Error', 'Failed to create organization: ' + error, 'error');
+            }
+        });
+    }
+    
+    // Show new API key modal
+    function showNewApiKeyModal() {
+        // First, load organizations and allowances/deductions
+        $.ajax({
+            url: 'api_management_actions.php',
+            method: 'POST',
+            data: { action: 'get_allowances_deductions' },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    showApiKeyForm(response.allowances, response.deductions);
+                } else {
+                    Swal.fire('Error', 'Failed to load data', 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Failed to load form data', 'error');
+            }
+        });
+    }
+    
+    function showApiKeyForm(allowances, deductions) {
+        const allowancesOptions = allowances.map(a => `<option value="${a.ed_id}">${a.ed_name}</option>`).join('');
+        const deductionsOptions = deductions.map(d => `<option value="${d.ed_id}">${d.ed_name}</option>`).join('');
+        const orgsOptions = <?php echo json_encode(array_map(function($org) {
+            return ['org_id' => $org['org_id'], 'org_name' => $org['org_name'], 'is_active' => $org['is_active']];
+        }, $organizations)); ?>.filter(o => o.is_active == 1).map(o => `<option value="${o.org_id}">${o.org_name}</option>`).join('');
+        
+        Swal.fire({
+            title: '<i class="fas fa-key mr-2"></i>Generate API Key',
+            html: `
+                <div class="text-left">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Organization *</label>
+                        <select id="api_org_id" class="w-full border rounded-lg px-3 py-2">
+                            <option value="">Select Organization</option>
+                            ${orgsOptions}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Resource Type *</label>
+                        <select id="api_ed_type" class="w-full border rounded-lg px-3 py-2" onchange="toggleResourceList()">
+                            <option value="">Select Type</option>
+                            <option value="1">Allowance</option>
+                            <option value="2">Deduction</option>
+                        </select>
+                    </div>
+                    <div class="mb-4" id="allowance_select" style="display:none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allowance *</label>
+                        <select id="api_ed_id_allow" class="w-full border rounded-lg px-3 py-2">
+                            <option value="">Select Allowance</option>
+                            ${allowancesOptions}
+                        </select>
+                    </div>
+                    <div class="mb-4" id="deduction_select" style="display:none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Deduction *</label>
+                        <select id="api_ed_id_deduc" class="w-full border rounded-lg px-3 py-2">
+                            <option value="">Select Deduction</option>
+                            ${deductionsOptions}
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rate Limit (requests/min)</label>
+                        <input type="number" id="api_rate_limit" class="w-full border rounded-lg px-3 py-2" value="100">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Expiration Date (optional)</label>
+                        <input type="date" id="api_expires_at" class="w-full border rounded-lg px-3 py-2">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allowed IPs (optional, comma-separated)</label>
+                        <input type="text" id="api_allowed_ips" class="w-full border rounded-lg px-3 py-2" placeholder="192.168.1.1, 10.0.0.1">
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Generate API Key',
+            confirmButtonColor: '#3b82f6',
+            width: '600px',
+            didOpen: () => {
+                window.toggleResourceList = function() {
+                    const type = $('#api_ed_type').val();
+                    if (type == '1') {
+                        $('#allowance_select').show();
+                        $('#deduction_select').hide();
+                    } else if (type == '2') {
+                        $('#allowance_select').hide();
+                        $('#deduction_select').show();
+                    } else {
+                        $('#allowance_select').hide();
+                        $('#deduction_select').hide();
+                    }
+                };
+            },
+            preConfirm: () => {
+                const orgId = $('#api_org_id').val();
+                const edType = $('#api_ed_type').val();
+                const edId = edType == '1' ? $('#api_ed_id_allow').val() : $('#api_ed_id_deduc').val();
+                
+                if (!orgId || !edType || !edId) {
+                    Swal.showValidationMessage('Please fill in all required fields');
+                    return false;
+                }
+                
+                return {
+                    org_id: orgId,
+                    ed_type: edType,
+                    ed_id: edId,
+                    rate_limit: $('#api_rate_limit').val(),
+                    expires_at: $('#api_expires_at').val(),
+                    allowed_ips: $('#api_allowed_ips').val()
+                };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                generateApiKey(result.value);
+            }
+        });
+    }
+    
+    // Generate API key
+    function generateApiKey(data) {
+        $.ajax({
+            url: 'api_management_actions.php',
+            method: 'POST',
+            data: { action: 'generate_api_key', ...data },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-4">${response.message}</p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                                    <p class="text-yellow-700 font-bold">${response.warning}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Key:</label>
+                                    <code class="block bg-gray-100 p-2 rounded text-sm break-all">${response.api_key}</code>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">API Secret:</label>
+                                    <code class="block bg-gray-100 p-2 rounded text-sm break-all">${response.api_secret}</code>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'success',
+                        width: '600px'
+                    }).then(() => {
+                        // Reload API keys table
+                        if ($.fn.DataTable.isDataTable('#apiKeysTable')) {
+                            $('#apiKeysTable').DataTable().ajax.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', response.error, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire('Error', 'Failed to generate API key: ' + error, 'error');
+            }
         });
     }
     </script>
