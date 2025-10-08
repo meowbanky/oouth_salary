@@ -10,6 +10,9 @@ header('Content-Type: text/plain');
 
 echo "=== API Debug Information ===\n\n";
 
+// Define API_ACCESS before loading config
+define('API_ACCESS', true);
+
 echo "1. Testing requires:\n";
 try {
     require_once dirname(__DIR__) . '/config/api_config.php';
@@ -89,4 +92,3 @@ try {
 }
 
 echo "\n=== End Debug ===\n";
-
