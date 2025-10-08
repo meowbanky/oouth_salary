@@ -71,6 +71,11 @@ if (empty($segments)) {
 $resource = $segments[0] ?? null;
 
 switch ($resource) {
+    case 'test':
+        // Simple test endpoint (no auth required)
+        require_once __DIR__ . '/test.php';
+        break;
+        
     case 'auth':
         // Authentication endpoints (no JWT required)
         // Set PATH_INFO for the authenticate handler
@@ -95,5 +100,5 @@ switch ($resource) {
         
     default:
         $logger->logRequest(null, null, $_SERVER['REQUEST_URI'], 404, 'NOT_FOUND', 'Endpoint not found');
-        apiError('NOT_FOUND', 'Endpoint not found', "Resource '$resource' does not exist. Available: auth, payroll, webhooks", 404);
+        apiError('NOT_FOUND', 'Endpoint not found', "Resource '$resource' does not exist. Available: test, auth, payroll, webhooks", 404);
 }
