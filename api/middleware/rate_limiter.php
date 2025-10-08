@@ -13,10 +13,17 @@ class RateLimiter {
     }
     
     /**
+     * Check if database connection is valid
+     */
+    private function hasConnection() {
+        return $this->conn !== null;
+    }
+    
+    /**
      * Check rate limit for API key
      */
     public function checkLimit($apiKey, $limit) {
-        if (!RATE_LIMIT_ENABLED) {
+        if (!RATE_LIMIT_ENABLED || !$this->hasConnection()) {
             return ['allowed' => true];
         }
         
@@ -36,6 +43,10 @@ class RateLimiter {
                 ORDER BY window_start DESC
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                return ['allowed' => true];
+            }
             
             $stmt->execute([$apiKey, $windowStart]);
             $window = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -95,6 +106,10 @@ class RateLimiter {
      * Create new rate limit window
      */
     private function createWindow($apiKey, $windowStart, $windowEnd) {
+        if (!$this->hasConnection()) {
+            return;
+        }
+        
         try {
             $stmt = $this->conn->prepare('
                 INSERT INTO api_rate_limits (api_key, window_start, window_end, request_count)
@@ -103,6 +118,10 @@ class RateLimiter {
                     request_count = request_count + 1,
                     last_request_at = NOW()
             ');
+            
+            if (!$stmt) {
+                return;
+            }
             
             $stmt->execute([$apiKey, $windowStart, $windowEnd]);
             
@@ -115,6 +134,10 @@ class RateLimiter {
      * Increment request count in current window
      */
     private function incrementCount($apiKey, $windowStart) {
+        if (!$this->hasConnection()) {
+            return;
+        }
+        
         try {
             $stmt = $this->conn->prepare('
                 UPDATE api_rate_limits 
@@ -122,6 +145,10 @@ class RateLimiter {
                     last_request_at = NOW()
                 WHERE api_key = ? AND window_start = ?
             ');
+            
+            if (!$stmt) {
+                return;
+            }
             
             $stmt->execute([$apiKey, $windowStart]);
             
@@ -134,6 +161,10 @@ class RateLimiter {
      * Clean up old rate limit windows
      */
     private function cleanupOldWindows() {
+        if (!$this->hasConnection()) {
+            return;
+        }
+        
         try {
             $cutoffTime = date('Y-m-d H:i:s', time() - (RATE_LIMIT_WINDOW * 2));
             
@@ -141,6 +172,10 @@ class RateLimiter {
                 DELETE FROM api_rate_limits 
                 WHERE window_end < ?
             ');
+            
+            if (!$stmt) {
+                return;
+            }
             
             $stmt->execute([$cutoffTime]);
             
@@ -153,7 +188,7 @@ class RateLimiter {
      * Check organization rate limit
      */
     public function checkOrganizationLimit($orgId, $limit) {
-        if (!RATE_LIMIT_ENABLED) {
+        if (!RATE_LIMIT_ENABLED || !$this->hasConnection()) {
             return ['allowed' => true];
         }
         
@@ -168,6 +203,10 @@ class RateLimiter {
                 WHERE ak.org_id = ? 
                   AND rl.window_end > ?
             ');
+            
+            if (!$stmt) {
+                return ['allowed' => true];
+            }
             
             $stmt->execute([$orgId, $windowStart]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -201,6 +240,14 @@ class RateLimiter {
      * Get rate limit status for API key
      */
     public function getStatus($apiKey, $limit) {
+        if (!$this->hasConnection()) {
+            return [
+                'limit' => $limit,
+                'remaining' => $limit,
+                'reset' => time() + RATE_LIMIT_WINDOW
+            ];
+        }
+        
         try {
             $windowStart = date('Y-m-d H:i:s', time() - RATE_LIMIT_WINDOW);
             
@@ -212,6 +259,14 @@ class RateLimiter {
                 ORDER BY window_start DESC
                 LIMIT 1
             ');
+            
+            if (!$stmt) {
+                return [
+                    'limit' => $limit,
+                    'remaining' => $limit,
+                    'reset' => time() + RATE_LIMIT_WINDOW
+                ];
+            }
             
             $stmt->execute([$apiKey, $windowStart]);
             $window = $stmt->fetch(PDO::FETCH_ASSOC);
