@@ -35,12 +35,14 @@
 ### **Step 2: Generate Signature**
 
 **Formula:**
+
 ```
 Signature String = API_KEY + TIMESTAMP
 HMAC Signature = hash_hmac('sha256', Signature String, API_SECRET)
 ```
 
 **Example (PHP):**
+
 ```php
 $apiKey = 'oouth_005_deduc_48_ed7dee3ccb995727';
 $apiSecret = 'your_64_character_secret_from_step_1';
@@ -51,6 +53,7 @@ $signature = hash_hmac('sha256', $signatureString, $apiSecret);
 ```
 
 **Example (Bash):**
+
 ```bash
 API_KEY="oouth_005_deduc_48_ed7dee3ccb995727"
 API_SECRET="your_64_character_secret"
@@ -64,11 +67,13 @@ SIGNATURE=$(echo -n "${API_KEY}${TIMESTAMP}" | openssl dgst -sha256 -hmac "$API_
 ### **Step 3: Make Request**
 
 **Required Headers:**
+
 - `X-API-Key`: Your API key
 - `X-Timestamp`: Current Unix timestamp
 - `X-Signature`: Calculated HMAC signature
 
 **Example cURL:**
+
 ```bash
 curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
   -H "Content-Type: application/json" \
@@ -78,6 +83,7 @@ curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
 ```
 
 **Success Response:**
+
 ```json
 {
   "success": true,
@@ -95,12 +101,14 @@ curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
 ## 🛠️ Tools & Resources
 
 ### **For Testing:**
+
 - **Get API Secret:** https://oouthsalary.com.ng/get_api_secret.php ⭐
 - **Signature Generator:** https://oouthsalary.com.ng/generate_signature.php
 - **Web API Tester:** https://oouthsalary.com.ng/api_test.php
 - **System Diagnostics:** https://oouthsalary.com.ng/api_diagnostic.php
 
 ### **Documentation:**
+
 - **Vendor Guide:** /API_VENDOR_GUIDE.md (complete integration guide)
 - **Security Config:** /api/SECURITY_CONFIG.md (security settings)
 - **Testing Guide:** /api/TESTING_GUIDE.md (how to test)
@@ -111,14 +119,17 @@ curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
 ## 📋 Common Errors & Solutions
 
 ### **Error: "Timestamp and signature are required"**
+
 **Problem:** Missing headers  
 **Solution:** Include `X-Timestamp` and `X-Signature` headers
 
 ---
 
 ### **Error: "Request signature verification failed"**
+
 **Problem:** Invalid signature calculation  
-**Solution:** 
+**Solution:**
+
 1. Verify you're using the correct API secret
 2. Check signature formula: `API_KEY + TIMESTAMP` (no spaces)
 3. Use HMAC-SHA256 algorithm
@@ -127,12 +138,14 @@ curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
 ---
 
 ### **Error: "Request timestamp is outside acceptable range"**
+
 **Problem:** Timestamp too old or too new (>5 minutes difference)  
 **Solution:** Use current timestamp: `time()` in PHP or `date +%s` in bash
 
 ---
 
 ### **Error: "INVALID_API_KEY"**
+
 **Problem:** API key not found or inactive  
 **Solution:** Contact OOUTH admin to verify key status
 
@@ -141,6 +154,7 @@ curl -X POST https://oouthsalary.com.ng/api/v1/auth/token \
 ## 🔐 Code Examples
 
 ### **PHP - Complete Example**
+
 ```php
 <?php
 // Configuration
@@ -184,56 +198,58 @@ if ($data['success']) {
 ---
 
 ### **Node.js - Complete Example**
-```javascript
-const crypto = require('crypto');
-const https = require('https');
 
-const apiKey = 'oouth_005_deduc_48_ed7dee3ccb995727';
+```javascript
+const crypto = require("crypto");
+const https = require("https");
+
+const apiKey = "oouth_005_deduc_48_ed7dee3ccb995727";
 const apiSecret = process.env.OOUTH_API_SECRET;
 const timestamp = Math.floor(Date.now() / 1000);
 
 // Generate signature
 const signatureString = apiKey + timestamp;
 const signature = crypto
-    .createHmac('sha256', apiSecret)
-    .update(signatureString)
-    .digest('hex');
+  .createHmac("sha256", apiSecret)
+  .update(signatureString)
+  .digest("hex");
 
 // Make request
 const options = {
-    hostname: 'oouthsalary.com.ng',
-    path: '/api/v1/auth/token',
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey,
-        'X-Timestamp': timestamp,
-        'X-Signature': signature
-    }
+  hostname: "oouthsalary.com.ng",
+  path: "/api/v1/auth/token",
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-API-Key": apiKey,
+    "X-Timestamp": timestamp,
+    "X-Signature": signature,
+  },
 };
 
 const req = https.request(options, (res) => {
-    let data = '';
-    
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-        const response = JSON.parse(data);
-        if (response.success) {
-            console.log('✅ Authentication successful!');
-            console.log('Token:', response.data.access_token);
-        } else {
-            console.log('❌ Error:', response.error.message);
-        }
-    });
+  let data = "";
+
+  res.on("data", (chunk) => (data += chunk));
+  res.on("end", () => {
+    const response = JSON.parse(data);
+    if (response.success) {
+      console.log("✅ Authentication successful!");
+      console.log("Token:", response.data.access_token);
+    } else {
+      console.log("❌ Error:", response.error.message);
+    }
+  });
 });
 
-req.on('error', (error) => console.error('Request failed:', error));
+req.on("error", (error) => console.error("Request failed:", error));
 req.end();
 ```
 
 ---
 
 ### **Python - Complete Example**
+
 ```python
 import hmac
 import hashlib
@@ -291,11 +307,13 @@ else:
 ## 📞 Support
 
 **Need Help?**
+
 - **Email:** api-support@oouth.edu.ng
 - **Phone:** [Contact Number]
 - **Hours:** Monday-Friday, 8:00 AM - 5:00 PM WAT
 
 **Common Issues:**
+
 1. Can't generate valid signature → Use get_api_secret.php tool
 2. Timestamp errors → Ensure system time is synchronized
 3. API key issues → Contact admin to verify key status
@@ -316,12 +334,12 @@ else:
 
 ## 📊 Signature Validation Rules
 
-| Rule | Requirement | Tolerance |
-|------|-------------|-----------|
-| Timestamp | Current Unix timestamp | ±5 minutes |
-| Algorithm | HMAC-SHA256 | Exact |
-| Signature String | API_KEY + TIMESTAMP | Exact (no spaces) |
-| Headers | X-Timestamp, X-Signature | Both required |
+| Rule             | Requirement              | Tolerance         |
+| ---------------- | ------------------------ | ----------------- |
+| Timestamp        | Current Unix timestamp   | ±5 minutes        |
+| Algorithm        | HMAC-SHA256              | Exact             |
+| Signature String | API_KEY + TIMESTAMP      | Exact (no spaces) |
+| Headers          | X-Timestamp, X-Signature | Both required     |
 
 ---
 
@@ -338,6 +356,7 @@ open https://oouthsalary.com.ng/generate_signature.php
 ```
 
 **Both tools provide:**
+
 - Real-time signature calculation
 - Copy-paste cURL commands
 - Instant testing
@@ -352,7 +371,7 @@ Your API integration is now production-ready with enterprise-grade security:
 ✅ HMAC signature verification  
 ✅ JWT token authentication  
 ✅ Rate limiting protection  
-✅ Complete audit logging  
+✅ Complete audit logging
 
 **Welcome to the OOUTH Salary API!**
 
@@ -361,4 +380,3 @@ Your API integration is now production-ready with enterprise-grade security:
 **Document Version:** 1.0.0  
 **Last Updated:** October 8, 2025  
 **API Status:** 🟢 PRODUCTION
-
