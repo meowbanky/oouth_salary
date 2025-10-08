@@ -17,4 +17,3 @@ echo json_encode([
     'path_info' => $_SERVER['PATH_INFO'] ?? 'not set',
     'php_version' => PHP_VERSION
 ], JSON_PRETTY_PRINT);
-
