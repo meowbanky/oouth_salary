@@ -4,14 +4,11 @@
  * Handles token generation, refresh, and revocation
  */
 
-define('API_ACCESS', true);
+// Note: This file is included from api/v1/index.php which already loads required files
+// Check if we need to define the class or if it's already available
 
-require_once dirname(__DIR__) . '/config/api_config.php';
-require_once dirname(__DIR__) . '/utils/response.php';
-require_once __DIR__ . '/jwt_handler.php';
-require_once __DIR__ . '/validate_key.php';
-
-class AuthenticationHandler {
+if (!class_exists('AuthenticationHandler')) {
+    class AuthenticationHandler {
     
     private $jwtHandler;
     private $keyValidator;
@@ -195,9 +192,9 @@ class AuthenticationHandler {
         
         apiSuccess(['message' => 'Token revoked successfully']);
     }
-}
+    }
+} // End of class_exists check
 
 // Handle request (HTTPS and OPTIONS already checked in main router)
 $handler = new AuthenticationHandler();
 $handler->handle();
-

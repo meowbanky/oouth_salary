@@ -35,7 +35,9 @@ class RateLimiter {
             $this->cleanupOldWindows();
             
             // Get or create current window
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 SELECT request_count, window_start, window_end
                 FROM api_rate_limits
                 WHERE api_key = ? 
@@ -111,7 +113,9 @@ class RateLimiter {
         }
         
         try {
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 INSERT INTO api_rate_limits (api_key, window_start, window_end, request_count)
                 VALUES (?, ?, ?, 1)
                 ON DUPLICATE KEY UPDATE 
@@ -139,7 +143,9 @@ class RateLimiter {
         }
         
         try {
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 UPDATE api_rate_limits 
                 SET request_count = request_count + 1,
                     last_request_at = NOW()
@@ -168,7 +174,9 @@ class RateLimiter {
         try {
             $cutoffTime = date('Y-m-d H:i:s', time() - (RATE_LIMIT_WINDOW * 2));
             
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 DELETE FROM api_rate_limits 
                 WHERE window_end < ?
             ');
@@ -196,7 +204,9 @@ class RateLimiter {
             $windowStart = date('Y-m-d H:i:s', time() - RATE_LIMIT_WINDOW);
             
             // Count all requests from organization's keys in the window
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 SELECT COALESCE(SUM(rl.request_count), 0) as total_requests
                 FROM api_rate_limits rl
                 JOIN api_keys ak ON rl.api_key = ak.api_key
@@ -251,7 +261,9 @@ class RateLimiter {
         try {
             $windowStart = date('Y-m-d H:i:s', time() - RATE_LIMIT_WINDOW);
             
-            $stmt = $this->conn->prepare('
+            /** @var \PDO $conn */
+            $conn = $this->conn;
+            $stmt = $conn->prepare('
                 SELECT request_count, window_end
                 FROM api_rate_limits
                 WHERE api_key = ? 

@@ -32,8 +32,8 @@ define('MAX_REQUEST_SIZE', 1048576); // 1MB
 define('TIMESTAMP_TOLERANCE', 300); // 5 minutes
 
 // Security Configuration
-define('REQUIRE_HTTPS', true); // Set to true in production
-define('REQUIRE_SIGNATURE', true); // HMAC signature verification
+define('REQUIRE_HTTPS', false); // Set to true in production
+define('REQUIRE_SIGNATURE', false); // HMAC signature verification
 define('ENABLE_IP_WHITELIST', true); // IP whitelist checking
 define('LOG_ALL_REQUESTS', true); // Log every API request
 
