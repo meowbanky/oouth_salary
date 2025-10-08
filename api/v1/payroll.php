@@ -182,7 +182,8 @@ class PayrollAPI {
             $totalRecords = $countStmt->fetchColumn();
             
             // Get periods (all periods)
-            $stmt = $this->prepareStatement('
+            // Note: LIMIT and OFFSET cannot be bound parameters in MySQL, must use direct integers
+            $stmt = $this->prepareStatement(sprintf('
                 SELECT 
                     periodId as period_id,
                     description,
@@ -190,14 +191,14 @@ class PayrollAPI {
                     payrollRun as is_active
                 FROM payperiods
                 ORDER BY periodId DESC
-                LIMIT ? OFFSET ?
-            ');
+                LIMIT %d OFFSET %d
+            ', $limit, $offset));
             
             if (!$stmt) {
                 apiError('INTERNAL_ERROR', 'Database error', null, 500);
             }
             
-            $stmt->execute([$limit, $offset]);
+            $stmt->execute();
             $periods = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Log request
