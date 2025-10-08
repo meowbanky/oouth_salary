@@ -218,8 +218,8 @@ class PayrollAPI {
         } catch (PDOException $e) {
             logApiActivity('error', 'Failed to fetch periods', ['error' => $e->getMessage()]);
             $this->logger->logRequest($this->keyData['org_id'], $this->keyData['api_key'], 
-                $_SERVER['REQUEST_URI'], 500, 'INTERNAL_ERROR', 'Database error');
-            apiError('INTERNAL_ERROR', 'Failed to fetch periods', null, 500);
+                $_SERVER['REQUEST_URI'], 500, 'INTERNAL_ERROR', $e->getMessage());
+            apiError('INTERNAL_ERROR', 'Failed to fetch periods', $e->getMessage(), 500);
         }
     }
     
