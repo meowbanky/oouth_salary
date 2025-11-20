@@ -298,6 +298,37 @@ try {
         .action-buttons {
             grid-template-columns: repeat(2, 1fr) !important;
         }
+
+        /* Ensure modals are full width on mobile */
+        #earningModal .bg-white,
+        #deductionModal .bg-white,
+        #loanModal .bg-white,
+        #gradeStepModal .bg-white,
+        #prorateModal .bg-white,
+        #payslipModal .bg-white {
+            margin: 0;
+            border-radius: 0.5rem;
+        }
+
+        /* Make table scrollable on mobile */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+
+    @media (max-width: 640px) {
+
+        /* Stack flex elements on mobile */
+        .flex.flex-col-md {
+            flex-direction: column;
+        }
+
+        /* Smaller text on mobile */
+        h1,
+        h2,
+        h3 {
+            font-size: 1.25rem;
+        }
     }
 
     /* Loading states */
@@ -398,17 +429,18 @@ try {
     }
 
     /* Ensure badge styling is persistent */
-    .badge-earning, .badge-deduction {
+    .badge-earning,
+    .badge-deduction {
         display: inline-block !important;
         transition: none !important;
         animation: none !important;
     }
-    
+
     .badge-earning {
         background-color: #dcfce7 !important;
         color: #166534 !important;
     }
-    
+
     .badge-deduction {
         background-color: #fee2e2 !important;
         color: #991b1b !important;
@@ -542,10 +574,10 @@ try {
 
 <body class="bg-gray-100 font-sans">
     <?php include 'header.php'; ?>
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen flex-col md:flex-row">
         <?php include 'sidebar.php'; ?>
-        <div class="flex-1 p-6">
-            <div class="container mx-auto">
+        <div class="flex-1 p-4 md:p-6 w-full">
+            <div class="container mx-auto max-w-full">
                 <nav class="mb-6">
                     <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
                     <span class="mx-2">/</span>
@@ -555,7 +587,7 @@ try {
                 <?php if (isset($_SESSION['msg'])): ?>
                 <div
                     class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
-                    <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                    <span><?php echo htmlspecialchars($_SESSION['msg'] ?? ''); ?></span>
                     <button onclick="this.parentElement.remove()"
                         class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
                         <i class="fas fa-times"></i>
@@ -564,45 +596,50 @@ try {
                 <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
                 <?php endif; ?>
 
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i class="fas fa-user-tie mr-2"></i> Employee Earnings
-                    <small class="text-base text-gray-600 ml-2">Manage employee payroll and earnings</small>
+                <h1
+                    class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6 flex flex-col md:flex-row md:items-center">
+                    <span class="flex items-center">
+                        <i class="fas fa-user-tie mr-2"></i> Employee Earnings
+                    </span>
+                    <small class="text-sm md:text-base text-gray-600 md:ml-2 mt-1 md:mt-0">Manage employee payroll and
+                        earnings</small>
                 </h1>
 
                 <!-- Payroll Period Info -->
-                <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
-                            <span class="font-semibold">Current Payroll Period:</span>
-                            <span class="ml-2 text-blue-600"><?php echo $_SESSION['activeperiodDescription']; ?></span>
-                            <span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Open</span>
+                <div class="bg-white p-3 md:p-4 rounded-lg shadow-md mb-4 md:mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <i class="fas fa-calendar-alt text-blue-600"></i>
+                            <span class="font-semibold text-sm md:text-base">Current Payroll Period:</span>
+                            <span
+                                class="text-blue-600 text-sm md:text-base break-words"><?php echo $_SESSION['activeperiodDescription']; ?></span>
+                            <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Open</span>
                         </div>
                         <div class="flex space-x-2">
                             <button id="reload-button"
-                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                <i class="fas fa-sync-alt"></i> Reload
+                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                                <i class="fas fa-sync-alt"></i> <span class="hidden sm:inline">Reload</span>
                             </button>
                             <button id="next-employee-button"
-                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                                <i class="fas fa-arrow-right"></i> Next Employee
+                                class="flex-1 md:flex-none px-3 md:px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                                <i class="fas fa-arrow-right"></i> <span class="hidden sm:inline">Next Employee</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Employee Search -->
-                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                    <div class="flex items-center space-x-4">
+                <div class="bg-white p-4 md:p-6 rounded-lg shadow-md mb-4 md:mb-6">
+                    <div class="w-full">
                         <div class="flex-1">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Search Employee</label>
-                            <div class="flex">
+                            <div class="flex flex-col sm:flex-row gap-2">
                                 <input type="text" id="employee-search"
-                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="flex-1 px-3 md:px-4 py-2 border border-gray-300 rounded-md sm:rounded-l-md sm:rounded-r-none focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
                                     placeholder="Enter Staff Name or Staff No">
                                 <button id="search-employee-btn"
-                                    class="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 focus:ring-blue-500 focus:border-blue-500">
-                                    <i class="fas fa-search"></i>
+                                    class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md sm:rounded-r-md sm:rounded-l-none hover:bg-blue-700 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base">
+                                    <i class="fas fa-search"></i> <span class="sm:hidden ml-2">Search</span>
                                 </button>
                             </div>
                             <!-- Hidden form for employee search -->
@@ -626,32 +663,36 @@ try {
 
 
             <?php if ($staffID): ?>
-            <div class="employee-card text-white p-6 rounded-lg shadow-md mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="employee-card text-white p-4 md:p-6 rounded-lg shadow-md mb-4 md:mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <div>
-                        <h3 class="text-lg font-semibold mb-2">Employee Information</h3>
-                        <p><strong>ID:</strong> <?php echo htmlspecialchars($staffID); ?></p>
-                        <p><strong>Name:</strong> <?php echo htmlspecialchars($empfname); ?></p>
+                        <h3 class="text-base md:text-lg font-semibold mb-2">Employee Information</h3>
+                        <p class="text-sm md:text-base"><strong>ID:</strong>
+                            <?php echo htmlspecialchars($staffID ?? ''); ?>
+                        </p>
+                        <p class="text-sm md:text-base break-words"><strong>Name:</strong>
+                            <?php echo htmlspecialchars($empfname ?? ''); ?></p>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold mb-2">Position Details</h3>
-                        <p><strong>Grade/Step:</strong>
+                        <h3 class="text-base md:text-lg font-semibold mb-2">Position Details</h3>
+                        <p class="text-sm md:text-base"><strong>Grade/Step:</strong>
                             <?php echo htmlspecialchars($empGrade ?? ''); ?>/<?php echo htmlspecialchars($empStep ?? ''); ?>
                         </p>
-                        <p><strong>Department:</strong> <?php echo htmlspecialchars($dept ?? ''); ?></p>
+                        <p class="text-sm md:text-base"><strong>Department:</strong>
+                            <?php echo htmlspecialchars($dept ?? ''); ?></p>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold mb-2">Status</h3>
-                        <p><strong>Status:</strong>
-                            <span class="px-2 py-1 bg-white bg-opacity-20 rounded text-sm">
+                        <h3 class="text-base md:text-lg font-semibold mb-2">Status</h3>
+                        <p class="text-sm md:text-base"><strong>Status:</strong>
+                            <span class="px-2 py-1 bg-white bg-opacity-20 rounded text-xs md:text-sm">
                                 <?php echo htmlspecialchars($status ?? ''); ?>
                             </span>
                         </p>
                     </div>
                     <div class="flex items-center justify-center">
                         <div class="text-center">
-                            <i class="fas fa-user-circle text-6xl mb-2"></i>
-                            <p class="text-sm opacity-75">Active Employee</p>
+                            <i class="fas fa-user-circle text-4xl md:text-6xl mb-2"></i>
+                            <p class="text-xs md:text-sm opacity-75">Active Employee</p>
                         </div>
                     </div>
                 </div>
@@ -659,76 +700,77 @@ try {
             <?php endif; ?>
 
             <!-- Earnings and Deductions Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
                 <!-- Earnings Card -->
-                <div class="earnings-card text-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-semibold">Earnings</h3>
-                        <i class="fas fa-plus-circle text-2xl"></i>
+                <div class="earnings-card text-white p-4 md:p-6 rounded-lg shadow-md">
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <h3 class="text-lg md:text-xl font-semibold">Earnings</h3>
+                        <i class="fas fa-plus-circle text-xl md:text-2xl"></i>
                     </div>
                     <div class="space-y-2">
                         <?php foreach ($earnings as $earning): ?>
                         <div class="flex justify-between items-center bg-white bg-opacity-20 p-2 rounded">
-                            <span><?php echo htmlspecialchars($earning['edDesc']); ?></span>
-                            <span class="font-semibold">₦<?php echo number_format($earning['value']); ?></span>
+                            <span><?php echo htmlspecialchars($earning['edDesc'] ?? ''); ?></span>
+                            <span class="font-semibold">₦<?php echo number_format($earning['value'] ?? 0); ?></span>
                         </div>
                         <?php endforeach; ?>
-                        <div class="border-t border-white border-opacity-30 pt-2 mt-4">
-                            <div class="flex justify-between items-center font-bold text-lg">
+                        <div class="border-t border-white border-opacity-30 pt-2 mt-3 md:mt-4">
+                            <div class="flex justify-between items-center font-bold text-base md:text-lg">
                                 <span>Gross Salary</span>
-                                <span>₦<?php echo number_format($gross); ?></span>
+                                <span class="text-sm md:text-base">₦<?php echo number_format($gross); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Deductions Card -->
-                <div class="deductions-card text-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-semibold">Deductions</h3>
-                        <i class="fas fa-minus-circle text-2xl"></i>
+                <div class="deductions-card text-white p-4 md:p-6 rounded-lg shadow-md">
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <h3 class="text-lg md:text-xl font-semibold">Deductions</h3>
+                        <i class="fas fa-minus-circle text-xl md:text-2xl"></i>
                     </div>
                     <div class="space-y-2">
                         <?php foreach ($deductions as $deduction): ?>
                         <div class="flex justify-between items-center bg-white bg-opacity-20 p-2 rounded">
-                            <span><?php echo htmlspecialchars($deduction['edDesc']); ?></span>
-                            <span class="font-semibold">₦<?php echo number_format($deduction['value']); ?></span>
+                            <span><?php echo htmlspecialchars($deduction['edDesc'] ?? ''); ?></span>
+                            <span class="font-semibold">₦<?php echo number_format($deduction['value'] ?? 0); ?></span>
                         </div>
                         <?php endforeach; ?>
-                        <div class="border-t border-white border-opacity-30 pt-2 mt-4">
-                            <div class="flex justify-between items-center font-bold text-lg">
+                        <div class="border-t border-white border-opacity-30 pt-2 mt-3 md:mt-4">
+                            <div class="flex justify-between items-center font-bold text-base md:text-lg">
                                 <span>Total Deductions</span>
-                                <span>₦<?php echo number_format($totalDeduction); ?></span>
+                                <span class="text-sm md:text-base">₦<?php echo number_format($totalDeduction); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Net Pay Card -->
-                <div class="net-pay-card text-white p-6 rounded-lg shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-semibold">Net Pay</h3>
-                        <i class="fas fa-wallet text-2xl"></i>
+                <div class="net-pay-card text-white p-4 md:p-6 rounded-lg shadow-md">
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <h3 class="text-lg md:text-xl font-semibold">Net Pay</h3>
+                        <i class="fas fa-wallet text-xl md:text-2xl"></i>
                     </div>
                     <div class="text-center">
-                        <div class="text-4xl font-bold mb-2">
+                        <div class="text-3xl md:text-4xl font-bold mb-2">
                             ₦<?php echo number_format($gross - $totalDeduction); ?>
                         </div>
-                        <p class="text-sm opacity-75">Take Home Pay</p>
+                        <p class="text-xs md:text-sm opacity-75">Take Home Pay</p>
                     </div>
-                    <div class="mt-6 space-y-2">
-                        <div class="flex justify-between">
+                    <div class="mt-4 md:mt-6 space-y-2">
+                        <div class="flex justify-between text-sm md:text-base">
                             <span>Gross Salary:</span>
-                            <span>₦<?php echo number_format($gross); ?></span>
+                            <span class="text-xs md:text-sm">₦<?php echo number_format($gross); ?></span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between text-sm md:text-base">
                             <span>Total Deductions:</span>
-                            <span>₦<?php echo number_format($totalDeduction); ?></span>
+                            <span class="text-xs md:text-sm">₦<?php echo number_format($totalDeduction); ?></span>
                         </div>
                         <div class="border-t border-white border-opacity-30 pt-2">
-                            <div class="flex justify-between font-bold">
+                            <div class="flex justify-between font-bold text-sm md:text-base">
                                 <span>Net Pay:</span>
-                                <span>₦<?php echo number_format($gross - $totalDeduction); ?></span>
+                                <span
+                                    class="text-xs md:text-sm">₦<?php echo number_format($gross - $totalDeduction); ?></span>
                             </div>
                         </div>
                     </div>
@@ -736,126 +778,134 @@ try {
             </div>
 
             <!-- Action Buttons -->
-            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Payroll Actions</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-md mb-4 md:mb-6">
+                <h3 class="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4">Payroll Actions</h3>
+                <div
+                    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4">
                     <button id="add-earning-btn"
-                        class="p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        <i class="fas fa-plus-circle text-2xl mb-2"></i>
-                        <div class="text-sm">Add Earning</div>
+                        class="p-3 md:p-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                        <i class="fas fa-plus-circle text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Add Earning</div>
                     </button>
                     <button id="add-deduction-btn"
-                        class="p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-minus-circle text-2xl mb-2"></i>
-                        <div class="text-sm">Add Deduction</div>
+                        class="p-3 md:p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        <i class="fas fa-minus-circle text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Add Deduction</div>
                     </button>
                     <button id="add-temp-btn"
-                        class="p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                        <i class="fas fa-clock text-2xl mb-2"></i>
-                        <div class="text-sm">Temp Item</div>
+                        class="p-3 md:p-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                        <i class="fas fa-clock text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Temp Item</div>
                     </button>
                     <button id="add-loan-btn"
-                        class="p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                        <i class="fas fa-hand-holding-usd text-2xl mb-2"></i>
-                        <div class="text-sm">Add Loan</div>
+                        class="p-3 md:p-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-hand-holding-usd text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Add Loan</div>
                     </button>
                     <button id="run-payroll-btn"
-                        class="p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '1') { echo 'opacity-50 cursor-not-allowed'; } ?>"
+                        class="p-3 md:p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '1') { echo 'opacity-50 cursor-not-allowed'; } ?>"
                         <?php if ($j == '1') { echo 'disabled'; } ?>>
-                        <i class="fas fa-play-circle text-2xl mb-2"></i>
-                        <div class="text-sm">Run Payroll</div>
+                        <i class="fas fa-play-circle text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Run Payroll</div>
                     </button>
                     <button id="view-payslip-btn"
-                        class="p-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '0') { echo 'opacity-50 cursor-not-allowed'; } ?>"
+                        class="p-3 md:p-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '0') { echo 'opacity-50 cursor-not-allowed'; } ?>"
                         <?php if ($j == '0') { echo 'disabled'; } ?>>
-                        <i class="fas fa-file-alt text-2xl mb-2"></i>
-                        <div class="text-sm">View Payslip</div>
+                        <i class="fas fa-file-alt text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">View Payslip</div>
                     </button>
                     <button id="delete-payslip-btn"
-                        class="p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '0') { echo 'opacity-50 cursor-not-allowed'; } ?>"
+                        class="p-3 md:p-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors <?php $j = retrievePayrollRunStatus($staffID, $_SESSION['currentactiveperiod']); if ($j == '0') { echo 'opacity-50 cursor-not-allowed'; } ?>"
                         <?php if ($j == '0') { echo 'disabled'; } ?>>
-                        <i class="fas fa-trash-alt text-2xl mb-2"></i>
-                        <div class="text-sm">Delete Payslip</div>
+                        <i class="fas fa-trash-alt text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Delete Payslip</div>
                     </button>
                     <button id="prorate-btn"
-                        class="p-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
-                        <i class="fas fa-percentage text-2xl mb-2"></i>
-                        <div class="text-sm">Prorate Allowance</div>
+                        class="p-3 md:p-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
+                        <i class="fas fa-percentage text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Prorate Allowance</div>
                     </button>
                     <button id="update-grade-btn"
-                        class="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-level-up-alt text-2xl mb-2"></i>
-                        <div class="text-sm">Update Grade/Step</div>
+                        class="p-3 md:p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-level-up-alt text-xl md:text-2xl mb-1 md:mb-2"></i>
+                        <div class="text-xs md:text-sm break-words">Update Grade/Step</div>
                     </button>
                 </div>
             </div>
 
             <!-- Detailed Table -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Detailed Breakdown</h3>
-                    <div class="flex space-x-2">
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-3 md:mb-4 gap-3">
+                    <h3 class="text-base md:text-lg font-semibold text-gray-800">Detailed Breakdown</h3>
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <button id="export-excel-btn"
-                            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                            <i class="fas fa-file-excel"></i> Export Excel
+                            class="w-full sm:w-auto px-3 md:px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                            <i class="fas fa-file-excel"></i> <span>Export Excel</span>
                         </button>
-                        <button id="print-btn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                            <i class="fas fa-print"></i> Print
+                        <button id="print-btn"
+                            class="w-full sm:w-auto px-3 md:px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                            <i class="fas fa-print"></i> <span>Print</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table id="earningsTable" class="min-w-full bg-white border border-gray-200">
-                        <thead>
-                            <tr class="bg-gray-800 text-white">
-                                <th class="py-2 px-4">Type</th>
-                                <th class="py-2 px-4">Code</th>
-                                <th class="py-2 px-4">Description</th>
-                                <th class="py-2 px-4">Amount</th>
-                                <th class="py-2 px-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($earnings as $earning): ?>
-                            <tr class="border-b hover:bg-green-50">
-                                <td class="py-2 px-4"><span
-                                        class="badge-earning px-2 py-1 rounded text-sm font-medium">Earning</span>
-                                </td>
-                                <td class="py-2 px-4"><?php echo htmlspecialchars($earning['allow_id']); ?></td>
-                                <td class="py-2 px-4"><?php echo htmlspecialchars($earning['edDesc']); ?></td>
-                                <td class="py-2 px-4 text-green-600 font-semibold">
-                                    ₦<?php echo number_format($earning['value']); ?></td>
-                                <td class="py-2 px-4">
-                                    <button class="delete-item-btn text-red-600 hover:text-red-900 mr-2"
-                                        data-id="<?php echo htmlspecialchars($earning['temp_id']); ?>"
-                                        data-type="earning">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
+                <div class="overflow-x-auto -mx-4 md:mx-0">
+                    <div class="inline-block min-w-full align-middle">
+                        <table id="earningsTable" class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-800 text-white">
+                                    <th class="py-2 px-2 md:px-4 text-xs md:text-sm">Type</th>
+                                    <th class="py-2 px-2 md:px-4 text-xs md:text-sm">Code</th>
+                                    <th class="py-2 px-2 md:px-4 text-xs md:text-sm">Description</th>
+                                    <th class="py-2 px-2 md:px-4 text-xs md:text-sm">Amount</th>
+                                    <th class="py-2 px-2 md:px-4 text-xs md:text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($earnings as $earning): ?>
+                                <tr class="border-b hover:bg-green-50">
+                                    <td class="py-2 px-2 md:px-4"><span
+                                            class="badge-earning px-1 md:px-2 py-1 rounded text-xs md:text-sm font-medium">Earning</span>
+                                    </td>
+                                    <td class="py-2 px-2 md:px-4 text-xs md:text-sm">
+                                        <?php echo htmlspecialchars($earning['allow_id'] ?? ''); ?></td>
+                                    <td class="py-2 px-2 md:px-4 text-xs md:text-sm break-words">
+                                        <?php echo htmlspecialchars($earning['edDesc'] ?? ''); ?></td>
+                                    <td class="py-2 px-2 md:px-4 text-green-600 font-semibold text-xs md:text-sm">
+                                        ₦<?php echo number_format($earning['value'] ?? 0); ?></td>
+                                    <td class="py-2 px-2 md:px-4">
+                                        <button class="delete-item-btn text-red-600 hover:text-red-900"
+                                            data-id="<?php echo htmlspecialchars($earning['temp_id'] ?? ''); ?>"
+                                            data-type="earning">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
 
-                            <?php foreach ($deductions as $deduction): ?>
-                            <tr class="border-b hover:bg-red-50">
-                                <td class="py-2 px-4"><span
-                                        class="badge-deduction px-2 py-1 rounded text-sm font-medium">Deduction</span>
-                                </td>
-                                <td class="py-2 px-4"><?php echo htmlspecialchars($deduction['allow_id']); ?></td>
-                                <td class="py-2 px-4"><?php echo htmlspecialchars($deduction['edDesc']); ?></td>
-                                <td class="py-2 px-4 text-red-600 font-semibold">
-                                    ₦<?php echo number_format($deduction['value']); ?></td>
-                                <td class="py-2 px-4">
-                                    <button class="delete-item-btn text-red-600 hover:text-red-900 mr-2"
-                                        data-id="<?php echo htmlspecialchars($deduction['temp_id']); ?>"
-                                        data-type="deduction">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                                <?php foreach ($deductions as $deduction): ?>
+                                <tr class="border-b hover:bg-red-50">
+                                    <td class="py-2 px-2 md:px-4"><span
+                                            class="badge-deduction px-1 md:px-2 py-1 rounded text-xs md:text-sm font-medium">Deduction</span>
+                                    </td>
+                                    <td class="py-2 px-2 md:px-4 text-xs md:text-sm">
+                                        <?php echo htmlspecialchars($deduction['allow_id'] ?? ''); ?></td>
+                                    <td class="py-2 px-2 md:px-4 text-xs md:text-sm break-words">
+                                        <?php echo htmlspecialchars($deduction['edDesc'] ?? ''); ?></td>
+                                    <td class="py-2 px-2 md:px-4 text-red-600 font-semibold text-xs md:text-sm">
+                                        ₦<?php echo number_format($deduction['value'] ?? 0); ?></td>
+                                    <td class="py-2 px-2 md:px-4">
+                                        <button class="delete-item-btn text-red-600 hover:text-red-900"
+                                            data-id="<?php echo htmlspecialchars($deduction['temp_id'] ?? ''); ?>"
+                                            data-type="deduction">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -863,8 +913,8 @@ try {
     </div>
 
     <!-- Add Earning Modal -->
-    <div id="earningModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-8">
+    <div id="earningModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 md:p-8 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Add Earning</h2>
                 <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
@@ -912,8 +962,9 @@ try {
     </div>
 
     <!-- Add Deduction Modal -->
-    <div id="deductionModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-8">
+    <div id="deductionModal"
+        class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 md:p-8 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Add Deduction</h2>
                 <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
@@ -961,8 +1012,8 @@ try {
     </div>
 
     <!-- Add Loan/Corporate Modal -->
-    <div id="loanModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-8">
+    <div id="loanModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 md:p-8 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Add Loan/Corporate</h2>
                 <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
@@ -1078,25 +1129,25 @@ try {
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Current Allowances</label>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto -mx-4 md:mx-0">
                                 <table class="min-w-full bg-white border border-gray-200">
                                     <thead>
                                         <tr class="bg-gray-100">
-                                            <th class="py-2 px-4 border">Code</th>
-                                            <th class="py-2 px-4 border">Description</th>
-                                            <th class="py-2 px-4 border">Amount</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Code</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Description</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($earnings as $earning): ?>
                                         <tr class="border-b">
-                                            <td class="py-2 px-4 border">
-                                                <?php echo htmlspecialchars($earning['allow_id']); ?>
+                                            <td class="py-2 px-2 md:px-4 border text-xs md:text-sm">
+                                                <?php echo htmlspecialchars($earning['allow_id'] ?? ''); ?>
                                             </td>
-                                            <td class="py-2 px-4 border">
-                                                <?php echo htmlspecialchars($earning['edDesc']); ?>
+                                            <td class="py-2 px-2 md:px-4 border text-xs md:text-sm break-words">
+                                                <?php echo htmlspecialchars($earning['edDesc'] ?? ''); ?>
                                             </td>
-                                            <td class="py-2 px-4 border text-right">
+                                            <td class="py-2 px-2 md:px-4 border text-right text-xs md:text-sm">
                                                 ₦<?php echo number_format($earning['value']); ?></td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -1107,13 +1158,13 @@ try {
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Calculated Allowances</label>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto -mx-4 md:mx-0">
                                 <table class="min-w-full bg-white border border-gray-200" id="calculatedTable">
                                     <thead>
                                         <tr class="bg-gray-100">
-                                            <th class="py-2 px-4 border">Code</th>
-                                            <th class="py-2 px-4 border">Description</th>
-                                            <th class="py-2 px-4 border">Amount</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Code</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Description</th>
+                                            <th class="py-2 px-2 md:px-4 border text-xs md:text-sm">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1148,8 +1199,9 @@ try {
     </div>
 
     <!-- Update Grade/Step Modal -->
-    <div id="gradeStepModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-8">
+    <div id="gradeStepModal"
+        class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-4 md:p-8 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold">Update Grade/Step</h2>
                 <button type="button" class="close-modal text-gray-500 hover:text-gray-700">
@@ -1201,8 +1253,9 @@ try {
 
     <!-- Payslip Modal -->
     <div id="payslipModal"
-        class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl flex flex-col" style="max-height: 90vh;">
+        class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center p-2 md:p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl flex flex-col mx-2 md:mx-0"
+            style="max-height: 90vh;">
             <!-- Modal Header -->
             <div class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
                 <div>
@@ -1290,13 +1343,17 @@ try {
                     var cellText = $typeCell.text().trim();
 
                     // Remove any existing badge classes first
-                    $typeCell.removeClass('badge-earning badge-deduction px-2 py-1 bg-green-100 text-green-800 bg-red-100 text-red-800 rounded text-sm font-medium');
-                    
+                    $typeCell.removeClass(
+                        'badge-earning badge-deduction px-2 py-1 bg-green-100 text-green-800 bg-red-100 text-red-800 rounded text-sm font-medium'
+                    );
+
                     // Add appropriate badge classes based on content
                     if (cellText === 'Earning') {
-                        $typeCell.addClass('badge-earning px-2 py-1 rounded text-sm font-medium');
+                        $typeCell.addClass(
+                            'badge-earning px-2 py-1 rounded text-sm font-medium');
                     } else if (cellText === 'Deduction') {
-                        $typeCell.addClass('badge-deduction px-2 py-1 rounded text-sm font-medium');
+                        $typeCell.addClass(
+                            'badge-deduction px-2 py-1 rounded text-sm font-medium');
                     }
                 });
             }
@@ -1342,7 +1399,8 @@ try {
         function autoRemoveValidationClasses() {
             setTimeout(function() {
                 // Only remove validation classes from form inputs, not badge elements
-                $('input.form-success, input.form-error, select.form-success, select.form-error, textarea.form-success, textarea.form-error').removeClass('form-success form-error');
+                $('input.form-success, input.form-error, select.form-success, select.form-error, textarea.form-success, textarea.form-error')
+                    .removeClass('form-success form-error');
             }, 3000);
         }
 

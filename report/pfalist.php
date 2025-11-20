@@ -144,6 +144,18 @@ if ($period != -1) {
                                 </div>
                             </div>
 
+                            <!-- Email Recipient Field -->
+                            <div>
+                                <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-envelope mr-2 text-purple-600"></i>Recipient Email
+                                </label>
+                                <input type="email" id="recipient_email" name="recipient_email"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                    placeholder="Enter email address to send report">
+                                <p class="mt-1 text-xs text-gray-500">Email will be auto-filled when a specific PFA is
+                                    selected</p>
+                            </div>
+
                             <div class="flex flex-wrap gap-3">
                                 <button name="generate_report" type="submit" id="generate_report"
                                     class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
@@ -152,6 +164,10 @@ if ($period != -1) {
                                 <button type="button" id="download-excel-button"
                                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
                                     <i class="fas fa-file-excel"></i> Download Excel
+                                </button>
+                                <button type="button" id="send-email-button"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-paper-plane"></i> Send via Email
                                 </button>
                                 <button type="button" id="download-pdf-button"
                                     class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
@@ -295,6 +311,84 @@ if ($period != -1) {
 
     <script type="text/javascript" language="javascript">
     $(document).ready(function() {
+        // Fetch PFA email when PFA is selected
+        $('#pfa').on('change', function() {
+            const pfaCode = $(this).val();
+            if (pfaCode && pfaCode !== '-1' && pfaCode !== '') {
+                // Fetch PFA details including email
+                $.ajax({
+                    url: '../libs/get_pfa_email.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        pfa_code: pfaCode
+                    },
+                    success: function(response) {
+                        if (response.status === 'success' && response.email) {
+                            $('#recipient_email').val(response.email);
+                        } else {
+                            // Clear email if PFA doesn't have one
+                            $('#recipient_email').val('');
+                        }
+                        updateButtonStates();
+                    },
+                    error: function() {
+                        // Silently fail - user can still enter email manually
+                        console.log('Could not fetch PFA email');
+                        updateButtonStates();
+                    }
+                });
+            } else {
+                // Clear email field when "All PFA" or empty selection
+                $('#recipient_email').val('');
+            }
+        });
+
+        // Update button states based on form inputs
+        function updateButtonStates() {
+            const hasData = $('#period').val() && $('#pfa').val();
+            const hasEmail = $('#recipient_email').val().trim();
+
+            $('#download-excel-button').prop('disabled', !hasData);
+            $('#download-pdf-button').prop('disabled', !hasData);
+            $('#send-email-button').prop('disabled', !hasData || !hasEmail);
+        }
+
+        // Update button states on input changes
+        $('#period, #pfa, #recipient_email').on('change input', function() {
+            updateButtonStates();
+        });
+
+        // Initial button state check
+        updateButtonStates();
+
+        // If a PFA is already selected on page load, fetch its email
+        <?php if ($pfa != -1 && $pfa != ''): ?>
+        $(document).ready(function() {
+            const pfaCode = '<?php echo htmlspecialchars($pfa); ?>';
+            if (pfaCode && pfaCode !== '-1') {
+                $.ajax({
+                    url: '../libs/get_pfa_email.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        pfa_code: pfaCode
+                    },
+                    success: function(response) {
+                        if (response.status === 'success' && response.email) {
+                            $('#recipient_email').val(response.email);
+                        }
+                        updateButtonStates();
+                    },
+                    error: function() {
+                        // Silently fail
+                        updateButtonStates();
+                    }
+                });
+            }
+        });
+        <?php endif; ?>
+
         // Form submission handling
         $('#generate_report').click(function(e) {
             if (!$('#period').val() || !$('#pfa').val()) {
@@ -310,6 +404,30 @@ if ($period != -1) {
                 return;
             }
             downloadExcel();
+        });
+
+        // Send Email functionality
+        $('#send-email-button').click(function() {
+            const email = $('#recipient_email').val().trim();
+
+            if (!$('#period').val() || !$('#pfa').val()) {
+                alert('Please select both Pay Period and PFA before sending email.');
+                return;
+            }
+
+            if (!email) {
+                alert('Please enter a recipient email address.');
+                $('#recipient_email').focus();
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Please enter a valid email address.');
+                $('#recipient_email').focus();
+                return;
+            }
+
+            sendEmail(email);
         });
 
         $('#download-pdf-button').click(function() {
@@ -370,6 +488,80 @@ if ($period != -1) {
             });
         }
 
+        function sendEmail(email) {
+            // Show loading alert
+            Swal.fire({
+                title: 'Sending Email',
+                text: 'Please wait while we generate and send the report...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: 'pfalist_export_excel.php',
+                data: {
+                    period: $('#period').val(),
+                    pfa: $('#pfa').val(),
+                    period_text: '<?php echo $month; ?>',
+                    pfa_text: '<?php echo htmlspecialchars($pfaName); ?>',
+                    recipient_email: email,
+                    action: 'email'
+                },
+                timeout: 300000,
+                dataType: 'json',
+                success: function(response) {
+                    Swal.close();
+
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Email Sent!',
+                            text: response.message ||
+                                'Report has been successfully sent to ' + email,
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message ||
+                                'Failed to send email. Please try again.',
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.close();
+                    console.error('AJAX Error:', status, error, xhr.responseText);
+
+                    let errorMsg = 'Error sending email. Please try again.';
+                    try {
+                        if (xhr.responseText) {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.message || response.error) {
+                                errorMsg = response.message || response.error;
+                            }
+                        }
+                    } catch (e) {
+                        if (xhr.responseText && xhr.responseText.length < 200) {
+                            errorMsg = xhr.responseText;
+                        }
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        showConfirmButton: true
+                    });
+                }
+            });
+        }
+
         function downloadPDF() {
             $('#ajax-loader').show();
             var form = document.createElement('form');
@@ -399,6 +591,7 @@ if ($period != -1) {
         }
     });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

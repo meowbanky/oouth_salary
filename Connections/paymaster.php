@@ -12,8 +12,12 @@ if (!$salary) {
 }
 
 try {
-	$conn = new PDO("mysql:host=$hostname_salary;dbname=$database_salary", $username_salary, $password_salary, array(PDO::ATTR_PERSISTENT => true));
+	// Removed persistent connection to prevent "too many connections" errors
+	$conn = new PDO("mysql:host=$hostname_salary;dbname=$database_salary", $username_salary, $password_salary);
 	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	// Set connection timeout to prevent hanging connections
+	$conn->setAttribute(PDO::ATTR_TIMEOUT, 5);
 } catch (PDOException $e) {
+	error_log("Database Connection Error: " . $e->getMessage());
 	echo "Failed Connection: " . $e->getMessage();
 }

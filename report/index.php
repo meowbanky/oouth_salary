@@ -71,7 +71,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-calculator text-blue-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Payroll Reports</h3>
+                                        <h3 class="font-semibold text-gray-600">Payroll Reports</h3>
                                         <p class="text-sm text-gray-600">Salary summaries and payroll analytics</p>
                                     </div>
                                 </a>
@@ -83,7 +83,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-receipt text-green-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Tax Computation</h3>
+                                        <h3 class="font-semibold text-gray-600">Tax Computation</h3>
                                         <p class="text-sm text-gray-600">Tax reports and annual returns</p>
                                     </div>
                                 </a>
@@ -95,7 +95,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-users text-purple-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Employee Reports</h3>
+                                        <h3 class="font-semibold text-gray-600">Employee Reports</h3>
                                         <p class="text-sm text-gray-600">Staff information and analytics</p>
                                     </div>
                                 </a>
@@ -107,7 +107,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-university text-yellow-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Bank Summary</h3>
+                                        <h3 class="font-semibold text-gray-600">Bank Summary</h3>
                                         <p class="text-sm text-gray-600">Banking and payment summaries</p>
                                     </div>
                                 </a>
@@ -119,7 +119,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-minus-circle text-red-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Deduction Reports</h3>
+                                        <h3 class="font-semibold text-gray-600">Deduction Reports</h3>
                                         <p class="text-sm text-gray-600">Salary deductions and lists</p>
                                     </div>
                                 </a>
@@ -131,7 +131,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-chart-line text-indigo-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Gross Amount</h3>
+                                        <h3 class="font-semibold text-gray-600">Gross Amount</h3>
                                         <p class="text-sm text-gray-600">Gross salary calculations</p>
                                     </div>
                                 </a>
@@ -143,7 +143,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-search text-teal-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Net to Bank</h3>
+                                        <h3 class="font-semibold text-gray-600">Net to Bank</h3>
                                         <p class="text-sm text-gray-600">Net salary bank transfers</p>
                                     </div>
                                 </a>
@@ -155,7 +155,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-file-invoice text-orange-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Payslip Reports</h3>
+                                        <h3 class="font-semibold text-gray-600">Payslip Reports</h3>
                                         <p class="text-sm text-gray-600">Individual and department payslips</p>
                                     </div>
                                 </a>
@@ -167,7 +167,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-piggy-bank text-pink-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Pension Fund Admin</h3>
+                                        <h3 class="font-semibold text-gray-600">Pension Fund Admin</h3>
                                         <p class="text-sm text-gray-600">PFA reports and summaries</p>
                                     </div>
                                 </a>
@@ -179,7 +179,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-chart-pie text-gray-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Variance Analysis</h3>
+                                        <h3 class="font-semibold text-gray-600">Variance Analysis</h3>
                                         <p class="text-sm text-gray-600">Salary variance reports</p>
                                     </div>
                                 </a>
@@ -191,7 +191,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                         <i class="fas fa-history text-cyan-600"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-gray-800">Audit Log</h3>
+                                        <h3 class="font-semibold text-gray-600">Audit Log</h3>
                                         <p class="text-sm text-gray-600">System activity and changes</p>
                                     </div>
                                 </a>
@@ -224,7 +224,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-search text-teal-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Detailed Amount to Bank</h4>
+                                                <h4 class="font-medium text-gray-600">Detailed Amount to Bank</h4>
                                                 <p class="text-sm text-gray-600">Complete net salary bank transfer
                                                     details</p>
                                             </div>
@@ -242,7 +242,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-file-invoice text-orange-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payslip All</h4>
+                                                <h4 class="font-medium text-gray-600">Payslip All</h4>
                                                 <p class="text-sm text-gray-600">Generate payslips for all employees</p>
                                             </div>
                                         </a>
@@ -253,7 +253,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-building text-orange-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Department Payslips</h4>
+                                                <h4 class="font-medium text-gray-600">Department Payslips</h4>
                                                 <p class="text-sm text-gray-600">Generate payslips by department</p>
                                             </div>
                                         </a>
@@ -264,7 +264,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-user text-orange-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Individual Payslip</h4>
+                                                <h4 class="font-medium text-gray-600">Individual Payslip</h4>
                                                 <p class="text-sm text-gray-600">Generate payslip for specific employee
                                                 </p>
                                             </div>
@@ -281,7 +281,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-building text-blue-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payroll Summary All</h4>
+                                                <h4 class="font-medium text-gray-600">Payroll Summary All</h4>
                                                 <p class="text-sm text-gray-600">Complete payroll summary for all
                                                     employees</p>
                                             </div>
@@ -293,7 +293,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-calendar text-blue-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payroll Summary by Department</h4>
+                                                <h4 class="font-medium text-gray-600">Payroll Summary by Department</h4>
                                                 <p class="text-sm text-gray-600">Department-wise payroll summaries</p>
                                             </div>
                                         </a>
@@ -304,7 +304,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-file-excel text-blue-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payroll Excel Export</h4>
+                                                <h4 class="font-medium text-gray-600">Payroll Excel Export</h4>
                                                 <p class="text-sm text-gray-600">Export payroll data to Excel format</p>
                                             </div>
                                         </a>
@@ -315,7 +315,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-table text-blue-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payroll Table</h4>
+                                                <h4 class="font-medium text-gray-600">Payroll Table</h4>
                                                 <p class="text-sm text-gray-600">Detailed payroll table view</p>
                                             </div>
                                         </a>
@@ -326,7 +326,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-building text-blue-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Payroll Table by Department</h4>
+                                                <h4 class="font-medium text-gray-600">Payroll Table by Department</h4>
                                                 <p class="text-sm text-gray-600">Department-wise payroll tables</p>
                                             </div>
                                         </a>
@@ -343,7 +343,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-receipt text-green-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Export for Tax Computation</h4>
+                                                <h4 class="font-medium text-gray-600">Export for Tax Computation</h4>
                                                 <p class="text-sm text-gray-600">Export data for tax computation
                                                     purposes</p>
                                             </div>
@@ -355,7 +355,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-file-invoice text-green-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Annual Tax Return</h4>
+                                                <h4 class="font-medium text-gray-600">Annual Tax Return</h4>
                                                 <p class="text-sm text-gray-600">Generate annual tax return reports</p>
                                             </div>
                                         </a>
@@ -372,7 +372,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-users text-purple-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Employee Report</h4>
+                                                <h4 class="font-medium text-gray-600">Employee Report</h4>
                                                 <p class="text-sm text-gray-600">Comprehensive employee information
                                                     report</p>
                                             </div>
@@ -389,7 +389,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-university text-yellow-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Bank Summary</h4>
+                                                <h4 class="font-medium text-gray-600">Bank Summary</h4>
                                                 <p class="text-sm text-gray-600">Banking and payment summaries</p>
                                             </div>
                                         </a>
@@ -405,7 +405,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-minus-circle text-red-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Deduction List</h4>
+                                                <h4 class="font-medium text-gray-600">Deduction List</h4>
                                                 <p class="text-sm text-gray-600">Complete list of salary deductions</p>
                                             </div>
                                         </a>
@@ -422,7 +422,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-chart-line text-indigo-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Gross Amount List</h4>
+                                                <h4 class="font-medium text-gray-600">Gross Amount List</h4>
                                                 <p class="text-sm text-gray-600">Gross salary calculations and reports
                                                 </p>
                                             </div>
@@ -440,7 +440,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-piggy-bank text-pink-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">PFA Report</h4>
+                                                <h4 class="font-medium text-gray-600">PFA Report</h4>
                                                 <p class="text-sm text-gray-600">Pension Fund Administrator reports</p>
                                             </div>
                                         </a>
@@ -451,8 +451,21 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-chart-pie text-pink-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">PFA Summary</h4>
+                                                <h4 class="font-medium text-gray-600">PFA Summary</h4>
                                                 <p class="text-sm text-gray-600">PFA summary reports and analytics</p>
+                                            </div>
+                                        </a>
+                                        <a href="pfa_individual.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-user text-pink-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Individual Staff Pension Report
+                                                </h4>
+                                                <p class="text-sm text-gray-600">Generate pension report for individual
+                                                    staff with period range and email</p>
                                             </div>
                                         </a>
                                     </div>
@@ -468,7 +481,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-chart-pie text-gray-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Variance Analysis</h4>
+                                                <h4 class="font-medium text-gray-600">Variance Analysis</h4>
                                                 <p class="text-sm text-gray-600">Salary variance reports and analysis
                                                 </p>
                                             </div>
@@ -486,7 +499,7 @@ if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == 
                                                 <i class="fas fa-history text-cyan-600 text-sm"></i>
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-800">Audit Log</h4>
+                                                <h4 class="font-medium text-gray-600">Audit Log</h4>
                                                 <p class="text-sm text-gray-600">System activity and change logs</p>
                                             </div>
                                         </a>

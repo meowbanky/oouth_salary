@@ -12,9 +12,11 @@ try {
     }
 
     // Prepare the SQL query with parameter binding to prevent SQL injection
+    // Fix collation mismatch by casting both sides to the same collation
     $query = "SELECT staff_id, CONCAT(staff_id, ' - ', NAME) AS details, EMAIL, POST 
               FROM employee 
-              WHERE staff_id LIKE :searchTerm OR NAME LIKE :searchTerm 
+              WHERE CAST(staff_id AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_general_ci LIKE :searchTerm 
+                 OR CAST(NAME AS CHAR CHARACTER SET utf8mb4) COLLATE utf8mb4_general_ci LIKE :searchTerm 
               ORDER BY staff_id ASC LIMIT 20"; // Limit results for performance
 
     $stmt = $conn->prepare($query);

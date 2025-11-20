@@ -18,10 +18,12 @@ $menuItems = [
 $adminItems = [
     ['href' => 'employee.php', 'icon' => 'fas fa-user', 'label' => 'Employees'],
     ['href' => 'empearnings.php', 'icon' => 'fas fa-credit-card', 'label' => 'Earnings/Deductions'],
+    ['href' => 'earningsdeductions.php', 'icon' => 'fas fa-list-alt', 'label' => 'Earnings/Deductions Items'],
     ['href' => 'upload.php', 'icon' => 'fas fa-cloud-upload-alt', 'label' => 'Upload Items'],
     ['href' => 'tax.php', 'icon' => 'fas fa-file-invoice-dollar', 'label' => 'Update Tax'],
     ['href' => 'payperiods.php', 'icon' => 'fas fa-calendar', 'label' => 'Pay Periods'],
-    ['href' => 'edit_conhess_conmess.php', 'icon' => 'fas fa-table', 'label' => 'Salary Table'],
+    ['href' => 'edit_conhess_conmess.php', 'icon' => 'fas fa-table', 'label' => 'Edit Allow Table '],
+    ['href' => 'edit_deduction_table.php', 'icon' => 'fas fa-edit', 'label' => 'Edit Deduction Table'],
     ['href' => 'users.php', 'icon' => 'fas fa-users', 'label' => 'Users'],
     ['href' => 'permissions.php', 'icon' => 'fas fa-shield-alt', 'label' => 'Permissions'],
     ['href' => 'payprocess.php', 'icon' => 'fas fa-cog', 'label' => 'Proces'],
@@ -41,7 +43,8 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
 }
 ?>
 
-<aside id="sidebar" class="w-64 min-h-screen p-4 hidden md:block" style="background-color: var(--bg-secondary); color: var(--text-primary);">
+<aside id="sidebar" class="w-64 min-h-screen p-4 hidden md:block"
+    style="background-color: var(--bg-secondary); color: var(--text-primary);">
     <h2 class="text-xl font-bold mb-6">Menu</h2>
     <ul class="space-y-2">
         <?php foreach ($menuItems as $item): ?>
