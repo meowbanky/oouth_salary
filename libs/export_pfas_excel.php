@@ -28,12 +28,14 @@ try {
     // Set headers
     $sheet->setCellValue('A1', 'PFA Code');
     $sheet->setCellValue('B1', 'PFA Name');
+    $sheet->setCellValue('C1', 'Email');
+    $sheet->setCellValue('D1', 'Website');
     
     // Style the header row
-    $sheet->getStyle('A1:B1')->getFont()->setBold(true);
-    $sheet->getStyle('A1:B1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
-    $sheet->getStyle('A1:B1')->getFill()->getStartColor()->setRGB('4472C4');
-    $sheet->getStyle('A1:B1')->getFont()->getColor()->setRGB('FFFFFF');
+    $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+    $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+    $sheet->getStyle('A1:D1')->getFill()->getStartColor()->setRGB('4472C4');
+    $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
     
     // Fetch data from database
     $query = $conn->prepare('SELECT * FROM tbl_pfa ORDER BY PFACODE ASC');
@@ -43,18 +45,22 @@ try {
     // Populate data
     $row = 2;
     foreach ($pfas as $pfa) {
-        $sheet->setCellValue('A' . $row, $pfa['PFACODE']);
-        $sheet->setCellValue('B' . $row, $pfa['PFANAME']);
+        $sheet->setCellValue('A' . $row, $pfa['PFACODE'] ?? '');
+        $sheet->setCellValue('B' . $row, $pfa['PFANAME'] ?? '');
+        $sheet->setCellValue('C' . $row, $pfa['EMAIL'] ?? '');
+        $sheet->setCellValue('D' . $row, $pfa['WEBSITE'] ?? '');
         $row++;
     }
     
     // Auto-size columns
     $sheet->getColumnDimension('A')->setAutoSize(true);
     $sheet->getColumnDimension('B')->setAutoSize(true);
+    $sheet->getColumnDimension('C')->setAutoSize(true);
+    $sheet->getColumnDimension('D')->setAutoSize(true);
     
     // Add borders to all cells with data
     $lastRow = $row - 1;
-    $sheet->getStyle('A1:B' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+    $sheet->getStyle('A1:D' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
     
     // Create the Excel file
     $writer = new Xlsx($spreadsheet);

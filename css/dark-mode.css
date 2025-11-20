@@ -157,6 +157,16 @@
   background-color: var(--bg-hover) !important;
 }
 
+/* Report sidebar hover fix for dark mode */
+[data-theme="dark"] .sidebar-link:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .sidebar-link:hover i {
+  color: var(--text-primary) !important;
+}
+
 /* Form Elements Dark Mode */
 [data-theme="dark"] input[type="text"],
 [data-theme="dark"] input[type="email"],

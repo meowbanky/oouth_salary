@@ -278,6 +278,68 @@ body[data-color="grey"].flat #sidebar > ul > li.active {
   opacity: 1;
 }
 
+/* Dark mode hover fix - ensure proper contrast */
+[data-theme="dark"] #sidebar li:hover {
+  background-color: #4a5568 !important;
+}
+
+[data-theme="dark"] #sidebar li:hover a {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #sidebar li:hover a i {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] #sidebar li.active {
+  background-color: #225e98 !important;
+}
+
+[data-theme="dark"] #sidebar li.active a {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] #sidebar li.active a i {
+  color: #ffffff !important;
+}
+
+/* Dark mode report category hover fix */
+[data-theme="dark"] .report-category {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-primary) !important;
+}
+
+[data-theme="dark"] .report-category h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .report-category p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .report-category:hover {
+  background-color: var(--bg-hover) !important;
+  border-color: var(--border-accent) !important;
+}
+
+[data-theme="dark"] .report-category:hover h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .report-category:hover p {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .report-category.bg-blue-100 {
+  background-color: var(--bg-accent) !important;
+}
+
+[data-theme="dark"] .report-category.bg-blue-100 h3,
+[data-theme="dark"] .report-category.bg-blue-100 p {
+  color: var(--text-primary) !important;
+}
+
 #sidebar.sales_minibar {
   width: 47px !important;
 }
@@ -2086,12 +2148,6 @@ a.clear-state {
   border: 1px solid #e7ecf1 !important;
 }
 
-@button-colour: #009ED8;
-@button-text: #ffffff;
-@regular-text: #333;
-@button-tint: fadeout(#000, 90%);
-@background: #303036;
-
 * {
   box-sizing: border-box;
 }
@@ -2103,38 +2159,41 @@ a.clear-state {
   position: relative;
   padding: 0.8em 1.4em;
   padding-right: 4.7em;
-  background: @button-colour;
+  background: #009ed8;
   border: none;
   color: white;
   transition: 0.2s;
-  &:before,
-  &:after {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    padding-top: inherit;
-    padding-bottom: inherit;
-    width: 2.8em;
-    content: "\00a0";
-    font-family: "FontAwesome", sans-serif;
-    font-size: 1.2em;
-    text-align: center;
+}
 
-    transition: 0.2s;
-    transform-origin: 50% 60%;
-  }
-  &:before {
-    background: @button-tint;
-  }
-  &:hover {
-    background: darken(@button-colour, 10%);
-  }
-  &:active,
-  &:focus {
-    background: darken(@button-colour, 30%);
-    outline: none;
-  }
+.buttonss::before,
+.buttonss::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  padding-top: inherit;
+  padding-bottom: inherit;
+  width: 2.8em;
+  content: "\00a0";
+  font-family: "FontAwesome", sans-serif;
+  font-size: 1.2em;
+  text-align: center;
+  transition: 0.2s;
+  transform-origin: 50% 60%;
+}
+
+.buttonss::before {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.buttonss:hover {
+  background: #0088c2;
+}
+
+.buttonss:active,
+.buttonss:focus {
+  background: #006d96;
+  outline: none;
 }
 
 .buttonss {

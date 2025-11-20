@@ -41,52 +41,52 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
-    
+
     <style>
-        /* Ensure footer is always visible */
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .flex-1 {
-            flex: 1;
-        }
-        
-        /* Modal positioning fixes */
-        #pfaModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
-        }
-        
-        /* Ensure SweetAlert2 appears above modal */
-        .swal2-container {
-            z-index: 10000 !important;
-        }
-        
-        .swal2-popup {
-            z-index: 10001 !important;
-        }
-        
-        /* DataTable styling improvements */
-        .dataTables_wrapper {
-            margin-bottom: 1rem;
-        }
-        
-        /* Ensure proper spacing */
-        .container {
-            flex: 1;
-        }
-        
-        /* Prevent body scroll when modal is open */
-        body.overflow-hidden {
-            overflow: hidden;
-        }
+    /* Ensure footer is always visible */
+    body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .flex-1 {
+        flex: 1;
+    }
+
+    /* Modal positioning fixes */
+    #pfaModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+    }
+
+    /* Ensure SweetAlert2 appears above modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
+
+    .swal2-popup {
+        z-index: 10001 !important;
+    }
+
+    /* DataTable styling improvements */
+    .dataTables_wrapper {
+        margin-bottom: 1rem;
+    }
+
+    /* Ensure proper spacing */
+    .container {
+        flex: 1;
+    }
+
+    /* Prevent body scroll when modal is open */
+    body.overflow-hidden {
+        overflow: hidden;
+    }
     </style>
 </head>
 
@@ -104,7 +104,7 @@ try {
                 <?php if (isset($_SESSION['msg'])): ?>
                 <div
                     class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
-                    <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                    <span><?php echo htmlspecialchars($_SESSION['msg'] ?? ''); ?></span>
                     <button onclick="this.parentElement.remove()"
                         class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
                         <i class="fas fa-times"></i>
@@ -140,23 +140,47 @@ try {
                                 <tr class="bg-gray-800 text-white">
                                     <th class="py-2 px-4">PFA Code</th>
                                     <th class="py-2 px-4">PFA Name</th>
+                                    <th class="py-2 px-4">Email</th>
+                                    <th class="py-2 px-4">Website</th>
                                     <th class="py-2 px-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($pfas as $pfa): ?>
                                 <tr>
-                                    <td class="py-2 px-4"><?php echo htmlspecialchars($pfa['PFACODE']); ?></td>
-                                    <td class="py-2 px-4"><?php echo htmlspecialchars($pfa['PFANAME']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($pfa['PFACODE'] ?? ''); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($pfa['PFANAME'] ?? ''); ?></td>
+                                    <td class="py-2 px-4">
+                                        <?php if (!empty($pfa['EMAIL'])): ?>
+                                        <a href="mailto:<?php echo htmlspecialchars($pfa['EMAIL']); ?>"
+                                            class="text-blue-600 hover:underline">
+                                            <?php echo htmlspecialchars($pfa['EMAIL']); ?>
+                                        </a>
+                                        <?php else: ?>
+                                        <span class="text-gray-400">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <?php if (!empty($pfa['WEBSITE'])): ?>
+                                        <a href="<?php echo htmlspecialchars($pfa['WEBSITE']); ?>" target="_blank"
+                                            class="text-blue-600 hover:underline">
+                                            <?php echo htmlspecialchars($pfa['WEBSITE']); ?>
+                                        </a>
+                                        <?php else: ?>
+                                        <span class="text-gray-400">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="py-2 px-4">
                                         <button class="edit-pfa-btn text-blue-600 hover:text-blue-900 mr-2"
-                                            data-pfacode="<?php echo htmlspecialchars($pfa['PFACODE']); ?>"
-                                            data-pfaname="<?php echo htmlspecialchars($pfa['PFANAME']); ?>">
+                                            data-pfacode="<?php echo htmlspecialchars($pfa['PFACODE'] ?? ''); ?>"
+                                            data-pfaname="<?php echo htmlspecialchars($pfa['PFANAME'] ?? ''); ?>"
+                                            data-pfaemail="<?php echo htmlspecialchars($pfa['EMAIL'] ?? ''); ?>"
+                                            data-pfawebsite="<?php echo htmlspecialchars($pfa['WEBSITE'] ?? ''); ?>">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
                                         <button class="delete-pfa-btn text-red-600 hover:text-red-900"
-                                            data-pfacode="<?php echo htmlspecialchars($pfa['PFACODE']); ?>"
-                                            data-pfaname="<?php echo htmlspecialchars($pfa['PFANAME']); ?>">
+                                            data-pfacode="<?php echo htmlspecialchars($pfa['PFACODE'] ?? ''); ?>"
+                                            data-pfaname="<?php echo htmlspecialchars($pfa['PFANAME'] ?? ''); ?>">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     </td>
@@ -181,19 +205,37 @@ try {
             <form id="pfaForm" method="POST" autocomplete="off">
                 <input type="hidden" name="action" id="action" value="create">
                 <input type="hidden" name="pfacode" id="pfacode">
-                
+
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">PFA Code</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">PFA Code <span
+                            class="text-red-500">*</span></label>
                     <input type="text" id="pfa_code" name="pfa_code" placeholder="Enter PFA code..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">PFA Name</label>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">PFA Name <span
+                            class="text-red-500">*</span></label>
                     <input type="text" id="pfa_name" name="pfa_name" placeholder="Enter PFA name..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
-                
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="pfa_email" name="pfa_email" placeholder="Enter email address..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                    <input type="url" id="pfa_website" name="pfa_website"
+                        placeholder="Enter website URL (e.g., https://example.com)..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <p class="text-xs text-gray-500 mt-1">You can enter with or without http:// or https://</p>
+                </div>
+
                 <div class="flex justify-end gap-3">
                     <button type="button" id="cancelBtn"
                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
@@ -209,8 +251,10 @@ try {
         var pfaTable = $('#pfaTable').DataTable({
             pageLength: 25,
             ordering: true,
-            columnDefs: [
-                { orderable: false, targets: 2 } // Disable sorting on Actions column
+            columnDefs: [{
+                    orderable: false,
+                    targets: 4
+                } // Disable sorting on Actions column
             ]
         });
 
@@ -218,7 +262,7 @@ try {
         $('#reload-button').click(function() {
             location.reload();
         });
-        
+
         // Download Excel button
         $('#download-excel-button').click(function() {
             window.location.href = 'libs/export_pfas_excel.php';
@@ -230,6 +274,8 @@ try {
             $('#pfaForm')[0].reset();
             $('#action').val('create');
             $('#pfacode').val('');
+            $('#pfa_email').val('');
+            $('#pfa_website').val('');
             showModal();
         });
 
@@ -239,7 +285,9 @@ try {
             $('#action').val('update');
             $('#pfacode').val($(this).data('pfacode'));
             $('#pfa_code').val($(this).data('pfacode'));
-            $('#pfa_name').val($(this).data('pfaname'));
+            $('#pfa_name').val($(this).data('pfaname') || '');
+            $('#pfa_email').val($(this).data('pfaemail') || '');
+            $('#pfa_website').val($(this).data('pfawebsite') || '');
             showModal();
         });
 
@@ -247,7 +295,7 @@ try {
         $(document).on('click', '.delete-pfa-btn', function() {
             const pfacode = $(this).data('pfacode');
             const pfaname = $(this).data('pfaname');
-            
+
             Swal.fire({
                 title: 'Are you sure?',
                 text: `Do you want to delete PFA "${pfaname}"?`,
@@ -270,7 +318,7 @@ try {
                             Swal.showLoading();
                         }
                     });
-                    
+
                     $.ajax({
                         url: 'libs/manage_pfa.php',
                         type: 'POST',
@@ -281,11 +329,15 @@ try {
                         },
                         success: function(response) {
                             Swal.fire({
-                                icon: response.status === 'success' ? 'success' : 'error',
-                                title: response.status === 'success' ? 'Deleted!' : 'Error',
+                                icon: response.status === 'success' ?
+                                    'success' : 'error',
+                                title: response.status === 'success' ?
+                                    'Deleted!' : 'Error',
                                 text: response.message,
-                                timer: response.status === 'success' ? 2000 : 0,
-                                showConfirmButton: response.status !== 'success'
+                                timer: response.status === 'success' ?
+                                    2000 : 0,
+                                showConfirmButton: response.status !==
+                                    'success'
                             }).then((result) => {
                                 if (response.status === 'success') {
                                     location.reload();
@@ -321,10 +373,10 @@ try {
         $('#pfaForm').submit(function(event) {
             event.preventDefault();
             var formData = $(this).serialize();
-            
+
             // Show loading state
             $('#saveBtn').prop('disabled', true).text('Saving...');
-            
+
             $.ajax({
                 url: 'libs/manage_pfa.php',
                 type: 'POST',
@@ -333,12 +385,14 @@ try {
                 success: function(response) {
                     // Hide modal first
                     hideModal();
-                    
+
                     // Show alert after modal is hidden
                     setTimeout(function() {
                         Swal.fire({
-                            icon: response.status === 'success' ? 'success' : 'error',
-                            title: response.status === 'success' ? 'Success' : 'Error',
+                            icon: response.status === 'success' ?
+                                'success' : 'error',
+                            title: response.status === 'success' ?
+                                'Success' : 'Error',
                             text: response.message,
                             timer: response.status === 'success' ? 2000 : 0,
                             showConfirmButton: response.status !== 'success'
@@ -352,7 +406,7 @@ try {
                 error: function() {
                     // Hide modal first
                     hideModal();
-                    
+
                     // Show error alert
                     setTimeout(function() {
                         Swal.fire({

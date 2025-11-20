@@ -135,7 +135,15 @@ try {
                 LIMIT 6
             ');
             $query->execute();
-            $dashboardData['payroll_trend'] = array_reverse($query->fetchAll(PDO::FETCH_ASSOC));
+            $trendData = $query->fetchAll(PDO::FETCH_ASSOC);
+            // Ensure all records have net_pay field (should already be calculated in query)
+            foreach ($trendData as &$item) {
+                if (!isset($item['net_pay'])) {
+                    $item['net_pay'] = ($item['gross_pay'] ?? 0) - ($item['total_deductions'] ?? 0);
+                }
+            }
+            unset($item); // Break reference
+            $dashboardData['payroll_trend'] = array_reverse($trendData);
 
 } catch (PDOException $e) {
     error_log("Error fetching dashboard data: " . $e->getMessage());
@@ -211,13 +219,13 @@ try {
     <!-- Header -->
     <?php include 'header.php'; ?>
 
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen flex-col md:flex-row">
         <!-- Sidebar -->
         <?php include 'sidebar.php'; ?>
 
         <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <div class="container mx-auto">
+        <div class="flex-1 p-4 md:p-6 w-full">
+            <div class="container mx-auto max-w-full">
                 <!-- Breadcrumb -->
                 <nav class="mb-6">
                     <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
@@ -237,10 +245,11 @@ try {
                 <?php endif; ?>
 
                 <!-- Dashboard Header -->
-                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6 flex items-center">
                     <i class="fas fa-dashboard mr-2"></i> Dashboard
                 </h1>
-                <h3 class="text-xl font-semibold text-blue-600 mb-8 text-center">Welcome to Salary Management System
+                <h3 class="text-lg md:text-xl font-semibold text-blue-600 mb-6 md:mb-8 text-center">Welcome to Salary
+                    Management System
                 </h3>
 
                 <!-- Debug Info (remove in production) -->
@@ -258,7 +267,7 @@ try {
                 <?php endif; ?>
 
                 <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
                     <!-- Total Employees -->
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
                         <div class="flex items-center justify-between">
@@ -317,64 +326,68 @@ try {
                 </div>
 
                 <!-- Charts Section -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                     <!-- Payroll Trend Chart -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+                        <h3
+                            class="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center flex-wrap">
                             <i class="fas fa-chart-line mr-2 text-blue-600"></i>
-                            Payroll Trend: Gross vs Net (Last 6 Periods)
+                            <span class="break-words">Payroll Trend: Gross vs Net (Last 6 Periods)</span>
                         </h3>
-                        <div class="relative" style="height: 300px;">
+                        <div class="relative" style="height: 250px; min-height: 250px;">
                             <canvas id="payrollTrendChart"></canvas>
                         </div>
                     </div>
 
                     <!-- Department Distribution -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+                        <h3 class="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center">
                             <i class="fas fa-chart-pie mr-2 text-green-600"></i>
                             Department Distribution
                         </h3>
-                        <div class="relative" style="height: 300px;">
+                        <div class="relative" style="height: 250px; min-height: 250px;">
                             <canvas id="departmentChart"></canvas>
                         </div>
                     </div>
                 </div>
 
                 <!-- Department Stats Table -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+                    <h3 class="text-base md:text-lg font-semibold text-gray-800 mb-3 md:mb-4 flex items-center">
                         <i class="fas fa-building mr-2 text-purple-600"></i>
                         Department Statistics
                     </h3>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto -mx-4 md:mx-0">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Department</th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Employees</th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Total Payroll</th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Avg. Salary</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <?php foreach ($dashboardData['departments'] as $dept): ?>
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <td class="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-medium text-gray-900">
                                         <?php echo htmlspecialchars($dept['dept']); ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td
+                                        class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-500">
                                         <?php echo number_format($dept['employee_count']); ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td
+                                        class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-500">
                                         ₦<?php echo number_format($dept['total_payroll']); ?></td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td
+                                        class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-500">
                                         ₦<?php echo number_format($dept['employee_count'] > 0 ? $dept['total_payroll'] / $dept['employee_count'] : 0); ?>
                                     </td>
                                 </tr>
@@ -385,7 +398,7 @@ try {
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                     <?php
                     $actions = [
                         ['href' => 'multiAdjustment.php', 'icon' => 'fa-shopping-cart', 'label' => 'Periodic Data'],
@@ -413,9 +426,11 @@ try {
                     <a href="<?php echo $action['href']; ?>"
                         <?php echo isset($action['id']) ? 'id="' . $action['id'] . '"' : ''; ?>
                         <?php echo isset($action['accesskey']) ? 'accesskey="' . $action['accesskey'] . '"' : ''; ?>
-                        class="quick-action bg-white p-6 rounded-lg shadow-md hover:bg-blue-50 text-center">
-                        <i class="fas <?php echo $action['icon']; ?> text-blue-600 text-3xl mb-4"></i>
-                        <p class="text-gray-700 font-medium"><?php echo $action['label']; ?></p>
+                        class="quick-action bg-white p-4 md:p-6 rounded-lg shadow-md hover:bg-blue-50 text-center">
+                        <i
+                            class="fas <?php echo $action['icon']; ?> text-blue-600 text-2xl md:text-3xl mb-2 md:mb-4"></i>
+                        <p class="text-xs md:text-sm text-gray-700 font-medium break-words">
+                            <?php echo $action['label']; ?></p>
                     </a>
                     <?php endforeach; ?>
                 </div>
