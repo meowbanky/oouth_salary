@@ -1,0 +1,79 @@
+# OOUTH Salary API - Apache Configuration
+# Enable URL rewriting and security headers
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Force HTTPS (uncomment in production)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Route all API requests to v1/index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^v1/(.*)$ v1/index.php [QSA,L]
+    
+    # Default to v1 if no version specified
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^((?!v1/).*)$ v1/index.php [QSA,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent MIME sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Clickjacking protection
+    Header set X-Frame-Options "DENY"
+    
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Referrer Policy
+    Header set Referrer-Policy "no-referrer"
+    
+    # HSTS (uncomment in production with HTTPS)
+    # Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # Content Security Policy
+    Header set Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+    
+    # Remove sensitive headers
+    Header unset X-Powered-By
+    Header unset Server
+</IfModule>
+
+# Deny access to sensitive files
+<FilesMatch "(^\.htaccess|^\.env|\.sql$|\.md$|config\.php$)">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Deny access to directories
+Options -Indexes
+
+# Enable CORS (configured in PHP)
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key, X-Timestamp, X-Signature, X-Request-ID"
+    Header always set Access-Control-Max-Age "86400"
+</IfModule>
+
+# Handle OPTIONS requests
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+</IfModule>
+
+# PHP Settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 30
+    php_value max_input_time 30
+    php_flag display_errors off
+    php_flag log_errors on
+</IfModule>
+

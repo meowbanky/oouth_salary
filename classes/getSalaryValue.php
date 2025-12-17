@@ -7,12 +7,18 @@ mysqli_select_db($salary, $database_salary);
 $code = $_POST['code'];
 if ($code == 1) {
      if (isset($_POST["grade_level"])) {
-          $grade_level = (int)($_POST['grade_level']);
-          $step = (int)($_POST['step']);
-          $newearningcode = (int)($_POST['newearningcode']);
-          $SALARY_TYPE = (int)($_POST['SALARY_TYPE']);
 
-          $sql = "SELECT ifnull(allowancetable.`value`,0) as `value` FROM allowancetable WHERE allowancetable.grade = '" . $grade_level . "' AND allowancetable.step = '" . $step . "' AND allowcode = " . $newearningcode . " AND SALARY_TYPE = " . $SALARY_TYPE;
+
+
+          if ($_POST['newearningcode'] == 21) {
+               $sql = "SELECT ifnull(allowancetable.`value`,0) as `value`  FROM allowancetable WHERE allowancetable.grade = '" . $_POST['grade_level'] . "' AND allowancetable.step = '" . $_POST['step'] . "' AND allowcode = " . $_POST['newearningcode'] . " AND category = '" . $_POST['callType'] . "'";
+          } elseif ($_POST['newearningcode'] == 5) {
+               $sql = "SELECT ifnull(allowancetable.`value`,0) as `value`  FROM allowancetable WHERE allowancetable.grade = '" . $_POST['grade_level'] . "' AND allowancetable.step = '" . $_POST['step'] . "' AND allowcode = " . $_POST['newearningcode'] . " AND category = '" . $_POST['HARZAD_TYPE'] . "'";
+          } else {
+               $sql = "SELECT ifnull(allowancetable.`value`,0) as `value` FROM allowancetable WHERE allowancetable.grade = '" . $_POST['grade_level'] . "' AND allowancetable.step = '" . $_POST['step'] . "' AND allowcode = " . $_POST['newearningcode'] . "";
+          }
+
+
 
           $result = mysqli_query($salary, $sql);
           $row = mysqli_fetch_assoc($result);
@@ -26,9 +32,26 @@ if ($code == 1) {
           }
      }
 } elseif ($code == 2) {
-    
+     if ($_POST['newearningcode'] == 50) {
+
+          $sql_consolidated = "SELECT allowancetable.`value` FROM allowancetable WHERE allowancetable.allowcode = 1 and grade = '" . $_POST['grade_level'] . "' and step = '" . $_POST['step'] . "'";
+          $result_consolidated = mysqli_query($salary, $sql_consolidated);
+          $row_consolidated = mysqli_fetch_assoc($result_consolidated);
+          $total_rowsConsolidated = mysqli_num_rows($result_consolidated);
+
+          $sql_pensionRate = "SELECT rate as rate FROM pension";
+          $result_pensionRate = mysqli_query($salary, $sql_pensionRate);
+          $row_pensionRate = mysqli_fetch_assoc($result_pensionRate);
+          $total_pensionRate = mysqli_num_rows($result_pensionRate);
+          if ($total_pensionRate > 0) {
+               $output = ceil($row_consolidated['value'] * $row_pensionRate['rate']);
+               echo $output;
+          } else {
+               echo "manual";
+          }
+     } else {
           echo "manual";
-     
+     }
 } elseif ($code == 3) {
      if (isset($_POST['grade_level'])) {
 

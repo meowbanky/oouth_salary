@@ -1,706 +1,772 @@
 <?php
 ini_set('max_execution_time', '0');
-session_start();
-
-include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-require_once('tcpdf.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-    header("location: ../index.php");
-    exit();
-}
-
+include_once('../classes/model.php');
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
 
 if (isset($_GET['period'])) {
-
     $period = $_GET['period'];
 } else {
     $period = $_SESSION['currentactiveperiod'];
 }
 ?>
+
 <!DOCTYPE html>
-<?php include('../header_payslip.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat">
-    <div class="modal fade hidden-print" id="myModal"></div>
-    <div id="wrapper">
-        <div id="header" class="hidden-print">
-            <h1><a href="../index.php"><img src="img/tasce_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-            <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-            <div class="clear"></div>
-        </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Payslip - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery-form@4.3.0/dist/jquery.form.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/theme-manager.js"></script>
+    <style>
+    /* Printable area styling with watermark */
+    .printMe {
+        position: relative;
+        background: white;
+    }
 
+    .watermark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('img/oouth_logo.png') center center no-repeat;
+        background-size: 50%;
+        opacity: 0.08;
+        pointer-events: none;
+        z-index: 1;
+    }
 
+    .printMe>* {
+        position: relative;
+        z-index: 2;
+    }
 
+    /* Ensure watermark shows in both light and dark mode for browser preview */
+    [data-theme="dark"] .watermark {
+        background-image: url('img/oouth_logo.png') !important;
+        background-repeat: no-repeat !important;
+        background-position: center center !important;
+        background-size: 50% !important;
+        opacity: 0.08 !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        pointer-events: none !important;
+        z-index: 1 !important;
+        background-color: transparent !important;
+    }
 
-        <div id="user-nav" class="hidden-print hidden-xs">
-            <ul class="btn-group ">
-                <li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-                <li class="btn  hidden-xs disabled">
-                    <a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-                            <?php
-                            $Today = date('y:m:d', time());
-                            $new = date('l, F d, Y', strtotime($Today));
-                            echo $new;
-                            ?> </span></a>
-                </li>
-                <li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-                <li class="btn  ">
-                    <a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-                </li>
-            </ul>
-        </div>
-        <?php include("report_sidebar.php"); ?>
+    @media print {
+        .watermark {
+            opacity: 0.1;
+            background-size: 45%;
+        }
 
+        .printMe {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            background: white !important;
+        }
 
+        /* Compact layout for single page - slightly more readable */
+        .printMe .p-4 {
+            padding: 0.75rem !important;
+        }
 
-        <div id="content" class="clearfix sales_content_minibar">
+        .printMe .p-6 {
+            padding: 0.75rem !important;
+        }
 
-            <div id="content-header" class="hidden-print">
-                <h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-            </div>
+        .printMe .p-3 {
+            padding: 0.5rem !important;
+        }
 
-            <div id="breadcrumb" class="hidden-print">
-                <a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payslip_personal.php">Report Input: Detailed Payslip individual</a>
-            </div>
-            <div class="clear"></div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon">
-                                <i class="fa fa-align-justify"></i>
-                            </span>
-                            <h5 align="center"></h5>
-                            <div class="clear"></div>
-                            <div class="clear"></div>
+        .printMe .p-2 {
+            padding: 0.375rem !important;
+        }
 
-                        </div>
-                        <div class="row">
-                            <?php
-                            global $conn;
-                            $deptName = '';
-                            $dept = '';
-                            if (!isset($_POST['Dept'])) {
-                                $dept = -1;
-                            } else {
-                                $dept = $_POST['Dept'];
-                            }
-                            try {
-                                $query = $conn->prepare('SELECT tbl_dept.dept_id, tbl_dept.dept FROM tbl_dept WHERE dept_id = ?');
-                                $res = $query->execute(array($dept));
-                                $out = $query->fetchAll(PDO::FETCH_ASSOC);
+        .printMe .mb-4 {
+            margin-bottom: 0.375rem !important;
+        }
 
-                                while ($row = array_shift($out)) {
-                                    $deptName = $row['dept'];
-                                }
-                            } catch (PDOException $e) {
-                                $e->getMessage();
-                            }
+        .printMe .mb-6 {
+            margin-bottom: 0.375rem !important;
+        }
 
-                            ?>
+        .printMe .mb-3 {
+            margin-bottom: 0.25rem !important;
+        }
 
+        .printMe .mb-2 {
+            margin-bottom: 0.25rem !important;
+        }
 
-                            <div class="col-md-12 pull-left">
-                                <img src="../img/tasce_logo.png" width="10%" height="10%" class="header-logo hidden-print" id="header-logo" alt="">
-                                <h2 class="page-title pull-right hidden-print">
-                                    <p align="center"> <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?> <br><?php echo $deptName; ?> Payslip Report
-                                    <p align="center">
-                                        for the Month of:
-                                        <?php
-                                        global $conn;
+        .printMe .mb-1 {
+            margin-bottom: 0.125rem !important;
+        }
 
-                                        try {
-                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-                                            $res = $query->execute(array($period));
-                                            $out = $query->fetchAll(PDO::FETCH_ASSOC);
+        .printMe .py-1 {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
 
-                                            while ($row = array_shift($out)) {
-                                                $fullPeriod =  $row['description'] . '-' . $row['periodYear'];
-                                                echo ($fullPeriod);
-                                            }
-                                        } catch (PDOException $e) {
-                                            $e->getMessage();
-                                        }
+        .printMe .py-2 {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
 
-                                        ?>
-                                </h2>
+        .printMe .py-4 {
+            padding-top: 0.375rem !important;
+            padding-bottom: 0.375rem !important;
+        }
+
+        .printMe .py-0 {
+            padding-top: 0.125rem !important;
+            padding-bottom: 0.125rem !important;
+        }
+
+        .printMe .text-base {
+            font-size: 0.875rem !important;
+        }
+
+        .printMe .text-lg {
+            font-size: 0.875rem !important;
+        }
+
+        .printMe .text-xl {
+            font-size: 1rem !important;
+        }
+
+        .printMe .text-2xl {
+            font-size: 1rem !important;
+        }
+
+        .printMe .text-sm {
+            font-size: 0.75rem !important;
+        }
+
+        .printMe .text-xs {
+            font-size: 0.6875rem !important;
+        }
+
+        .printMe .grid-cols-2 {
+            display: block !important;
+        }
+
+        .printMe .grid-cols-2>div {
+            margin-bottom: 0.125rem !important;
+        }
+
+        .printMe .gap-2 {
+            gap: 0.125rem !important;
+        }
+
+        .printMe .gap-4 {
+            gap: 0.125rem !important;
+        }
+
+        .printMe .gap-1 {
+            gap: 0.125rem !important;
+        }
+
+        .printMe .mt-2 {
+            margin-top: 0.125rem !important;
+        }
+
+        .printMe .mt-4 {
+            margin-top: 0.125rem !important;
+        }
+
+        .printMe .mt-1 {
+            margin-top: 0.125rem !important;
+        }
+
+        .printMe .rounded-lg {
+            border-radius: 0.25rem !important;
+        }
+
+        .printMe .rounded {
+            border-radius: 0.25rem !important;
+        }
+
+        /* Force single page with balanced constraints */
+        .printMe {
+            page-break-inside: avoid;
+            max-height: 95vh;
+            overflow: hidden;
+        }
+
+        /* Balanced line height for readability */
+        .printMe * {
+            line-height: 1.2 !important;
+        }
+
+        /* Ensure watermark shows in print */
+        @page {
+            margin: 0.5in;
+        }
+
+        /* Override dark mode print styles for payslip */
+        [data-theme="dark"] .printMe,
+        [data-theme="dark"] .printMe *:not(.watermark) {
+            background: #fff0 !important;
+            color: black !important;
+            box-shadow: none !important;
+        }
+
+        /* Special override for watermark - ensure it's never affected by dark mode */
+        [data-theme="dark"] .printMe .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: 45% !important;
+            opacity: 0.1 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            z-index: 1 !important;
+            background-color: transparent !important;
+        }
+
+        /* Ensure watermark is visible in print regardless of theme */
+        .watermark,
+        [data-theme="dark"] .watermark,
+        [data-theme="light"] .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: 45% !important;
+            opacity: 0.1 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none !important;
+            z-index: 1 !important;
+            background-color: transparent !important;
+        }
+
+        /* Ensure print content is above watermark */
+        [data-theme="dark"] .printMe>*:not(.watermark) {
+            position: relative !important;
+            z-index: 2 !important;
+            background: #fff0 !important;
+            color: black !important;
+        }
+
+        /* Override the global dark mode print CSS specifically for watermark */
+        [data-theme="dark"] .watermark {
+            background-image: url('img/oouth_logo.png') !important;
+            background-color: transparent !important;
+            opacity: 0.1 !important;
+        }
+    }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('report_sidebar_modern.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Breadcrumb Navigation -->
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <a href="../home.php"
+                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <i class="fas fa-home w-4 h-4 mr-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                                <a href="index.php"
+                                    class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
                             </div>
-                            <div class="col-md-12 hidden-print">
-                                <form class="form-horizontal form-horizontal-mobiles" method="POST" action="payslip_dept.php">
-                                    <div class="form-group">
-                                        <label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period :</label>
-                                        <div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
-                                            <div class="input-group">
-                                                <span class="input-group-addon"><i class="fa fa-location-arrow hidden-print"></i></span>
-                                                <select name="period" id="period" class="form-control hidden-print">
-                                                    <option value="">Select Pay Period</option>
-
-                                                    <?php
-                                                    global $conn;
-
-                                                    try {
-                                                        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-                                                        $res = $query->execute(array('1'));
-                                                        $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                        while ($row = array_shift($out)) {
-                                                            echo '<option value="' . $row['periodId'] . '"';
-                                                            if ($row['periodId'] == $period) {
-                                                                echo 'selected = "selected"';
-                                                            };
-                                                            echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-                                                        }
-                                                    } catch (PDOException $e) {
-                                                        echo $e->getMessage();
-                                                    }
-
-                                                    ?>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </form>
-                                <div class="form-group">
-                                    <label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Name :</label>
-                                    <div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
-                                        <form action="payslip_personal.php" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-                                            <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-                                            <input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Staff Name or Staff No" />
-                                            <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-                                            <input type="hidden" name="staff_id" id="staff_id" value="">
-                                        </form>
-                                    </div>
-
-                                    <div class="form-actions">
-                                        <button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-                                    </div>
-
-                                </div>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                                <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Personal Payslip</span>
                             </div>
-
-
-
-                            <?php
-                            if (isset($_GET['item'])) {
-                                $item = $_GET['item'];
-                            } else {
-                                $item = -1;
-                            }
-                            $query = $conn->prepare('SELECT staff_id FROM master_staff WHERE staff_id=? and period = ?');
-                            $query->execute(array($item, $period));
-                            $ftres = $query->fetchAll(PDO::FETCH_COLUMN);
-                            $count = $query->rowCount();
-                            $counter = 1;
-                            //print($count . "<br />");
-                            //print_r($ftres);
-                            $counter = 0;
-                            if ($_SESSION['emptrack'] >= $count) {
-                                $_SESSION['emptrack'] = 0;
-                            }
-                            // $currentemp = $ftres[''.$_SESSION['emptrack'].''];
-                            ?>
-
-                            <div class="col-md-12">
-                                <!-- BEGIN EXAMPLE TABLE PORTLET-->
-                                <div class="portlet light bordered">
-
-                                    <div class="portlet-body">
-                                        <div class="table-toolbar hidden-print">
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <button class="btn btn-sm btn-primary" type="button">
-                                                        Payroll Period <span class="badge"><?php if (isset($fullPeriod)) {
-                                                                                                print $fullPeriod;
-                                                                                            } ?></span>
-                                                    </button>
-                                                    <button class="btn btn-sm purple" type="button">
-                                                        Number of Employees <span class="badge"><?php print $count ?></span>
-                                                    </button>
-                                                    <button class="btn btn-sm red" id="btnPrint">Print <i class="fa fa-print" aria-hidden="true"></i></button>
-
-                                                    <form id="form_payprocess" method="post">
-
-                                                        <button class="btn btn-sm purple" type="button" id="sendmail">
-                                                            Send email
-                                                        </button>
-                                                    </form>
-
-                                                    <div id="loading-indicator" style="display:none;"><img src="img/ajax-loader.gif" alt="">Sending mail...</div>
-                                                    <div class="form-group">
-
-
-
-                                                        <div id="sample_1" style="display: block;">
-
-                                                            <div id="progress" style="border:1px solid #ccc; border-radius: 5px;"></div>
-                                                            <div id="information" style="width:500px"></div>
-                                                            <div id="message" style="width:500px">
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="btn-group pull-right">
-
-                                                        <!--<button class="btn blue  btn-outline dropdown-toggle" data-toggle="dropdown">Tools
-                                                            <i class="fa fa-angle-down"></i>
-                                                        </button>
-                                                        <ul class="dropdown-menu pull-right">
-                                                            <li>
-                                                                <a href="javascript:;">
-                                                                    <i class="fa fa-print"></i> Print </a>
-                                                            </li>
-                                                            <li>
-                                                                <a href="javascript:;">
-                                                                    <i class="fa fa-file-pdf-o"></i> Save as PDF </a>
-                                                            </li>
-                                                            <li>
-                                                                <a href="javascript:;">
-                                                                    <i class="fa fa-file-excel-o"></i> Export to Excel </a>
-                                                            </li>
-                                                        </ul>-->
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="btn-group pull-right">
-
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!--Printer-->
-                                            <script type='text/javascript'>
-                                                //<![CDATA[
-                                                window.onload = function() {
-                                                    jQuery.fn.extend({
-                                                        printElem: function() {
-                                                            var cloned = this.clone();
-                                                            var printSection = $('#printSection');
-                                                            if (printSection.length == 0) {
-                                                                printSection = $('<div id="printSection"></div>')
-                                                                $('body').append(printSection);
-                                                            }
-                                                            printSection.append(cloned);
-                                                            var toggleBody = $('body *:visible');
-                                                            toggleBody.hide();
-                                                            $('#printSection, #printSection *').show();
-                                                            window.print();
-                                                            printSection.remove();
-                                                            toggleBody.show();
-                                                        }
-                                                    });
-
-                                                    $(document).ready(function() {
-                                                        $(document).on('click', '#btnPrint', function() {
-                                                            $('.printMe').printElem();
-                                                        });
-                                                    });
-                                                } //]]> 
-                                            </script>
-                                            <!--Printer-->
-                                            <!--Printer-->
-                                            <table border="1" class="wrap_trs">
-                                                <tr>
-                                                    <?php
-                                                    while ($counter < $count) {
-                                                        echo '<td>';
-                                                        //Print employee payslips
-                                                        $thisemployee = $ftres['' . $counter . ''];
-                                                        //print_r($thisemployee);
-                                                    ?>
-
-                                                        <!-- START ROLL-->
-                                                        <?php
-                                                        global $conn;
-
-                                                        try {
-                                                            $query = $conn->prepare('SELECT tbl_bank.BNAME, tbl_dept.dept, master_staff.STEP, master_staff.GRADE, master_staff.staff_id, master_staff.`NAME`, master_staff.ACCTNO FROM master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN tbl_bank ON tbl_bank.BCODE = master_staff.BCODE WHERE staff_id = ? and period = ?');
-                                                            $res = $query->execute(array($thisemployee, $period));
-                                                            $out = $query->fetch();
-                                                        ?>
-                                                            <div class="row bottom-spacer-40">
-                                                                <div class="col-md-3"></div>
-
-                                                                <div class="col-md-6 payslip_background">
-
-                                                                    <div id="printThis" class="printMe payslip-wrapper">
-                                                                        <div class=" payslip-header">
-                                                                            <div class="row header-label">
-                                                                                <div class="col-md-12 txt-ctr text-uppercase"><b>
-                                                                                        <?php echo $_SESSION['BUSINESSNAME']; ?>, <?php echo $_SESSION['town']; ?>
-                                                                                    </b></div>
-                                                                                <div class="col-md-12 txt-ctr text-uppercase">
-                                                                                    <b> PAYSLIP FOR <b> <?php echo $fullPeriod; ?> </b></b>
-                                                                                </div>
-
-                                                                            </div>
-                                                                            <div class="row header-label">
-                                                                                <div class="col-md-6 col-xs-6">
-                                                                                    <span class="pay-header-item" style="white-space:nowrap;">Name:
-                                                                                        <?php
-                                                                                        echo $out['NAME'];
-                                                                                        ?>
-
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div class="col-md-6 col-xs-6 txt-left" style="white-space:nowrap;"><?php
-                                                                                                                                                    //  echo $out['NAME'];
-                                                                                                                                                    ?></div>
-                                                                            </div>
-                                                                            <div class="row header-label">
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">Staff No.: <?php print_r($thisemployee); ?>
-                                                                                    <input type="hidden" name="staff_no" id="staff_no" value="<?php echo $thisemployee ?>">
-                                                                                    <input type="hidden" name="period" id="period" value="<?php echo $period ?>">
-                                                                                </div>
-
-                                                                            </div>
-                                                                            <div class="row header-label">
-
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">
-                                                                                    Dept:
-                                                                                    <?php
-                                                                                    echo $out['dept'];
-                                                                                    ?>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="row header-label">
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">Bank:
-                                                                                    <?php
-                                                                                    echo $out['BNAME'];
-                                                                                    ?>
-                                                                                </div>
-
-                                                                            </div>
-                                                                            <div class="row header-label">
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">Acct No.:
-                                                                                    <?php
-                                                                                    echo $out['ACCTNO'];
-                                                                                    ?>
-                                                                                </div>
-
-                                                                            </div>
-                                                                            <div class="row header-label">
-
-                                                                                <div class="col-md-6 col-xs-6" style="white-space:nowrap;">BASIC:
-                                                                                    <?php
-                                                                                    echo $out['GRADE'] . '/' . $out['STEP'];
-                                                                                    ?>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    <?php
-                                                                } catch (PDOException $e) {
-                                                                    echo $e->getMessage();
-                                                                }
-
-                                                                    ?>
-
-                                                                    <div class="payslip-body">
-                                                                        <div class="row header-label">
-                                                                            <div class="col-md-12 col-xs-12"><b>BASIC SALARY</b></div>
-                                                                        </div>
-
-                                                                        <div class="row header-label">
-                                                                            <div class="col-md-6 col-xs-6" style="white-space:nowrap;">BASIC SALARY: </div>
-                                                                            <div class="col-md-6 col-xs-6 txt-right">
-                                                                                <?php
-                                                                                $consolidated = 0;
-                                                                                try {
-                                                                                    $query = $conn->prepare('SELECT tbl_master.staff_id,tbl_master.allow FROM tbl_master WHERE allow_id = ? and staff_id = ? and period = ?');
-                                                                                    $fin = $query->execute(array('1', $thisemployee, $period));
-                                                                                    //$res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                                    $res = $query->fetch();
-                                                                                    if ($query->rowCount() > 0) {
-                                                                                        $consolidated = $res['allow'];
-                                                                                    } else {
-                                                                                        $consolidated = 0;
-                                                                                    }
-
-
-                                                                                    echo number_format($consolidated);
-                                                                                } catch (PDOException $e) {
-                                                                                    echo $e->getMessage();
-                                                                                }
-                                                                                ?>
-
-
-
-                                                                            </div>
-
-                                                                        </div>
-                                                                        <div class="row header-label">
-                                                                            <div class="col-md-12 col-xs-12"><b><u>ALLOWANCES</u></b></div>
-                                                                        </div>
-                                                                        <div class="row payslip-data">
-                                                                            <?php
-                                                                            $totalAllow = 0;
-                                                                            try {
-                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
-                                                                                $fin = $query->execute(array('1', $thisemployee, $period, '1'));
-                                                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                                //print_r($res);
-
-                                                                                foreach ($res as $row => $link) {
-
-                                                                                    $totalAllow = $totalAllow + floatval($link['allow']);
-
-                                                                                    echo '<div class="col-md-8 col-xs-8" style="white-space:nowrap;">' . $link['ed'];
-
-                                                                                    echo '</div><div class="col-md-4 col-xs-4 payslip-amount">' . number_format($link['allow']) . '</div>';
-                                                                                }
-                                                                            } catch (PDOException $e) {
-                                                                                echo $e->getMessage();
-                                                                            }
-                                                                            ?>
-                                                                        </div>
-
-                                                                        <div class="row payslip-total">
-
-                                                                            <div class="col-md-8 col-xs-8"><b>Gross Salary</b></div>
-                                                                            <div class="col-md-4 col-xs-4 payslip-amount"><b>
-                                                                                    <?php
-                                                                                    echo number_format(floatval($totalAllow) + floatval($consolidated));
-                                                                                    ?>
-                                                                                </b></div>
-                                                                        </div>
-                                                                    </div>
-
-
-
-                                                                    <div class="payslip-body">
-                                                                        <div class="row header-label">
-                                                                            <div class="col-md-12 col-xs-12"><b><u>Deductions</u></b></div>
-                                                                        </div>
-                                                                        <div class="row payslip-data">
-                                                                            <?php
-                                                                            $totalDeduction = 0;
-                                                                            try {
-                                                                                $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and tbl_earning_deduction.type = ?');
-                                                                                $fin = $query->execute(array($thisemployee, $period, '2'));
-                                                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-
-
-                                                                                foreach ($res as $row => $link) {
-
-                                                                                    //Get ED description
-                                                                                    $totalDeduction = $totalDeduction + floatval($link['deduc']);
-
-
-                                                                                    echo '<div class="col-md-8 col-xs-8" style="white-space:nowrap;">' . $link['ed'];
-
-                                                                                    echo '</div><div class="col-md-4 col-xs-4 payslip-amount">' . number_format($link['deduc']) . '</div>';
-                                                                                }
-                                                                            } catch (PDOException $e) {
-                                                                                echo $e->getMessage();
-                                                                            }
-                                                                            ?>
-
-
-                                                                        </div>
-
-
-
-                                                                        <div class="row payslip-total">
-                                                                            <div class="col-md-8 col-xs-8"><b>Total Deductions</b></div>
-                                                                            <div class="col-md-4 col-xs-4 payslip-amount"><b>
-                                                                                    <?php
-                                                                                    echo number_format($totalDeduction);
-                                                                                    ?>
-                                                                                </b></div>
-                                                                        </div>
-                                                                    </div>
-
-
-                                                                    <div class="payslip-body">
-
-
-                                                                        <div class="row payslip-total">
-                                                                            <div class="col-md-8 col-xs-8"><b>Net Pay</b></div>
-                                                                            <div class="col-md-4 col-xs-4 payslip-amount"><b>
-                                                                                    <?php
-                                                                                    echo number_format((floatval($totalAllow) + floatval($consolidated)) - floatval($totalDeduction));
-                                                                                    ?>
-                                                                                </b></div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                                <div class="col-md-3"></div>
-                                                            </div>
-                                                            <!-- END ROLL-->
-
-                                                        <?php
-                                                        $counter++;
-                                                        //end employee payslips
-                                                    }
-                                                    echo '</td>';
-                                                    echo '<p style = "page-break-after:always;"></p>';
-                                                        ?>
-                                                </tr>
-                                            </table>
-                                        </div>
-
-                                    </div>
-
-                                    <!-- END EXAMPLE TABLE PORTLET-->
-                                </div>
-                            </div>
-
-                        </div>
+                        </li>
+                    </ol>
+                </nav>
+
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-user"></i> Personal Payslip
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate individual employee payslips with detailed
+                            salary breakdown.</p>
                     </div>
-                    <div id="register_container" class="receiving"></div>
                 </div>
 
-            </div>
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Search Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
+                                </label>
+                                <select name="period" id="period"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm">
+                                    <option value="">Select Pay Period</option>
+                                    <?php
+                                    try {
+                                        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                        $query->execute(['1']);
+                                        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                            $selected = $row['periodId'] == $period ? 'selected' : '';
+                                            echo "<option value='{$row['periodId']}' $selected>{$row['description']} - {$row['periodYear']}</option>";
+                                        }
+                                    } catch (PDOException $e) {
+                                        echo "<option value=''>Error loading periods</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
 
-            <div id="footer" class="col-md-12 hidden-print">
-                Please visit our
-                <a href="https://tasce.edu.ng/site/" target="_blank">
-                    website </a>
-                to learn the latest information about the project.
-                <span class="text-info"> <span class="label label-info"> 14.1</span></span>
-            </div>
+                            <div>
+                                <label for="item" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-search mr-2 text-green-600"></i>Staff Search
+                                </label>
+                                <div class="relative">
+                                    <input type="text" name="item" id="item"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        placeholder="Enter Staff Name or Staff No" />
+                                    <div id="ajax-loader" class="absolute right-3 top-3 hidden">
+                                        <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="staff_id" id="staff_id" value="">
+                            </div>
+                        </div>
 
-        </div><!--end #content-->
-        <!--end #wrapper-->
+                        <div class="flex flex-wrap gap-3 mt-6">
+                            <button type="button" onclick="generatePayslip()"
+                                class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <i class="fas fa-search"></i> Generate Payslip
+                            </button>
+                            <button type="button" id="btnPrint"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            <button type="button" id="sendmail"
+                                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <i class="fas fa-envelope"></i> Send Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-
-        <script type="text/javascript" language="javascript">
-            $(document).ready(function() {
-
-                $("#item").autocomplete({
-                    source: '../searchStaff.php',
-                    type: 'POST',
-                    delay: 10,
-                    autoFocus: false,
-                    minLength: 1,
-                    select: function(event, ui) {
-                        event.preventDefault();
-                        $("#item").val(ui.item.value);
-                        $item = $("#item").val();
-                        $period = $("#period").val();
-                        $('#add_item_form').ajaxSubmit({
-                            beforeSubmit: salesBeforeSubmit,
-                            success: itemScannedSuccess
-                        });
-                        $("#staff_id").val($item);
-                        $('#add_item_form').ajaxSubmit({
-                            type: "POST",
-                            url: "payslip_personal.php",
-                            success: function(data) {
-                                window.location.href = "payslip_personal.php?item=" + $item + "&period=" + $period;
-                            }
-
-
-                        });
+                <?php
+                // Get period description for display
+                $fullPeriod = '';
+                if ($period != -1) {
+                    try {
+                        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear FROM payperiods WHERE periodId = ?');
+                        $query->execute([$period]);
+                        $row = $query->fetch(PDO::FETCH_ASSOC);
+                        $fullPeriod = $row ? $row['description'] . '-' . $row['periodYear'] : '';
+                    } catch (PDOException $e) {
+                        $fullPeriod = 'Error loading period';
                     }
-                });
-
-                $('#item').focus();
-                var last_focused_id = null;
-                var submitting = false;
-
-                function salesBeforeSubmit(formData, jqForm, options) {
-                    if (submitting) {
-                        return false;
-                    }
-                    submitting = true;
-                    $("#ajax-loader").show();
-
                 }
+                ?>
 
-                function itemScannedSuccess(responseText, statusText, xhr, $form) {
+                <!-- Payslip Display Section -->
+                <?php if (isset($_GET['item']) && $_GET['item'] != '') { ?>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            Payslip for <?php echo htmlspecialchars($fullPeriod); ?>
+                        </p>
+                    </div>
 
-                    if (($('#code').val()) == 1) {
-                        gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
+                    <div class="p-6">
+                        <?php
+                            $item = $_GET['item'];
+                            try {
+                                $query = $conn->prepare('SELECT staff_id FROM master_staff WHERE staff_id=? and period = ?');
+                                $query->execute([$item, $period]);
+                                $ftres = $query->fetchAll(PDO::FETCH_COLUMN);
+                                $count = $query->rowCount();
+                                
+                                if ($count > 0) {
+                                    $thisemployee = $ftres[0];
+                                    
+                                    // Get employee details
+                                    $query = $conn->prepare('SELECT tbl_bank.BNAME, tbl_dept.dept, master_staff.STEP, master_staff.GRADE, master_staff.staff_id, master_staff.NAME, master_staff.ACCTNO FROM master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN tbl_bank ON tbl_bank.BCODE = master_staff.BCODE WHERE staff_id = ? and period = ?');
+                                    $query->execute([$thisemployee, $period]);
+                                    $out = $query->fetch();
+                                    
+                                    if ($out) {
+                                        // Employee Information Card
+                                        echo '<div class="bg-gray-50 rounded-lg p-6 mb-6">';
+                                        echo '<h3 class="text-lg font-semibold text-gray-800 mb-4">Employee Information</h3>';
+                                        echo '<div class="grid md:grid-cols-2 gap-4">';
+                                        echo '<div><strong>Name:</strong> ' . htmlspecialchars($out['NAME']) . '</div>';
+                                        echo '<div><strong>Staff No:</strong> ' . htmlspecialchars($out['staff_id']) . '</div>';
+                                        echo '<div><strong>Department:</strong> ' . htmlspecialchars($out['dept']) . '</div>';
+                                        echo '<div><strong>Bank:</strong> ' . htmlspecialchars($out['BNAME']) . '</div>';
+                                        echo '<div><strong>Account No:</strong> ' . htmlspecialchars($out['ACCTNO']) . '</div>';
+                                        echo '<div><strong>Grade/Step:</strong> ' . htmlspecialchars($out['GRADE'] . '/' . $out['STEP']) . '</div>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        
+                                        // Payslip Details (printable area)
+                                        echo '<div id="printThis" class="printMe">';
+                                        // Watermark layer
+                                        echo '<div class="watermark"></div>';
+                                        
+                                        // Hospital Header for Print
+                                        echo '<div class="text-center mb-4 pb-2 border-b-2 border-blue-800">';
+                                        echo '<h1 class="text-lg font-bold text-blue-800">OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL</h1>';
+                                        echo '<p class="text-sm text-blue-700 font-medium">Payslip for ' . htmlspecialchars($fullPeriod) . '</p>';
+                                        echo '</div>';
+                                        
+                                        // Employee Information for Print
+                                        echo '<div class="bg-gray-50 rounded p-3 mb-3 border">';
+                                        echo '<h3 class="text-sm font-semibold text-gray-800 mb-2 border-b pb-1">Employee Information</h3>';
+                                        echo '<div class="grid grid-cols-2 gap-2 text-sm">';
+                                        echo '<div><strong>Name:</strong> ' . htmlspecialchars($out['NAME']) . '</div>';
+                                        echo '<div><strong>Staff No:</strong> ' . htmlspecialchars($out['staff_id']) . '</div>';
+                                        echo '<div><strong>Department:</strong> ' . htmlspecialchars($out['dept']) . '</div>';
+                                        echo '<div><strong>Bank:</strong> ' . htmlspecialchars($out['BNAME']) . '</div>';
+                                        echo '<div><strong>Account No:</strong> ' . htmlspecialchars($out['ACCTNO']) . '</div>';
+                                        echo '<div><strong>Grade/Step:</strong> ' . htmlspecialchars($out['GRADE'] . '/' . $out['STEP']) . '</div>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        
+                                        // Consolidated Salary
+                                        $consolidated = 0;
+                                        try {
+                                            $query = $conn->prepare('SELECT tbl_master.staff_id,tbl_master.allow FROM tbl_master WHERE allow_id = ? and staff_id = ? and period = ?');
+                                            $query->execute(['1', $thisemployee, $period]);
+                                            $res = $query->fetch();
+                                            if ($query->rowCount() > 0 && $res) {
+                                                $consolidated = $res['allow'];
+                                            }
+                                        } catch (PDOException $e) {
+                                            $consolidated = 0;
+                                        }
+                                        
+                                        echo '<div class="bg-white border rounded p-3 mb-3">';
+                                        echo '<h4 class="text-sm font-semibold text-blue-800 mb-2">CONSOLIDATED SALARY</h4>';
+                                        echo '<div class="flex justify-between items-center py-1 border-b">';
+                                        echo '<span class="text-sm">Consolidated Salary:</span>';
+                                        echo '<span class="font-semibold text-sm">₦' . number_format($consolidated) . '</span>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        
+                                        // Allowances
+                                        $totalAllow = 0;
+                                        try {
+                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.allow, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE allow_id <> ? and staff_id = ? and period = ? and type = ?');
+                                            $query->execute(['1', $thisemployee, $period, '1']);
+                                            $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                            
+                                            if (count($res) > 0) {
+                                                echo '<div class="bg-white border rounded p-3 mb-3">';
+                                                echo '<h4 class="text-sm font-semibold text-green-800 mb-2">ALLOWANCES</h4>';
+                                                
+                                                foreach ($res as $link) {
+                                                    $totalAllow += floatval($link['allow']);
+                                                    echo '<div class="flex justify-between items-center py-1 border-b">';
+                                                    echo '<span class="text-sm">' . htmlspecialchars($link['ed']) . ':</span>';
+                                                    echo '<span class="font-semibold text-sm">₦' . number_format($link['allow']) . '</span>';
+                                                    echo '</div>';
+                                                }
+                                                echo '</div>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            // Handle error silently
+                                        }
+                                        
+                                        // Gross Salary
+                                        $grossSalary = $totalAllow + $consolidated;
+                                        echo '<div class="bg-green-50 border border-green-200 rounded p-3 mb-3">';
+                                        echo '<div class="flex justify-between items-center">';
+                                        echo '<span class="text-sm font-semibold text-green-800">Gross Salary:</span>';
+                                        echo '<span class="text-sm font-bold text-green-800">₦' . number_format($grossSalary) . '</span>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        
+                                        // Deductions
+                                        $totalDeduction = 0;
+                                        try {
+                                            $query = $conn->prepare('SELECT tbl_master.staff_id, tbl_master.deduc, tbl_earning_deduction.ed FROM tbl_master INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = tbl_master.allow_id WHERE staff_id = ? and period = ? and type = ?');
+                                            $query->execute([$thisemployee, $period, '2']);
+                                            $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                            
+                                            if (count($res) > 0) {
+                                                echo '<div class="bg-white border rounded p-3 mb-3">';
+                                                echo '<h4 class="text-sm font-semibold text-red-800 mb-2">DEDUCTIONS</h4>';
+                                                
+                                                foreach ($res as $link) {
+                                                    $totalDeduction += floatval($link['deduc']);
+                                                    echo '<div class="flex justify-between items-center py-1 border-b">';
+                                                    echo '<span class="text-sm">' . htmlspecialchars($link['ed']) . ':</span>';
+                                                    echo '<span class="font-semibold text-sm">₦' . number_format($link['deduc']) . '</span>';
+                                                    echo '</div>';
+                                                }
+                                                
+                                                echo '<div class="flex justify-between items-center py-1 mt-2 bg-red-50 rounded">';
+                                                echo '<span class="font-semibold text-red-800 text-sm">Total Deductions:</span>';
+                                                echo '<span class="font-bold text-red-800 text-sm">₦' . number_format($totalDeduction) . '</span>';
+                                                echo '</div>';
+                                                echo '</div>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            // Handle error silently
+                                        }
+                                        
+                                        // Net Pay
+                                        $netPay = $grossSalary - $totalDeduction;
+                                        echo '<div class="bg-blue-50 border border-blue-200 rounded p-3">';
+                                        echo '<div class="flex justify-between items-center">';
+                                        echo '<span class="text-sm font-bold text-blue-800">Net Pay:</span>';
+                                        echo '<span class="text-base font-bold text-blue-800">₦' . number_format($netPay) . '</span>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                        
+                                        echo '</div>'; // End printMe div
+                                        
+                                        // Hidden form for email sending
+                                        echo '<form id="form_payprocess" method="post" class="hidden">';
+                                        echo '<input type="hidden" name="staff_no" id="staff_no" value="' . htmlspecialchars($thisemployee) . '">';
+                                        echo '<input type="hidden" name="period" id="period_hidden" value="' . htmlspecialchars($period) . '">';
+                                        echo '</form>';
+                                    }
+                                } else {
+                                    echo '<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">';
+                                    echo '<i class="fas fa-exclamation-triangle text-yellow-600 text-3xl mb-4"></i>';
+                                    echo '<h3 class="text-lg font-semibold text-yellow-800 mb-2">Staff Not Found</h3>';
+                                    echo '<p class="text-yellow-700">No payslip data found for the selected staff member and period.</p>';
+                                    echo '</div>';
+                                }
+                            } catch (PDOException $e) {
+                                echo '<div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">';
+                                echo '<i class="fas fa-exclamation-circle text-red-600 text-3xl mb-4"></i>';
+                                echo '<h3 class="text-lg font-semibold text-red-800 mb-2">Error</h3>';
+                                echo '<p class="text-red-700">Error loading payslip data: ' . htmlspecialchars($e->getMessage()) . '</p>';
+                                echo '</div>';
+                            }
+                            ?>
+                    </div>
+                </div>
+                <?php } ?>
+            </div>
+        </main>
+    </div>
 
-                    } else {
-                        gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-                        //	window.location.reload(true);
-                        $("#ajax-loader").hide();
+    <script type="text/javascript" language="javascript">
+    $(document).ready(function() {
+        // Autocomplete for staff search
+        $("#item").autocomplete({
+            source: '../searchStaff.php',
+            type: 'POST',
+            delay: 10,
+            autoFocus: false,
+            minLength: 1,
+            select: function(event, ui) {
+                event.preventDefault();
+                $("#item").val(ui.item.value);
+                $("#staff_id").val(ui.item.value);
+            }
+        });
 
-                    }
-                    setTimeout(function() {
-                        $('#item').focus();
-                    }, 10);
+        $('#item').focus();
 
-                    setTimeout(function() {
+        // Email sending functionality
+        $('#sendmail').click(function() {
+            event.preventDefault();
 
-                        $.gritter.removeAll();
-                        return false;
+            const staff_no = $('#staff_no').val();
+            const period = $('#period_hidden').val();
 
-                    }, 1000);
+            if (!staff_no || !period) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please generate a payslip first before sending email.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1E40AF'
+                });
+                return;
+            }
 
+            Swal.fire({
+                title: 'Send Email?',
+                text: 'This will send the payslip to the employee\'s email address.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1E40AF',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Send Email',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendEmail();
                 }
-
-
-
-                $('#item').click(function() {
-                    $(this).attr('placeholder', '');
-                });
-
-                $('#sendmail').click(function() {
-                    event.preventDefault();
-                    const staff_no = $('#staff_no').val();
-                    const period = $('#period').val();
-                    const All = 0;
-                    $('#sample_1').css("display", "block")
-                    $('#sendmail').attr('disabled', true);
-
-                    $('#form_payprocess').ajaxSubmit({
-                        data: {
-                            staff_no: staff_no,
-                            period: period,
-                            All: All
-                        },
-                        url: 'callPdf.php',
-                        xhrFields: {
-                            onprogress: function(e) {
-                                $('#sample_1').html(e.target.responseText);
-                                // console.log(e.target.responseText);
-                            }
-                        },
-                        success: function(response, message) {
-                            if (message == 'success') {
-
-                                $('#sendmail').attr('disabled', false);
-                                alert("Mail succesfully Processed");
-
-                                gritter("Success", message, 'gritter-item-success', false, false);
-
-
-                            } else {
-                                gritter("Error", message, 'gritter-item-error', false, false);
-
-                            }
-
-                            $('#sendmail').attr('disabled', false);
-                            $('#sample_1').css("display", "block")
-
-                        }
-                    })
-                });
-
-
-                //Ajax submit current location
-                $("#employee_current_location_id").change(function() {
-                    $("#form_set_employee_current_location_id").ajaxSubmit(function() {
-                        window.location.reload(true);
-                    });
-                });
-
-                document.getElementById('item').focus();
-
             });
-        </script>
-        <script src="js/tableExport.js"></script>
-        <script src="js/main.js"></script>
+        });
+
+        function sendEmail() {
+            const staff_no = $('#staff_no').val();
+            const period = $('#period_hidden').val();
+            const All = 0;
+
+            // Show loading state
+            Swal.fire({
+                title: 'Sending Email...',
+                text: 'Please wait while we send the payslip.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('staff_no', staff_no);
+            formData.append('period', period);
+            formData.append('All', All);
+
+            $.ajax({
+                url: 'callPdf.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response, textStatus, xhr) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Email Sent Successfully!',
+                        text: 'The payslip has been sent to the employee\'s email address.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Sending Email',
+                        text: 'There was an error sending the email. Please try again.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                }
+            });
+        }
+    });
+
+    function generatePayslip() {
+        const period = $('#period').val();
+        const staffId = $('#staff_id').val();
+
+        if (!period) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please select a pay period.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
+            return;
+        }
+
+        if (!staffId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please search and select a staff member.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
+            return;
+        }
+
+        // Show loading state
+        Swal.fire({
+            title: 'Generating Payslip...',
+            text: 'Please wait while we generate the payslip.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        window.location.href = "payslip_personal.php?item=" + staffId + "&period=" + period;
+    }
+
+    // Print functionality
+    $(document).ready(function() {
+        $('#btnPrint').click(function() {
+            // Ensure the printable content includes the watermark and personal details
+            $('.printMe').printElem();
+        });
+    });
+
+    // Print element extension
+    jQuery.fn.extend({
+        printElem: function() {
+            var cloned = this.clone();
+            var printSection = $('#printSection');
+            if (printSection.length == 0) {
+                printSection = $('<div id="printSection"></div>');
+                $('body').append(printSection);
+            }
+            printSection.html(cloned);
+            var toggleBody = $('body *:visible');
+            toggleBody.hide();
+            $('#printSection, #printSection *').show();
+
+            // Ensure watermark shows in print
+            setTimeout(function() {
+                window.print();
+                printSection.remove();
+                toggleBody.show();
+            }, 100);
+        }
+    });
+    </script>
 </body>
 
 </html>

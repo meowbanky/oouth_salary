@@ -1,245 +1,558 @@
 <?php
 require_once('../Connections/paymaster.php');
-session_start();
+include_once('../classes/model.php');
+require_once '../libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once '../libs/middleware.php';
+checkPermission();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: index.php");
-	exit();
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == '') {
+    header("location: ../index.php");
+    exit();
 }
-
 ?>
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
-<html>
-<?php include('../header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="index.php"><img src="support/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
+<head>
+    <meta charset="UTF-8">
+    <title>Reports | OOUTH Salary Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../js/theme-manager.js"></script>
+    <style>
+    html,
+    body {
+        overflow-x: hidden;
+    }
+    </style>
+</head>
 
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('report_sidebar_modern.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-chart-bar"></i> Reports Dashboard
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate and view various payroll reports and
+                            analytics.</p>
+                    </div>
+                </div>
 
+                <!-- Reports Grid -->
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- Main Reports List -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="bg-blue-50 px-6 py-4 border-b">
+                            <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                                <i class="fas fa-list"></i> Report Categories
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid gap-3">
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="sales">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-calculator text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Payroll Reports</h3>
+                                        <p class="text-sm text-gray-600">Salary summaries and payroll analytics</p>
+                                    </div>
+                                </a>
 
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="tax_export">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-receipt text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Tax Computation</h3>
+                                        <p class="text-sm text-gray-600">Tax reports and annual returns</p>
+                                    </div>
+                                </a>
 
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="pos/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
-		<?php include("report_sidebar.php"); ?>
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="employee">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-users text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Employee Reports</h3>
+                                        <p class="text-sm text-gray-600">Staff information and analytics</p>
+                                    </div>
+                                </a>
 
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="transfer">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-university text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Bank Summary</h3>
+                                        <p class="text-sm text-gray-600">Banking and payment summaries</p>
+                                    </div>
+                                </a>
 
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="inventory">
+                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-minus-circle text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Deduction Reports</h3>
+                                        <p class="text-sm text-gray-600">Salary deductions and lists</p>
+                                    </div>
+                                </a>
 
-		<div id="content" class="clearfix sales_content_minibar">
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="gross">
+                                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-indigo-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Gross Amount</h3>
+                                        <p class="text-sm text-gray-600">Gross salary calculations</p>
+                                    </div>
+                                </a>
 
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="expiry-report">
+                                    <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-search text-teal-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Net to Bank</h3>
+                                        <p class="text-sm text-gray-600">Net salary bank transfers</p>
+                                    </div>
+                                </a>
 
-			<div id="content-header">
-				<h1> <i class="icon fa fa-bar-chart-o"></i>
-					Reports </h1>
-			</div>
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="customers">
+                                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-file-invoice text-orange-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Payslip Reports</h3>
+                                        <p class="text-sm text-gray-600">Individual and department payslips</p>
+                                    </div>
+                                </a>
 
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="deleted-sales">
+                                    <div class="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-piggy-bank text-pink-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Pension Fund Admin</h3>
+                                        <p class="text-sm text-gray-600">PFA reports and summaries</p>
+                                    </div>
+                                </a>
 
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a class="current" href="reports.php">Reports</a>
-			</div>
-			<div class="clear"></div>
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="discounts">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-chart-pie text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Variance Analysis</h3>
+                                        <p class="text-sm text-gray-600">Salary variance reports</p>
+                                    </div>
+                                </a>
 
-			<div class="row report-listing">
-				<div class="col-md-6  ">
-					<div class="panel">
-						<div class="panel-body">
-							<div class="list-group parent-list">
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="sales"><i class="fa fa-shopping-cart"></i> Payroll</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+                                <a href="#"
+                                    class="report-category flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                    id="log">
+                                    <div class="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-history text-cyan-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-600">Audit Log</h3>
+                                        <p class="text-sm text-gray-600">System activity and changes</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Report Details Panel -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden" id="report_selection">
+                        <div class="bg-blue-50 px-6 py-4 border-b">
+                            <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2" id="report_title">
+                                <i class="fas fa-arrow-right"></i> Select a Report Category
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="text-center py-12 text-gray-500" id="default_message">
+                                <i class="fas fa-mouse-pointer text-4xl mb-4"></i>
+                                <p class="text-lg font-medium">Choose a report category from the left</p>
+                                <p class="text-sm">Click on any category to view available reports</p>
+                            </div>
 
-									<a href="#" class="list-group-item" id="tax_export"><i class="fa fa-shopping-cart"></i> Export Tax Computation</a>
+                            <!-- Report Options (Hidden by default) -->
+                            <div class="hidden" id="report_options">
+                                <!-- Net to Bank Reports -->
+                                <div class="report-section hidden" id="expiry-report">
+                                    <div class="space-y-3">
+                                        <a href="net2bank.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-search text-teal-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Detailed Amount to Bank</h4>
+                                                <p class="text-sm text-gray-600">Complete net salary bank transfer
+                                                    details</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
+                                <!-- Payslip Reports -->
+                                <div class="report-section hidden" id="customers">
+                                    <div class="space-y-3">
+                                        <a href="payslip_all.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-invoice text-orange-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payslip All</h4>
+                                                <p class="text-sm text-gray-600">Generate payslips for all employees</p>
+                                            </div>
+                                        </a>
+                                        <a href="payslip_dept.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-building text-orange-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Department Payslips</h4>
+                                                <p class="text-sm text-gray-600">Generate payslips by department</p>
+                                            </div>
+                                        </a>
+                                        <a href="payslip_personal.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-user text-orange-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Individual Payslip</h4>
+                                                <p class="text-sm text-gray-600">Generate payslip for specific employee
+                                                </p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- Payroll Reports -->
+                                <div class="report-section hidden" id="sales">
+                                    <div class="space-y-3">
+                                        <a href="payrollsummary_all.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-building text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payroll Summary All</h4>
+                                                <p class="text-sm text-gray-600">Complete payroll summary for all
+                                                    employees</p>
+                                            </div>
+                                        </a>
+                                        <a href="payrollDept.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payroll Summary by Department</h4>
+                                                <p class="text-sm text-gray-600">Department-wise payroll summaries</p>
+                                            </div>
+                                        </a>
+                                        <a href="payrollexcel_all.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-excel text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payroll Excel Export</h4>
+                                                <p class="text-sm text-gray-600">Export payroll data to Excel format</p>
+                                            </div>
+                                        </a>
+                                        <a href="payrollTable.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-table text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payroll Table</h4>
+                                                <p class="text-sm text-gray-600">Detailed payroll table view</p>
+                                            </div>
+                                        </a>
+                                        <a href="payrollTablebyDept.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-building text-blue-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Payroll Table by Department</h4>
+                                                <p class="text-sm text-gray-600">Department-wise payroll tables</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-									<a href="#" class="list-group-item" id="employee"><i class="fa fa-shopping-cart"></i> Employee Report</a>
+                                <!-- Tax Reports -->
+                                <div class="report-section hidden" id="tax_export">
+                                    <div class="space-y-3">
+                                        <a href="taxexport.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-receipt text-green-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Export for Tax Computation</h4>
+                                                <p class="text-sm text-gray-600">Export data for tax computation
+                                                    purposes</p>
+                                            </div>
+                                        </a>
+                                        <a href="tax_returns.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-invoice text-green-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Annual Tax Return</h4>
+                                                <p class="text-sm text-gray-600">Generate annual tax return reports</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="transfer"><i class="fa fa-exchange"></i> Bank Summary</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="inventory"><i class="fa fa-table"></i> Deduction List</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="gross"><i class="fa fa-table"></i> Gross Amount</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="expiry-report">
-									<?php  } ?>
-									<?php if ($_SESSION['role'] == 'Admin') { ?>
+                                <!-- Employee Reports -->
+                                <div class="report-section hidden" id="employee">
+                                    <div class="space-y-3">
+                                        <a href="employee_report.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-users text-purple-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Employee Report</h4>
+                                                <p class="text-sm text-gray-600">Comprehensive employee information
+                                                    report</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <!-- Bank Summary Reports -->
+                                <div class="report-section hidden" id="transfer">
+                                    <div class="space-y-3">
+                                        <a href="banksummary.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-university text-yellow-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Bank Summary</h4>
+                                                <p class="text-sm text-gray-600">Banking and payment summaries</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-										<i class="fa fa-search"></i>Net to Bank</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="customers"><i class="fa fa-group"></i> Payslip</a>
+                                <!-- Deduction Reports -->
+                                <div class="report-section hidden" id="inventory">
+                                    <div class="space-y-3">
+                                        <a href="deductionlist.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-minus-circle text-red-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Deduction List</h4>
+                                                <p class="text-sm text-gray-600">Complete list of salary deductions</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin' || $_SESSION['role'] == 'pfa') { ?>
-									<a href="#" class="list-group-item" id="deleted-sales"><i class="fa fa-trash-o"></i> Pension Fund Admin</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="discounts"><i class="fa fa-magic"></i> Variance</a>
-								<?php  } ?>
-								<?php if ($_SESSION['role'] == 'Admin') { ?>
-									<a href="#" class="list-group-item" id="log"><i class="fa fa-history fa-fw"></i> Audit Log</a>
-								<?php  } ?>
-							</div>
-						</div>
-					</div> <!-- /panel -->
-				</div>
-				<div class="col-md-6" id="report_selection">
-					<div class="panel">
-						<div class="panel-body child-list">
-							<h3 class="page-header text-info">« Reports: Make a selection</h3>
-							<div class="list-group expiry-report hidden">
-								<a href="net2bank.php" class="list-group-item ">
-									<i class="fa fa-search report-icon"></i> Detailed Amount to Bank</a>
-							</div>
-							<div class="list-group customers hidden">
-								<a class="list-group-item" href="payslip_all.php"><i class="fa fa-bar-chart-o"></i> Payslip All</a>
-								<a class="list-group-item" href="payslip_dept.php"><i class="fa fa-building-o"></i> Paysip Department</a>
-								<a class="list-group-item" href="payslip_personal.php"><i class="fa fa-calendar"></i> Individual</a>
-							</div>
-							<div class="list-group employees hidden">
-								<a class="list-group-item" href="#"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a class="list-group-item" href="#"><i class="fa fa-building-o"></i> Summary Reports</a>
-								<a class="list-group-item" href="#"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group sales hidden">
-								<!-- <a class="list-group-item" href="#"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a> -->
-								<a class="list-group-item" href="payrollsummary_all.php"><i class="fa fa-building-o"></i> Payroll Summary All </a>
-								<a class="list-group-item" href="payrollDept.php"><i class="fa fa-calendar"></i> Payroll Summary Dept</a>
-								<a class="list-group-item" href="payrollexcel_all.php"><i class="fa fa-calendar"></i> Payroll by Excel2</a>
-								<a class="list-group-item" href="payrollTable.php"><i class="fa fa-building-o"></i> Payroll Excel </a>
-								<a class="list-group-item" href="payrollTablebyDept.php"><i class="fa fa-building-o"></i> Payroll Excel by Dept</a>
+                                <!-- Gross Amount Reports -->
+                                <div class="report-section hidden" id="gross">
+                                    <div class="space-y-3">
+                                        <a href="gross.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-chart-line text-indigo-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Gross Amount List</h4>
+                                                <p class="text-sm text-gray-600">Gross salary calculations and reports
+                                                </p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-							</div>
-							<div class="list-group tax_export hidden">
-								<a class="list-group-item" href="taxexport.php"><i class="fa fa-bar-chart-o"></i> Export for Tax Computation</a>
+                                <!-- PFA Reports -->
+                                <div class="report-section hidden" id="deleted-sales">
+                                    <div class="space-y-3">
+                                        <a href="pfalist.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-piggy-bank text-pink-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">PFA Report</h4>
+                                                <p class="text-sm text-gray-600">Pension Fund Administrator reports</p>
+                                            </div>
+                                        </a>
+                                        <a href="pfasummary.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-chart-pie text-pink-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">PFA Summary</h4>
+                                                <p class="text-sm text-gray-600">PFA summary reports and analytics</p>
+                                            </div>
+                                        </a>
+                                        <a href="pfa_individual.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-user text-pink-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Individual Staff Pension Report
+                                                </h4>
+                                                <p class="text-sm text-gray-600">Generate pension report for individual
+                                                    staff with period range and email</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-							</div>
-							<div class="list-group employee hidden">
-								<a class="list-group-item" href="employee_report.php"><i class="fa fa-bar-chart-o"></i> Employee Report</a>
+                                <!-- Variance Reports -->
+                                <div class="report-section hidden" id="discounts">
+                                    <div class="space-y-3">
+                                        <a href="variance.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-chart-pie text-gray-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Variance Analysis</h4>
+                                                <p class="text-sm text-gray-600">Salary variance reports and analysis
+                                                </p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
 
-							</div>
-							<div class="list-group deleted-sales hidden">
-								<a href="pfalist.php" class="list-group-item"><i class="fa fa-calendar"></i> PFA report</a>
-								<a href="pfasummary.php" class="list-group-item"><i class="fa fa-calendar"></i> PFA report Summary</a>
-							</div>
-							<div class="list-group register-log hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group transfer hidden">
-								<!-- <a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a> -->
-								<a href="banksummary.php" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group discounts hidden">
-								<a href="variance.php" class="list-group-item"><i class="fa fa-building-o"></i> Variance</a>
-							</div>
-							<div class="list-group log hidden">
-								<a href="log.php" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group items hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group item-kits hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group payments hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group suppliers hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-								<a href="http://www.optimumlinkup.com.ng/pos/index.php/reports/specific_supplier" class="list-group-item"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group taxes hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-bar-chart-o"></i> Graphical Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-							</div>
-							<div class="list-group receivings hidden">
-								<a href="report_details_purchase.php" class="list-group-item"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group inventory hidden">
-								<a href="deductionlist.php" class="list-group-item"><i class="fa fa-calendar"></i> Deduction List</a>
-							</div>
-							<div class="list-group gross hidden">
-								<a href="gross.php" class="list-group-item"><i class="fa fa-calendar"></i> Gross List</a>
-							</div>
-							<div class="list-group giftcards hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group store-accounts hidden">
-								<a href="#" class="list-group-item"><i class="fa fa-calendar"></i> Store Account Statements</a>
-								<a href="#" class="list-group-item"><i class="fa fa-building-o"></i> Summary Reports</a>
-								<a href="#" class="list-group-item"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-							<div class="list-group profit-and-loss hidden">
-								<a class="list-group-item" href="#"><i class="fa fa-building-o"></i> Summary Reports</a>
-								<a class="list-group-item" href="#"><i class="fa fa-calendar"></i> Detailed Reports</a>
-							</div>
-						</div>
-					</div> <!-- /panel -->
-				</div>
-			</div>
-		</div>
-		<script type="text/javascript">
-			$('.parent-list a').click(function(e) {
-				e.preventDefault();
-				$('.parent-list a').removeClass('active');
-				$(this).addClass('active');
-				var currentClass = '.child-list .' + $(this).attr("id");
-				$('.child-list .page-header').html($(this).html());
-				$('.child-list .list-group').addClass('hidden');
-				$(currentClass).removeClass('hidden');
+                                <!-- Audit Log Reports -->
+                                <div class="report-section hidden" id="log">
+                                    <div class="space-y-3">
+                                        <a href="log.php"
+                                            class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                                            <div
+                                                class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-history text-cyan-600 text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-600">Audit Log</h4>
+                                                <p class="text-sm text-gray-600">System activity and change logs</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+            $(document).ready(function() {
+                // Handle report category clicks
+                $('.report-category').click(function(e) {
+                    e.preventDefault();
 
-				$('html, body').animate({
-					scrollTop: $("#report_selection").offset().top
-				}, 500);
-			});
-		</script>
+                    // Remove active state from all categories
+                    $('.report-category').removeClass('bg-blue-100 border-blue-400').addClass(
+                        'border-gray-200');
 
+                    // Add active state to clicked category
+                    $(this).removeClass('border-gray-200').addClass('bg-blue-100 border-blue-400');
 
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="#" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
+                    // Get the category ID
+                    var categoryId = $(this).attr('id');
+                    var categoryName = $(this).find('h3').text();
 
-	</div><!--end #content-->
-	<!--end #wrapper-->
+                    // Update the report title
+                    $('#report_title').html('<i class="fas fa-arrow-right"></i> ' + categoryName);
+
+                    // Hide default message
+                    $('#default_message').addClass('hidden');
+
+                    // Show report options
+                    $('#report_options').removeClass('hidden');
+
+                    // Hide all report sections
+                    $('.report-section').addClass('hidden');
+
+                    // Show the selected report section
+                    $('#' + categoryId + '_section, .report-section[id="' + categoryId + '"]')
+                        .removeClass('hidden');
+
+                    // Smooth scroll to report selection
+                    $('html, body').animate({
+                        scrollTop: $("#report_selection").offset().top - 100
+                    }, 500);
+                });
+            });
+            </script>
+
+        </main>
+    </div>
 
 </body>
 

@@ -1,460 +1,440 @@
 <?php
 session_start();
 ini_set('max_execution_time', '0');
+
+require_once('../Connections/paymaster.php');
 include_once('../classes/model.php');
-require_once('Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: ../index.php");
-	exit();
-}
-if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
-		global $con;
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
 
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
-
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
+// Function to get default period
+function getDefaultPeriod($conn) {
+    $query = $conn->prepare("
+        SELECT periodId, CONCAT(description,' - ', periodYear) as description
+        FROM payperiods 
+        WHERE periodid = (
+            SELECT MAX(periodid)
+            FROM payperiods 
+            WHERE active = 0
+        )
+    ");
+    $query->execute();
+    return $query->fetch(PDO::FETCH_ASSOC);
 }
 
+// Get default period
+$defaultPeriod = getDefaultPeriod($conn);
+$periodFrom = isset($_GET['periodFrom']) ? $_GET['periodFrom'] : ($defaultPeriod['periodId'] ?? '');
+$periodTo = isset($_GET['periodTo']) ? $_GET['periodTo'] : ($defaultPeriod['periodId'] ?? '');
 
+// Get period description for display
+function getPeriodDescription($conn, $periodId) {
+    if (empty($periodId)) return '';
+    $query = $conn->prepare("
+        SELECT CONCAT(description,' - ', periodYear) as description
+        FROM payperiods 
+        WHERE periodId = ?
+    ");
+    $query->execute([$periodId]);
+    $result = $query->fetch(PDO::FETCH_ASSOC);
+    return $result ? $result['description'] : '';
+}
+
+$periodFromDesc = getPeriodDescription($conn, $periodFrom);
+$periodToDesc = getPeriodDescription($conn, $periodTo);
 ?>
+
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
-
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
-
-
-
-
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
-		<?php include("report_sidebar.php"); ?>
-
-
-
-		<div id="content" class="clearfix sales_content_minibar">
-
-			<div id="content-header" class="hidden-print">
-				<h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-			</div>
-
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payrollDept.php">Report Input: Detailed Payroll by Dept Report</a>
-			</div>
-			<div class="clear"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-align-justify"></i>
-							</span>
-							<h5 class="center"></h5>
-							<div class="clear"></div>
-							<div class="clear"></div>
-
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
-								<h2 class="page-title pull-right">
-									<p class="text-center"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL<br> PAYROLL SUMMARY BETWEEN THE MONTH OF
-								</h2>
-								<div class="row">
-									<div class="col-md-4">
-										<p class="text-center">
-
-											<?php $monthTo = '';
-											$monthFrom = '';
-											$periodTo = -1;
-											$periodFrom = -1;
-											global $conn;
-											if (!isset($_GET['periodFrom'])) {
-												$periodFrom = -1;
-											} else {
-												$periodFrom = $_GET['periodFrom'];
-											}
-											if (!isset($_GET['periodTo'])) {
-												$periodTo = -1;
-											} else {
-												$periodTo = $_GET['periodTo'];
-											}
-											try {
-												$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-												$res = $query->execute(array($periodFrom));
-												$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-												while ($row = array_shift($out)) {
-													echo ($monthFrom = $row['description'] . '-' . $row['periodYear']);
-												}
-											} catch (PDOException $e) {
-												$e->getMessage();
-											}
-
-											?>
-									</div>
-									<div class="col-md-4"> TO </div>
-									<div class="col-md-4"><?php $month = '';
-															global $conn;
-															if (!isset($_GET['periodTo'])) {
-																$periodTo = -1;
-															} else {
-																$periodTo = $_GET['periodTo'];
-															}
-															try {
-																$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-																$res = $query->execute(array($periodTo));
-																$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-																while ($row = array_shift($out)) {
-																	echo ($monthTo = $row['description'] . '-' . $row['periodYear']);
-																}
-															} catch (PDOException $e) {
-																$e->getMessage();
-															}
-
-															?>
-									</div>
-								</div>
-
-							</div>
-							<div class="col-md-12 hidden-print">
-								<form class="form-horizontal form-horizontal-mobiles" method="GET" action="payrollTable.php">
-									<div class="form-group">
-										<div class="col-md-6">
-											<div class="form-group">
-												<label class="control-label">Period:</label>
-
-												<select name="periodFrom" id="periodFrom" class="form-control hidden-print" required="required">
-													<option value="">Select Pay Period</option>
-
-													<?php
-													global $conn;
-
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
-
-													?>
-												</select>
-											</div>
-										</div>
-
-										<div class="col-md-6">
-											<div class="form-group">
-												<label class="control-label">Period:</label>
-
-												<select name="periodTo" id="periodTo" class="form-control hidden-print" required="required">
-													<option value="">Select Pay Period</option>
-
-													<?php
-													global $conn;
-
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
-
-													?>
-												</select>
-											</div>
-										</div>
-
-									</div>
-
-									<div class="form-actions">
-										<button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-									</div>
-								</form>
-							</div>
-						</div>
-						<?php
-
-
-						$results_per_page = 100;
-						if (isset($_GET['page'])) {
-							$page = $_GET['page'];
-						} else {
-							$page = 1;
-						} ?>
-						<div class="top-panel pull-right hidden-print">
-							<div class="btn-group">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php echo 'Page ' . $page; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php echo 'Page ' . $page; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php echo 'Page ' . $page; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
-							</div>
-						</div>
-						<div class="widget-content nopadding">
-							<div class="table-responsive">
-
-								<nav aria-label="page navigation example" class="hidden-print">
-									<ul class="pagination">
-
-										<?php
-
-
-										//$results_per_page = 100;
-
-										$sql = 'SELECT count(staff_id) as "Total" FROM master_staff WHERE period BETWEEN ' . $periodFrom . ' AND ' . $periodTo;
-										$result = $conn->query($sql);
-										$row = $result->fetch();
-										$total_pages = ceil($row['Total'] / $results_per_page);
-										for ($i = 1; $i <= $total_pages; $i++) {
-											//echo "<a href='payslip_all.php?page=".$i."'";
-											//	if($i ==$page){echo " class='curPage'";}
-											//	echo "> ".$i." </a>";
-											echo '<li class="page-item ';
-											if ($i == $page) {
-												echo ' active"';
-											};
-											echo '"><a class="page-link" href="payrollTable.php?page=' . $i . '&periodFrom=' . $periodFrom . '&periodTo=' . $periodTo . '">' . $i . '</a></li>';
-										}
-										?>
-									</ul>
-
-									<table border="1" class="table table-striped table-bordered table-hover table-checkable order-column" id="sample_1">
-										<thead>
-											<tr>
-
-
-												<th>STAFF NO</th>
-												<th> NAME</th>
-												<th> PAY PERIOD</th>
-												<th> DEPT</th>
-												<?php global $conn;
-												$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
-												$res = $query->execute(array(1));
-												$out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-												while ($row = array_shift($out)) {
-													echo '<th>' . $row['ed'] . '</th>';
-												}
-												echo '<th> TOTAL ALLOW </th>';
-
-
-												global $conn;
-												$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
-												$res = $query->execute(array(1));
-												$out = $query->fetchAll(PDO::FETCH_ASSOC);
-												//get employee info                                          
-												while ($row = array_shift($out)) {
-													echo '<th>' . $row['ed'] . '</th>';
-												}
-
-
-												echo '<th>TOTAL DEDUC</th>';
-												echo '<th> NET PAY</th>';
-												?>
-
-											</tr>
-										</thead>
-										<tbody>
-											<?php
-											//retrieveData('employment_types', 'id', '2', '1');
-
-
-
-
-											try {
-												$start_from = ($page - 1) * $results_per_page;
-												$query = $conn->prepare('SELECT
-ANY_VALUE(master_staff.staff_id) AS staff_id, ANY_VALUE(master_staff.`NAME`) AS `NAME`, ANY_VALUE(DEPTCD) AS DEPTCD,ANY_VALUE(tbl_dept.dept) AS dept,ANY_VALUE(concat(payperiods.description," ",payperiods.periodYear)) as period FROM
-master_staff INNER JOIN tbl_dept ON tbl_dept.dept_id = master_staff.DEPTCD INNER JOIN payperiods ON payperiods.periodId = master_staff.period 
-WHERE master_staff.period BETWEEN ? AND ? GROUP BY master_staff.staff_id ORDER BY DEPTCD, staff_id LIMIT ' . $start_from . ',' . $results_per_page);
-												$fin = $query->execute(array($periodFrom, $periodTo));
-												$res = $query->fetchAll(PDO::FETCH_ASSOC);
-												$numberofstaff = count($res);
-												$counter = 1;
-												//sdsd
-												$sumAll = 0;
-												$sumDeduct = 0;
-												$sumTotal = 0;
-												$countStaff = 0;
-												echo '<tr class="odd gradeX">';
-												foreach ($res as $row => $link) {
-											?>
-											<?php
-
-													//                                                                $query2 = $conn->prepare('SELECT Count(master_staff.DEPTCD) as "numb" FROM master_staff WHERE STATUSCD = ? and DEPTCD = ? GROUP BY DEPTCD ');
-													//                                                                $fin2 = $query2->execute(array('A',$link['DEPTCD']));
-													//                                                                $res2 = $query2->fetchAll(PDO::FETCH_ASSOC);
-													//                                                                foreach($res2 as $row2 => $link2){
-													//                                                                	$numb =  $link2['numb'];
-													//                                                                	$countStaff = $countStaff + $numb;
-													//                                                                }
-													$allow = 0;
-													$dedu = 0;
-													$net = 0;
-													echo '<td class="stylecaps">' . $link['staff_id'] .  '</td><td class="stylecaps"">' . $link['NAME'] . '</td>';
-													echo '<td align="left"> From ' . $monthFrom . 'To ' . $monthTo . '</td>';
-													echo '<td >' . $link['dept'] . '</td>';
-
-													global $conn;
-													$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType = ?');
-													$res = $query->execute(array(1));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-													//get employee info 
-													$allow = 0;
-													while ($row = array_shift($out)) {
-														$j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
-														echo '<td>' . number_format($j) . '</td>';
-														$allow = $allow + $j;
-													}
-													echo '<td>' . number_format($allow) . '</td>';
-
-													$dedu = 0;
-													global $conn;
-													$query = $conn->prepare('SELECT tbl_earning_deduction.ed_id, tbl_earning_deduction.ed FROM tbl_earning_deduction WHERE tbl_earning_deduction.edType > ?');
-													$res = $query->execute(array(1));
-													$out = $query->fetchAll(PDO::FETCH_ASSOC);
-													//get employee info                                          
-													while ($row = array_shift($out)) {
-														$j = retrievePayroll($periodFrom, $periodTo, $link['staff_id'], $row['ed_id']);
-														echo '<td>' . number_format($j) . '</td>';
-														$dedu = $dedu + $j;
-													}
-
-
-													echo '<td>' .  number_format($dedu) . '</td>';
-													echo '<td>' .  number_format(floatval($allow) - floatval($dedu)) . '</td>';
-													echo '</tr>';
-												}
-												//																echo '<tr class="odd gradeX">';
-												//																echo '<td class="stylecaps">TOTAL</td><td align="right"> <strong>' . number_format($countStaff) . '</strong></td><td align="right"> <strong>' . number_format($sumAll) . '</strong></td>';
-												//                                   											echo '<td align="right"><strong>'.number_format($sumDeduct).'</strong></td>';
-												//                                                                               
-												//                                                        echo '<td align="right"><strong>'. number_format($sumTotal).'</strong></td>';
-												//																											
-												//																echo '</tr>';
-											} catch (PDOException $e) {
-												echo $e->getMessage();
-											}
-											?>
-
-
-										</tbody>
-									</table>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div id="register_container" class="receiving"></div>
-			</div>
-
-		</div>
-
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="http://www.oouth.com/" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
-
-	</div><!--end #content-->
-	<!--end #wrapper-->
-
-
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {
-			//'sales_report.php');
-
-
-			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
-				$("#complex_radio").prop('checked', true);
-			});
-
-			$("#report_date_range_simple").change(function() {
-				$("#simple_radio").prop('checked', true);
-			});
-
-
-
-			function receivingsBeforeSubmit(formData, jqForm, options) {
-				var submitting = false;
-				if (submitting) {
-					return false;
-				}
-				submitting = true;
-
-				$("#ajax-loader").show();
-				//	$("#finish_sale_button").hide();
-			}
-		});
-	</script>
-	<script src="js/tableExport.js"></script>
-	<script src="js/main.js"></script>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Report Generator - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/theme-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('report_sidebar_modern.php'); ?>
+
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="../home.php"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-home w-4 h-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <a href="index.php"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Payroll Table</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+
+
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i> Payroll Report Generator
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate comprehensive payroll reports with email
+                            delivery
+                            options.</p>
+                    </div>
+                </div>
+
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <!-- Organization Header -->
+                        <div class="text-center mb-8">
+                            <img src="img/oouth_logo.gif" alt="OOUTH Logo" class="h-16 mx-auto mb-4">
+                            <h3 class="text-lg font-bold text-blue-800">OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                            </h3>
+                            <p class="text-blue-600 font-medium">Payroll Report Generator</p>
+                        </div>
+
+                        <form method="GET" action="payroll_report.php" id="payrollForm" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="periodFrom" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period From
+                                    </label>
+                                    <select name="periodFrom" id="periodFrom"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Starting Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('
+                                                SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
+                                                FROM payperiods 
+                                                WHERE payrollRun = ? 
+                                                ORDER BY periodId DESC
+                                            ');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodFrom) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <div id="periodFromError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please select a starting period
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="periodTo" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Period To
+                                    </label>
+                                    <select name="periodTo" id="periodTo"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Ending Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('
+                                                SELECT payperiods.description, payperiods.periodYear, payperiods.periodId 
+                                                FROM payperiods 
+                                                WHERE payrollRun = ? 
+                                                ORDER BY periodId DESC
+                                            ');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = ($row['periodId'] == $periodTo) ? 'selected="selected"' : '';
+                                                echo sprintf(
+                                                    '<option value="%s" %s>%s - %s</option>',
+                                                    htmlspecialchars($row['periodId']),
+                                                    $selected,
+                                                    htmlspecialchars($row['description']),
+                                                    htmlspecialchars($row['periodYear'])
+                                                );
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                    <div id="periodToError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please select an ending period
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email Section -->
+                            <div class="border-t pt-6">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="send_email" id="send_email"
+                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                            onchange="toggleEmailField()">
+                                        <label for="send_email" class="ml-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-envelope mr-2 text-blue-600"></i>Send Excel file via email
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div id="email_field" class="hidden">
+                                    <label for="email_address" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-at mr-2 text-blue-600"></i>Email Address
+                                    </label>
+                                    <input type="email" name="email_address" id="email_address"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        placeholder="Enter email address">
+                                    <div id="emailError" class="text-red-500 text-sm mt-1 hidden">
+                                        Please enter a valid email address
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 pt-4">
+                                <button type="submit"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2"
+                                    id="submitButton">
+                                    <i class="fas fa-file-excel"></i> Generate Report
+                                </button>
+                                <button type="button" onclick="window.history.back()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Instructions Section -->
+                <div class="bg-blue-50 rounded-xl p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> Instructions
+                    </h3>
+                    <div class="text-sm text-blue-700 space-y-2">
+                        <p><strong>1. Select Period Range:</strong> Choose the starting and ending pay periods for your
+                            report.</p>
+                        <p><strong>2. Email Option:</strong> Check the email option to receive the report via email
+                            instead
+                            of downloading directly.</p>
+                        <p><strong>3. Generate Report:</strong> Click "Generate Report" to create your payroll report.
+                        </p>
+                        <p><strong>Note:</strong> Large reports may take a few minutes to process. Please be patient.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Loading Overlay -->
+                <div id="loading-overlay"
+                    class="fixed inset-0 bg-gray-800 bg-opacity-75 items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg p-6 flex flex-col items-center">
+                        <i class="fas fa-spinner fa-spin text-blue-600 text-3xl mb-4"></i>
+                        <p class="text-gray-700 font-medium">Generating report...</p>
+                        <p class="text-sm text-gray-500 mt-2">Please wait while we process your request</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="text/javascript">
+    function toggleEmailField() {
+        const emailField = document.getElementById('email_field');
+        const emailCheckbox = document.getElementById('send_email');
+
+        if (emailCheckbox.checked) {
+            emailField.classList.remove('hidden');
+            emailField.classList.add('block');
+        } else {
+            emailField.classList.add('hidden');
+            emailField.classList.remove('block');
+        }
+    }
+
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+    }
+
+    function hideError(elementId) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.classList.add('hidden');
+    }
+
+    function hideAllErrors() {
+        hideError('periodFromError');
+        hideError('periodToError');
+        hideError('emailError');
+    }
+
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    document.getElementById('payrollForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let isValid = true;
+        hideAllErrors();
+
+        // Validate period selections
+        const periodFrom = document.getElementById('periodFrom').value;
+        const periodTo = document.getElementById('periodTo').value;
+
+        if (!periodFrom) {
+            showError('periodFromError', 'Please select a starting period');
+            isValid = false;
+        }
+
+        if (!periodTo) {
+            showError('periodToError', 'Please select an ending period');
+            isValid = false;
+        }
+
+        // Validate email if checkbox is checked
+        const emailCheckbox = document.getElementById('send_email');
+        const emailInput = document.getElementById('email_address');
+
+        if (emailCheckbox.checked) {
+            if (!emailInput.value) {
+                showError('emailError', 'Please enter an email address');
+                isValid = false;
+            } else if (!validateEmail(emailInput.value)) {
+                showError('emailError', 'Please enter a valid email address');
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            // Scroll to first error
+            const firstError = document.querySelector('.text-red-500:not(.hidden)');
+            if (firstError) {
+                firstError.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+            return false;
+        }
+
+        // Show loading overlay
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        document.getElementById('loading-overlay').classList.add('flex');
+        document.getElementById('submitButton').disabled = true;
+
+        // If send_email is checked, use AJAX for JSON response
+        if (emailCheckbox.checked) {
+            const form = this;
+            const formData = new FormData(form);
+            const url = form.action;
+            const queryString = new URLSearchParams(formData).toString();
+
+            fetch(url + '?' + queryString, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.text())
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('loading-overlay').classList.remove('flex');
+                        document.getElementById('submitButton').disabled = false;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Report Sent!',
+                            text: data.message,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
+                    } catch (e) {
+                        document.getElementById('loading-overlay').classList.add('hidden');
+                        document.getElementById('loading-overlay').classList.remove('flex');
+                        document.getElementById('submitButton').disabled = false;
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Report Sent!',
+                            text: 'Report has been sent successfully to ' + emailInput.value,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    document.getElementById('submitButton').disabled = false;
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Report May Have Been Sent',
+                        text: 'An error occurred, but the report may have been sent. Please check your email.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1E40AF'
+                    });
+                });
+        } else {
+            // For download, submit the form traditionally
+            document.getElementById('loading-overlay').classList.add('hidden');
+            document.getElementById('submitButton').disabled = false;
+            this.submit();
+        }
+    });
+
+    // Auto-focus first empty field
+    document.addEventListener('DOMContentLoaded', function() {
+        const periodFrom = document.getElementById('periodFrom');
+        const periodTo = document.getElementById('periodTo');
+
+        if (!periodFrom.value) {
+            periodFrom.focus();
+        } else if (!periodTo.value) {
+            periodTo.focus();
+        }
+    });
+    </script>
 </body>
 
 </html>

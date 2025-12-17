@@ -1,0 +1,39 @@
+<?php
+/**
+ * OOUTH Salary API Client Configuration
+ * Copy this file to api_config.php and fill in your credentials
+ */
+
+// API Endpoint Configuration
+define('OOUTH_API_BASE_URL', 'https://oouthsalary.com.ng/api/v1');
+
+// API Credentials (Get from OOUTH Admin)
+// Visit: https://oouthsalary.com.ng/get_api_secret.php
+define('OOUTH_API_KEY', 'oouth_005_deduc_48_ed7dee3ccb995727');  // Your API key
+define('OOUTH_API_SECRET', 'your_64_character_secret_here');      // Your API secret (64 chars)
+
+// Resource Configuration
+// The API key is scoped to a specific resource
+define('OOUTH_RESOURCE_TYPE', 'deduction');  // 'deduction' or 'allowance'
+define('OOUTH_RESOURCE_ID', 48);             // Resource ID (e.g., 48 = Pension)
+
+// Request Configuration
+define('OOUTH_API_TIMEOUT', 30);             // Request timeout in seconds
+define('OOUTH_API_DEBUG', true);             // Enable debug logging (set to false in production)
+
+/*
+ * How to Get Your API Secret:
+ * 
+ * 1. Login to OOUTH Salary system
+ * 2. Visit: https://oouthsalary.com.ng/get_api_secret.php
+ * 3. Select your API key from the dropdown
+ * 4. Copy the 64-character API secret
+ * 5. Paste it above in OOUTH_API_SECRET
+ * 
+ * Security Tips:
+ * - Never commit api_config.php to version control
+ * - Keep API secret secure
+ * - Rotate keys periodically
+ * - Use environment variables in production
+ */
+

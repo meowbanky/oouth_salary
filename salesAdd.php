@@ -1,7 +1,10 @@
 <?php require_once('Connections/paymaster.php');
 include_once('classes/model.php'); ?>
 <?php
-//session_start();
+if(session_status() == PHP_SESSION_NONE ){
+    session_start();
+}
+
 $_SESSION['SESS_INVOICE'] = 'SIV-23302280';
 
 function createRandomPassword()

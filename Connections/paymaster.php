@@ -3,19 +3,21 @@
 # Type="MYSQL"
 # HTTP="true"
 $hostname_salary = "localhost";
-$database_salary = "emmaggic_tasce";
+$database_salary = "oouthsal_salary3";
 $username_salary = "oouthsal_root";
 $password_salary = "Oluwaseyi@7980";
-$salary = mysqli_connect($hostname_salary, $username_salary, $password_salary) or trigger_error(mysqli_error($salary), E_USER_ERROR);
-
-
-// $db_server = "localhost";
-// $db_user = 	"oouthsal_root";
-// $db_passwd = "Oluwaseyi@7980";
+$salary = mysqli_connect($hostname_salary, $username_salary, $password_salary);
+if (!$salary) {
+    trigger_error(mysqli_connect_error(), E_USER_ERROR);
+}
 
 try {
-	$conn = new PDO("mysql:host=$hostname_salary;dbname=$database_salary", $username_salary, $password_salary, array(PDO::ATTR_PERSISTENT => true));
+	// Removed persistent connection to prevent "too many connections" errors
+	$conn = new PDO("mysql:host=$hostname_salary;dbname=$database_salary", $username_salary, $password_salary);
 	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	// Set connection timeout to prevent hanging connections
+	$conn->setAttribute(PDO::ATTR_TIMEOUT, 5);
 } catch (PDOException $e) {
+	error_log("Database Connection Error: " . $e->getMessage());
 	echo "Failed Connection: " . $e->getMessage();
 }

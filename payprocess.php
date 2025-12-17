@@ -1,369 +1,466 @@
-<?php include_once('classes/model.php');
-ini_set('max_execution_time', '0');
+<?php
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+require_once 'classes/model.php';
+require_once 'libs/App.php';
+require_once 'libs/middleware.php';
+
+$App = new App();
+$App->checkAuthentication();
+checkPermission();
+
 session_start();
 
-include_once('classes/model.php');
-require_once('Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-    header("location: index.php");
-    exit();
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '') {
+    header("Location: index.php");
+    exit;
 }
 
+// Check for processing errors
+$processingerrors = false;
+$missing = [];
+$setbasic = 0;
+$missingbasic = 0;
 
+try {
+    // Get active employees
+    $query = $conn->prepare('SELECT staff_id FROM employee WHERE STATUSCD = ? ORDER BY staff_id ASC');
+    $query->execute(['A']);
+    $employees = $query->fetchAll(PDO::FETCH_ASSOC);
+    $employeecount = count($employees);
 
+    // Check each employee's payroll data
+    foreach ($employees as $employee) {
+        $staff_id = $employee['staff_id'];
+        
+        // Get allowances
+        $allowance_query = $conn->prepare('SELECT ANY_VALUE(Sum(allow_deduc.`value`)) AS allowance, ANY_VALUE(allow_deduc.allow_id) AS allow_id, ANY_VALUE(tbl_earning_deduction.ed) AS ed FROM allow_deduc INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id WHERE staff_id = ? and transcode = ? GROUP BY staff_id');
+        $allowance_query->execute([$staff_id, '01']);
+        $allowances = $allowance_query->fetchAll(PDO::FETCH_ASSOC);
+        
+        $allowance = 0;
+        if ($allowances) {
+            foreach ($allowances as $allow) {
+                $allowance = $allow['allowance'];
+            }
+        }
+
+        // Get deductions
+        $deduction_query = $conn->prepare('SELECT any_value(Sum(allow_deduc.`value`)) as deductions, any_value(allow_deduc.allow_id) as allow_id, any_value(tbl_earning_deduction.ed) as ed FROM allow_deduc INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id WHERE staff_id = ? and transcode = ? GROUP BY staff_id');
+        $deduction_query->execute([$staff_id, '02']);
+        $deductions = $deduction_query->fetchAll(PDO::FETCH_ASSOC);
+        
+        $deduction = 0;
+        if ($deductions) {
+            foreach ($deductions as $ded) {
+                $deduction = $ded['deductions'];
+            }
+        }
+
+        $net = $allowance - $deduction;
+        if ($net >= 0) {
+            $setbasic++;
+        } else {
+            $missingbasic++;
+            $missing[] = $staff_id . ' => ' . number_format($net, 2);
+        }
+    }
+
+    if ($missingbasic > 0) {
+        $processingerrors = true;
+        $_SESSION['msg'] = $missingbasic . ' employees have negative net pay. Please correct this to be able to run payroll.';
+        $_SESSION['alertcolor'] = 'danger';
+    }
+
+} catch (PDOException $e) {
+    error_log("Database error in payprocess.php: " . $e->getMessage());
+    $processingerrors = true;
+    $_SESSION['msg'] = 'Database error occurred while checking payroll data.';
+    $_SESSION['alertcolor'] = 'danger';
+}
 ?>
 <!DOCTYPE html>
-<?php include('header1.php'); ?>
-
-<body data-color="grey" class="flat">
-    <div class="modal fade hidden-print" id="myModal"></div>
-    <div id="wrapper">
-        <div id="header" class="hidden-print">
-            <h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-            <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-            <div class="clear"></div>
-        </div>
-
-
-
-
-        <div id="user-nav" class="hidden-print hidden-xs">
-            <ul class="btn-group ">
-                <li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-                <li class="btn  hidden-xs disabled">
-                    <a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-                            <?php
-                            $Today = date('y:m:d', time());
-                            $new = date('l, F d, Y', strtotime($Today));
-                            echo $new;
-                            ?> </span></a>
-                </li>
-                <li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-                <li class="btn  ">
-                    <a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-                </li>
-            </ul>
-        </div>
-
-        <?php include('sidebar.php') ?>
-
-
-    </div>
-
-
-
-    <div id="content" class="clearfix sales_content_minibar">
-
-        <div id="content-header" class="hidden-print">
-            <h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-        </div>
-
-        <div id="breadcrumb" class="hidden-print">
-            <a href="home.php"><i class="fa fa-home"></i> Dashboard</a><a a class="current" href="payprocess.php">Run Payroll Process</a>
-        </div>
-        <div class="clear"></div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="widget-box">
-                    <div class="widget-title hidden-print">
-                        <span class="icon">
-                            <i class="fa fa-align-justify"></i>
-                        </span>
-                        <h5 align="center"></h5>
-                        <div class="clear"></div>
-                        <div class="clear"></div>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Processing - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/theme-manager.js"></script>
+    
+    <style>
+        .progress-bar {
+            background: linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%);
+            height: 20px;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .processing-status {
+            min-height: 200px;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            background: #F9FAFB;
+        }
+        
+        .status-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-success {
+            color: #059669;
+        }
+        
+        .status-error {
+            color: #DC2626;
+        }
+        
+        .status-warning {
+            color: #D97706;
+        }
+        
+        .status-info {
+            color: #2563EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+<?php include 'header.php'; ?>
+<div class="flex min-h-screen">
+    <?php include 'sidebar.php'; ?>
+    <div class="flex-1 p-6">
+        <div class="container mx-auto">
+            <nav class="mb-6">
+                <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                <span class="mx-2">/</span>
+                <span>Payroll Processing</span>
+            </nav>
+            
+            <?php if (isset($_SESSION['msg'])): ?>
+                <div class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                    <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                    <button onclick="this.parentElement.remove()" class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+            <?php endif; ?>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-calculator mr-2"></i> Payroll Processing
+                <small class="text-base text-gray-600 ml-2">Run final payroll processing sequence</small>
+            </h1>
+            
+            <div class="max-w-6xl mx-auto">
+                <!-- Pre-requisites Check -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-clipboard-check text-blue-600 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Pre-requisites Check</h2>
                     </div>
-
-                    <!-- BEGIN PAGE TITLE-->
-                    <h1 class="page-title"> Payroll Processing </h1>
-                    <!-- END PAGE TITLE-->
-                    <!-- END PAGE HEADER-->
-
-
-                    <!--Begin Page Content-->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="portlet box blue">
-                                <div class="portlet-title">
-                                    <div class="caption">
-                                        <i class="fa fa-gift"></i>Run Final Payroll Processing Sequence
-                                    </div>
-
-                                    <div class="tools">
-                                        <!--<a href="javascript:;" class="reload"> </a>
-                                                <a href="javascript:;" class="collapse"> </a>
-                                                <a href="#portlet-config" data-toggle="modal" class="config"> </a>
-                                                <a href="javascript:;" class="remove"> </a>-->
-                                    </div>
-                                </div>
-                                <div class="portlet-body form">
-
-                                    <div>
-                                        <div class="portlet light bordered">
-                                            <!--<div class="portlet-title">
-                                                        <div class="caption">
-                                                            <i class="icon-social-dribbble font-purple"></i>
-                                                            <span class="caption-subject font-purple bold uppercase">Please Note</span>
-                                                        </div>
-                                                        
-                                                    </div>-->
-                                            <div class="portlet-body">
-                                                <div class="well">
-                                                    <b>Before running the final payroll sequence, please ensure all pre requisites regarding employee earnings and deductions have been fulfilled.</b>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <!-- BEGIN FORM-->
-                                    <form method="post" id="form_payprocess" class="form-horizontal">
-
-                                        <div class="form-body">
-                                            <div class="row">
-
-
-                                                <div class="col-md-12">
-                                                    <?php
-                                                    $query = $conn->prepare('SELECT staff_id FROM employee WHERE STATUSCD = ?  ORDER BY staff_id ASC');
-                                                    $query->execute(array('A'));
-                                                    $ftres = $query->fetchAll(PDO::FETCH_ASSOC);;
-                                                    $employeecount = $query->rowCount();
-                                                    // print($employeecount . "<br />");
-                                                    // print_r($ftres);
-
-
-                                                    $counter = 0;
-                                                    $missingbasic = 0;
-                                                    $setbasic = 0;
-                                                    $missing = array();
-
-
-                                                    foreach ($ftres as $row => $link) {
-
-                                                        // echo $ftres[$counter] . ", ";
-                                                        $payrollquery = $conn->prepare('SELECT ANY_VALUE(Sum(allow_deduc.`value`)) AS  "allowance", ANY_VALUE(allow_deduc.allow_id) AS allow_id, ANY_VALUE(tbl_earning_deduction.ed) AS ed FROM allow_deduc INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id  WHERE staff_id = ? and transcode = ? GROUP BY staff_id');
-                                                        $payrollquery->execute(array($link['staff_id'], '01'));
-                                                        $allow = $payrollquery->fetchAll(PDO::FETCH_ASSOC);
-                                                        if (!$allow) {
-                                                            $allowance = 0;
-                                                        } else {
-                                                            foreach ($allow as $row => $link1) {
-                                                                $allowance = $link1['allowance'];
-                                                            }
-                                                        }
-
-                                                        $payrollquery2 = $conn->prepare('SELECT any_value(Sum(allow_deduc.`value`)) as "deductions", any_value(allow_deduc.allow_id) as allow_id, any_value(tbl_earning_deduction.ed) as ed FROM allow_deduc INNER JOIN tbl_earning_deduction ON tbl_earning_deduction.ed_id = allow_deduc.allow_id  WHERE staff_id = ? and transcode = ? GROUP BY staff_id');
-                                                        $payrollquery2->execute(array($link['staff_id'], '02'));
-                                                        $deduc = $payrollquery2->fetchAll(PDO::FETCH_ASSOC);
-
-                                                        if (!$deduc) {
-                                                            $deduction = 0;
-                                                        } else {
-                                                            foreach ($deduc as $row => $link2) {
-
-                                                                $deduction =  $link2['deductions'];
-                                                            }
-                                                        }
-
-                                                        $net = $allowance - $deduction;
-                                                        if ($net >= 0) {
-                                                            $setbasic = $setbasic + 1;
-                                                        } else {
-                                                            $missingbasic = $missingbasic + 1;
-                                                            $together = $link['staff_id'] . '=>' . $net;
-                                                            array_push($missing, $together);
-                                                        }
-
-                                                        $counter++;
-                                                    }
-
-                                                    //print("<br />Set basic: " . $setbasic . "<br />" . "Missing Basic: " . $missingbasic);
-
-                                                    if ($missingbasic > 0) {
-                                                        print_r(implode(',', $missing));
-                                                        $_SESSION['msg'] = $missingbasic . ' employees have negative net pay. Please correct this to be able to run payroll.';
-                                                        $_SESSION['alertcolor'] = 'danger';
-                                                        $processingerrors = true;
-                                                    } else {
-                                                        $processingerrors = false;
-                                                    }
-
-                                                    if (isset($_SESSION['msg'])) {
-                                                        echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                                                        unset($_SESSION['msg']);
-                                                        unset($_SESSION['alertcolor']);
-                                                    }
-                                                    ?>
-                                                </div>
-
-
-
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label"><b>Current Active Payroll Period</b></label>
-                                                        <div class="col-md-4">
-
-
-
-                                                            <?php
-                                                            /*$query = $conn->prepare('SELECT description FROM payperiods WHERE companyId = ? AND active =?');
-                                                                            $query->execute([$_SESSION['companyid'], '1']);
-                                                                            $ftres = $query->fetchAll(PDO::FETCH_COLUMN);
-                                                                            //print_r($ftres);
-                                                                            $closingperiodname = $ftres[0];*/
-                                                            ?>
-
-                                                            <input type="text" required class="form-control" id="activeperiod" name="activeperiod" value="<?php echo $_SESSION['activeperiodDescription']; ?>" disabled>
-
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label"><b>Progress</b></label>
-                                                        <div class="col-md-4">
-                                                            <div id="sample_1">
-                                                                <div id="progress" style="border:1px solid #ccc; border-radius: 5px;"></div>
-                                                                <div id="information" style="width:500px">
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </div>
-
-
-                                                </div>
-
-                                            </div>
-                                        </div>
-
-                                        <div class="form-actions">
-                                            <div class="row">
-                                                <div class="col-md-12 txt-ctr">
-                                                    <?php
-                                                    $processingerrors = false;
-                                                    if (isset($_SESSION['periodstatuschange']) && $_SESSION['periodstatuschange'] == '1') {
-                                                    ?><button disabled class="btn btn-lg yellow" data-toggle="modal" data-placement="top" title="You are in a closed period. Unable to process data.">Viewing Closed Period <i class="fa fa-cog"></i></button><?php
-                                                                                                                                                                                                                                                            } else {
-                                                                                                                                                                                                                                                                if ($processingerrors) {
-                                                                                                                                                                                                                                                                ?><button disabled class="btn btn-lg yellow" data-toggle="modal" data-placement="top" title="Processing disabled. Fix errors to be able to run full payroll.">Process Payroll <i class="fa fa-cog"></i></button><?php
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            } else {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ?><button type="submit" id="payprocessbtn" class="btn btn-lg red">Process Payroll <i class="fa fa-cog"></i></button><?php
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ?>
-
-                                                </div>
-                                                <iframe id="loadarea" style="display:none"></iframe><br />
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <!-- END FORM-->
-
-
-                                </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <p class="text-blue-800 font-medium">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Before running the final payroll sequence, please ensure all pre-requisites regarding employee earnings and deductions have been fulfilled.
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Total Employees</span>
+                                <span class="text-2xl font-bold text-gray-800"><?php echo $employeecount; ?></span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <span class="text-green-600">Valid Payroll</span>
+                                <span class="text-2xl font-bold text-green-800"><?php echo $setbasic; ?></span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <span class="text-red-600">Issues Found</span>
+                                <span class="text-2xl font-bold text-red-800"><?php echo $missingbasic; ?></span>
                             </div>
                         </div>
                     </div>
-
-                    <!--End Page Content-->
-
-                    <div class="clearfix"></div>
-
+                    
+                    <?php if ($missingbasic > 0): ?>
+                        <div class="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h3 class="text-red-800 font-semibold mb-2">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Payroll Issues Detected
+                            </h3>
+                            <p class="text-red-700 mb-3">The following employees have negative net pay:</p>
+                            <div class="bg-white border border-red-200 rounded p-3 max-h-40 overflow-y-auto">
+                                <?php foreach ($missing as $issue): ?>
+                                    <div class="text-sm text-red-600 py-1"><?php echo htmlspecialchars($issue); ?></div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <div id="register_container" class="receiving"> </div>
+                
+                <!-- Payroll Processing Form -->
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-cog text-indigo-600 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Payroll Processing</h2>
+                    </div>
+                    
+                    <form id="payrollForm" method="post" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Current Active Payroll Period
+                                </label>
+                                <input type="text" id="activeperiod" name="activeperiod" 
+                                       value="<?php echo htmlspecialchars($_SESSION['activeperiodDescription'] ?? ''); ?>" 
+                                       class="w-full p-3 border border-gray-300 rounded-md bg-gray-50" readonly>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Processing Status
+                                </label>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div id="progressBar" class="progress-bar h-2 rounded-full" style="width: 0%"></div>
+                                    </div>
+                                    <span id="progressText" class="text-sm text-gray-600">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Processing Status Display -->
+                        <div class="processing-status p-4">
+                            <h3 class="font-semibold text-gray-800 mb-3">Processing Status</h3>
+                            <div id="processingStatus" class="space-y-2">
+                                <div class="text-gray-500 text-center py-8">
+                                    <i class="fas fa-clock text-2xl mb-2"></i>
+                                    <p>Ready to process payroll</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-4">
+                            <?php if (isset($_SESSION['periodstatuschange']) && $_SESSION['periodstatuschange'] == '1'): ?>
+                                <button type="button" disabled 
+                                        class="px-6 py-3 bg-yellow-500 text-white rounded-lg opacity-50 cursor-not-allowed flex items-center">
+                                    <i class="fas fa-lock mr-2"></i>
+                                    Viewing Closed Period
+                                </button>
+                            <?php elseif ($processingerrors): ?>
+                                <button type="button" disabled 
+                                        class="px-6 py-3 bg-red-500 text-white rounded-lg opacity-50 cursor-not-allowed flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Fix Errors First
+                                </button>
+                            <?php else: ?>
+                                <button type="submit" id="payprocessbtn" 
+                                        class="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200 flex items-center">
+                                    <i class="fas fa-cog mr-2"></i>
+                                    Process Payroll
+                                </button>
+                            <?php endif; ?>
+                            
+                            <button type="button" id="refreshBtn" 
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Refresh Status
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
         </div>
+    </div>
+</div>
 
-        <div id="footer" class="col-md-12 hidden-print">
-            Please visit our
-            <a href="http://www.oouth.com/" target="_blank">
-                website </a>
-            to learn the latest information about the project.
-            <span class="text-info"> <span class="label label-info"> 14.1</span></span>
-        </div>
-
-    </div><!--end #content-->
-    <!--end #wrapper-->
-
-    <!-- <script>
-        $("#payprocessbtn").click(function() {
-            document.getElementById('loadarea').src = 'classes/runPayroll.php';
-        });
-    </script> -->
-
-    <script type="text/javascript" language="javascript">
-        $(document).ready(function() {
-
-            $('#payprocessbtn').click(function() {
-                event.preventDefault();
-
-                if (confirm('Are you sure you want to run ' + $('#activeperiod').val() + ' Payroll?')) {
-
-                    $('#payprocessbtn').attr('disabled', true);
-                    $('#payprocessbtn').html("Transaction is processing");
-                    //$('#payprocessbtn').prop("disable",true);
-                    $('#payprocessbtn').attr('val', 'Please wait while your transaction is Processing');
-                    submitting = false;
-                    $.ajax({
-                        type: "GET",
-                        url: 'classes/runPayroll.php',
-                        xhrFields: {
-                            onprogress: function(e) {
-                                $('#sample_1').html(e.target.responseText);
-                                console.log(e.target.responseText);
-                            }
-                        },
-                        success: function(response, message) {
-                            if (message == 'success') {
-                                //if(response == 1){
-                                //$('#payprocessbtn').attr('disabled',false);
-                                //	alert("Payroll for the month already Processed");
-                                //	gritter("Error",message,'gritter-item-error',false,false);
-                                //}else{
-                                $('#payprocessbtn').attr('disabled', false);
-                                alert("Payroll for the month succesfully Processed");
-                                //location.reload(true);
-                                gritter("Success", message, 'gritter-item-success', false, false);
-                                //}
-
-                            } else {
-                                gritter("Error", message, 'gritter-item-error', false, false);
-
-                            }
-
-                            $('#payprocessbtn').attr('disabled', false);
-                            $('#payprocessbtn').html("Payroll Process");
-
-
-                        }
-                    })
-                }
-
-
-
-            })
-
-
-
-            function receivingsBeforeSubmit(formData, jqForm, options) {
-                var submitting = false;
-                if (submitting) {
-                    return false;
-                }
-                submitting = true;
-
-                $("#ajax-loader").show();
-                //	$("#finish_sale_button").hide();
+<script>
+$(document).ready(function() {
+    let isProcessing = false;
+    
+    $('#payrollForm').submit(function(e) {
+        e.preventDefault();
+        
+        if (isProcessing) {
+            return false;
+        }
+        
+        Swal.fire({
+            title: 'Confirm Payroll Processing',
+            text: 'Are you sure you want to run payroll for ' + $('#activeperiod').val() + '?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#DC2626',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'Yes, Process Payroll',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                startPayrollProcessing();
             }
-
         });
-    </script>
-    <script src="js/tableExport.js"></script>
-    <script src="js/main.js"></script>
-</body>
+    });
+    
+    $('#refreshBtn').click(function() {
+        location.reload();
+    });
+    
+    function startPayrollProcessing() {
+        isProcessing = true;
+        
+        // Update button state
+        $('#payprocessbtn').prop('disabled', true);
+        $('#payprocessbtn').html('<i class="fas fa-spinner fa-spin mr-2"></i>Processing...');
+        
+        // Clear previous status
+        $('#processingStatus').empty();
+        $('#progressBar').css('width', '0%');
+        $('#progressText').text('0%');
+        
+        // Add initial status
+        addStatusItem('Starting payroll processing...', 'info');
+        
+        $.ajax({
+            type: 'GET',
+            url: 'classes/runPayroll.php',
+            xhrFields: {
+                onprogress: function(e) {
+                    try {
+                        const response = e.target.responseText;
+                        updateProgress(response);
+                    } catch (error) {
+                        console.log('Progress update error:', error);
+                    }
+                }
+            },
+            success: function(response, status) {
+                isProcessing = false;
+                $('#payprocessbtn').prop('disabled', false);
+                $('#payprocessbtn').html('<i class="fas fa-cog mr-2"></i>Process Payroll');
+                
+                if (status === 'success') {
+                    addStatusItem('Payroll processing completed successfully!', 'success');
+                    $('#progressBar').css('width', '100%');
+                    $('#progressText').text('100%');
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Payroll Processed Successfully!',
+                        text: 'The payroll for ' + $('#activeperiod').val() + ' has been processed successfully.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    addStatusItem('Payroll processing failed', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Processing Failed',
+                        text: 'An error occurred during payroll processing.'
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                isProcessing = false;
+                $('#payprocessbtn').prop('disabled', false);
+                $('#payprocessbtn').html('<i class="fas fa-cog mr-2"></i>Process Payroll');
+                
+                addStatusItem('Payroll processing failed: ' + error, 'error');
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Processing Failed',
+                    text: 'An error occurred during payroll processing: ' + error
+                });
+            }
+        });
+    }
+    
+    function updateProgress(response) {
+        try {
+            // Parse the response to extract progress information
+            const lines = response.split('\n');
+            let progress = 0;
+            let currentStep = '';
+            
+            lines.forEach(line => {
+                if (line.includes('Progress:')) {
+                    const match = line.match(/(\d+)%/);
+                    if (match) {
+                        progress = parseInt(match[1]);
+                    }
+                }
+                if (line.includes('Processing:') || line.includes('Step:')) {
+                    currentStep = line.replace(/.*Processing:\s*|.*Step:\s*/, '').trim();
+                }
+            });
+            
+            // Update progress bar
+            $('#progressBar').css('width', progress + '%');
+            $('#progressText').text(progress + '%');
+            
+            // Add status item if there's a new step
+            if (currentStep && !$('#processingStatus').text().includes(currentStep)) {
+                addStatusItem(currentStep, 'info');
+            }
+            
+        } catch (error) {
+            console.log('Progress parsing error:', error);
+        }
+    }
+    
+    function addStatusItem(message, type) {
+        const statusClass = {
+            'success': 'status-success',
+            'error': 'status-error',
+            'warning': 'status-warning',
+            'info': 'status-info'
+        };
+        
+        const iconClass = {
+            'success': 'fas fa-check-circle',
+            'error': 'fas fa-times-circle',
+            'warning': 'fas fa-exclamation-triangle',
+            'info': 'fas fa-info-circle'
+        };
+        
+        const statusItem = `
+            <div class="status-item">
+                <div class="flex items-center">
+                    <i class="${iconClass[type]} ${statusClass[type]} mr-2"></i>
+                    <span class="text-sm">${message}</span>
+                </div>
+                <span class="text-xs text-gray-500">${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+        
+        $('#processingStatus').append(statusItem);
+        
+        // Scroll to bottom
+        const statusContainer = document.getElementById('processingStatus');
+        statusContainer.scrollTop = statusContainer.scrollHeight;
+    }
+});
+</script>
 
+<?php include 'footer.php'; ?>
+</body>
 </html>

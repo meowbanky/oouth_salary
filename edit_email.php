@@ -1,507 +1,286 @@
-<?php ini_set('max_execution_time', '300');
-require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
 
-//Start session
 session_start();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: index.php");
-	exit();
+// Restrict to logged-in users
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '') {
+    header("Location: index.php");
+    exit;
 }
 
-if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
-		global $salary;
+$results_per_page = 100;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$start_from = ($page - 1) * $results_per_page;
 
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($salary, $theValue) : mysqli_escape_string($salary, $theValue);
-
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
+// Count total records
+try {
+    $sql = "SELECT COUNT(*) AS Total FROM employee WHERE STATUSCD = 'A'";
+    if (isset($_GET['item']) && is_numeric($_GET['item'])) {
+        $sql = "SELECT COUNT(*) AS Total FROM employee WHERE STATUSCD = 'A' AND staff_id = :staff_id";
+    }
+    $stmt = $conn->prepare($sql);
+    if (isset($_GET['item']) && is_numeric($_GET['item'])) {
+        $stmt->bindParam(':staff_id', $_GET['item'], PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    $total_records = $stmt->fetchColumn();
+    $total_pages = ceil($total_records / $results_per_page);
+} catch (PDOException $e) {
+    error_log("Count error: " . $e->getMessage());
+    $total_pages = 1;
 }
 
-$currentPage = $_SERVER["PHP_SELF"];
-
-
-
-
-
-
-$today = '';
-$today = date('Y-m-d');
+// Fetch employee data
+try {
+    $sql = "SELECT employee.`NAME`, employee.EMAIL, employee.staff_id, tbl_dept.dept 
+            FROM employee 
+            INNER JOIN tbl_dept ON employee.DEPTCD = tbl_dept.dept_id 
+            WHERE employee.STATUSCD = 'A'";
+    if (isset($_GET['item']) && is_numeric($_GET['item'])) {
+        $sql .= " AND employee.staff_id = :staff_id";
+    }
+    $sql .= " ORDER BY employee.`NAME` ASC LIMIT :start_from, :results_per_page";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':start_from', $start_from, PDO::PARAM_INT);
+    $stmt->bindParam(':results_per_page', $results_per_page, PDO::PARAM_INT);
+    if (isset($_GET['item']) && is_numeric($_GET['item'])) {
+        $stmt->bindParam(':staff_id', $_GET['item'], PDO::PARAM_INT);
+    }
+    $stmt->execute();
+    $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Query error: " . $e->getMessage());
+    $employees = [];
+}
 ?>
+
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
-<html>
-<?php include('header1.php'); ?>
-
-<body data-color="grey" class="flat" style="zoom: 1;">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
-
-		<?php include('header.php'); ?>
-
-
-		<?php include('sidebar.php'); ?>
-
-
-
-		<div id="content" class="clearfix sales_content_minibar">
-
-			<script type="text/javascript">
-				$(document).ready(function() {
-
-
-				});
-			</script>
-			<div id="content-header" class="hidden-print">
-				<h1> <i class="icon fa fa-table"></i>
-					Edit Email</h1>
-
-
-			</div>
-
-
-			<div id="breadcrumb" class="hidden-print">
-				<a href="home.php"><i class="fa fa-home"></i> Dashboard</a><a class="current" href="edit_email.php">Edit Email </a>
-			</div>
-			<div class="clear"></div>
-			<div id="datatable_wrapper"></div>
-			<div class=" pull-right">
-				<div class="row">
-					<div id="datatable_wrapper"></div>
-					<div class="col-md-12 center" style="text-align: center;">
-						<?php
-						if (isset($_SESSION['msg'])) {
-							echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-							unset($_SESSION['msg']);
-							unset($_SESSION['alertcolor']);
-						}
-						?>
-						<?php
-						if (isset($_SESSION['msg'])) {
-							echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-							unset($_SESSION['msg']);
-							unset($_SESSION['alertcolor']);
-						}
-						?>
-						<div class="btn-group  ">
-							<div id="buttons">
-
-								<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-								<ul class="dropdown-menu" role="menu">
-									<li><a onclick="window.print();">Print</a></li>
-									<li><a onclick="exportAll('xls','<?php echo 'pfa'; ?>');" href="javascript://">XLS</a></li>
-									<li><a onclick="exportAll('csv','<?php echo 'pfa'; ?>');" href="javascript://">CSV</a></li>
-									<li><a onclick="exportAll('txt','<?php echo 'pfa'; ?>');" href="javascript://">TXT</a></li>
-
-								</ul>
-
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row ">
-				<form action="edit_email.php" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-					<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-					<input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Staff Name or Staff No" />
-					<span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-				</form>
-			</div>
-
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-th"></i>
-							</span>
-							<h5>Salary Table</h5>
-							<span title="" class="label label-info tip-left" data-original-title="total Employee">Total Employee<?php echo '100' ?></span>
-
-						</div>
-						<!--endbegiing of employee details-->
-						<div id="datatable_wrapper">
-
-							<div class="row top-spacer-20">
-
-								<div class="col-md-12">
-
-									<div class="container">
-										<nav aria-label="page navigation example" class="hidden-print">
-											<ul class="pagination">
-
-												<?php
-												$results_per_page = 100;
-												if (isset($_GET['page'])) {
-													$page = $_GET['page'];
-												} else {
-													$page = 1;
-												}
-												$results_per_page = 100;
-												if (!isset($_GET['item'])) {
-													$sql = "SELECT count(*) as Total FROM employee WHERE STATUSCD = 'A'";
-												} else {
-													$sql = "SELECT count(*) as Total FROM employee WHERE STATUSCD = 'A' AND staff_id = {$_GET['item']}";
-												}
-
-												$result = $conn->query($sql);
-												$row = $result->fetch();
-												$total_pages = ceil($row['Total'] / $results_per_page);
-												for ($i = 1; $i <= $total_pages; $i++) {
-													echo '<li class="page-item ';
-													if ($i == $page) {
-														echo ' active"';
-													};
-													echo '"><a class="page-link" href="edit_email.php?page=' . $i . '">' . $i . '</a></li>';
-												}
-												?>
-											</ul>
-										</nav>
-									</div>
-									<div style="overflow-x: auto;">
-										<table class="table table-striped table-bordered table-hover table-checkable order-column tblbtn w-auto" id="sample_1">
-											<thead>
-												<tr>
-													<th> Staff No </th>
-													<th> Name </th>
-													<th> Department </th>
-													<th> Email </th>
-												</tr>
-											</thead>
-											<tbody>
-
-												<!--Begin Data Table-->
-												<?php
-												//retrieveData('employment_types', 'id', '2', '1');
-												$results_per_page = 100;
-												if (isset($_GET['page'])) {
-													$page = $_GET['page'];
-												} else {
-													$page = 1;
-												}
-
-												try {
-													$start_from = ($page - 1) * $results_per_page;
-													if (!isset($_GET['item'])) {
-														$sql = 'SELECT employee.`NAME`, employee.EMAIL, employee.staff_id, tbl_dept.dept FROM employee INNER JOIN tbl_dept ON employee.DEPTCD = tbl_dept.dept_id WHERE STATUSCD = "A" ORDER BY NAME ASC LIMIT ' . $start_from . ',' . $results_per_page;
-													} else {
-														$sql = "SELECT employee.`NAME`, employee.EMAIL, employee.staff_id, tbl_dept.dept FROM employee INNER JOIN tbl_dept ON employee.DEPTCD = tbl_dept.dept_id WHERE STATUSCD = 'A' AND staff_id = {$_GET['item']} ORDER BY NAME ASC LIMIT " . $start_from . ',' . $results_per_page;
-													}
-													$query = $conn->prepare($sql);
-													$fin = $query->execute();
-													$res = $query->fetchAll(PDO::FETCH_ASSOC);
-													//sdsd
-
-													foreach ($res as $row => $link) {
-												?><tr class="odd gradeX">
-															<?php
-															$thisemployeealterid = $link['staff_id'];
-															$thisemployeeNum = $link['staff_id'];
-															echo '<td>' . $link['staff_id'] .  '</td><td class="stylecaps">' . $link['NAME'] . '</td>';
-															echo '<td>';
-															echo $link['dept'];
-															echo '</td>';
-															echo '<td>';
-															echo $link['EMAIL'];
-															echo '</td>';
-															echo '</tr>';
-															?>
-
-													<?php
-													}
-												} catch (PDOException $e) {
-													echo $e->getMessage();
-												}
-													?>
-													<!--End Data Table-->
-
-
-
-
-
-											</tbody>
-										</table>
-
-									</div>
-
-
-
-
-
-								</div>
-								<div class="container">
-									<nav aria-label="page navigation example" class="hidden-print">
-										<ul class="pagination">
-
-											<?php
-											$results_per_page = 100;
-											if (isset($_GET['page'])) {
-												$page = $_GET['page'];
-											} else {
-												$page = 1;
-											}
-											$results_per_page = 100;
-											if (!isset($_GET['item'])) {
-												$sql = "SELECT count(*)  as Total FROM employee WHERE STATUSCD = 'A'";
-											} else {
-												$sql = "SELECT count(*) as Total FROM employee  WHERE STATUSCD = 'A' AND staff_id = {$_GET['item']}";
-											}
-
-											$result = $conn->query($sql);
-											$row = $result->fetch();
-											$total_pages = ceil($row['Total'] / $results_per_page);
-											for ($i = 1; $i <= $total_pages; $i++) {
-												//echo "<a href='payslip_all.php?page=".$i."'";
-												//	if($i ==$page){echo " class='curPage'";}
-												//	echo "> ".$i." </a>";
-												echo '<li class="page-item ';
-												if ($i == $page) {
-													echo ' active"';
-												};
-												echo '"><a class="page-link" href="edit_email.php?page=' . $i . '">' . $i . '</a></li>';
-											}
-											?>
-										</ul>
-									</nav>
-								</div>
-							</div>
-						</div>
-					</div>
-					<!-- Button trigger modal -->
-
-
-					<!-- Modal -->
-
-
-
-
-
-
-				</div>
-			</div>
-			<div id="footer" class="col-md-12 hidden-print">
-				Please visit our
-				<a href="#" target="_blank">
-					website </a>
-				to learn the latest information about the project.
-				<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-			</div>
-
-
-
-			<script type="text/javascript">
-				COMMON_SUCCESS = "Success";
-				COMMON_ERROR = "Error";
-				$.ajaxSetup({
-					cache: false,
-					headers: {
-						"cache-control": "no-cache"
-					}
-				});
-
-				$(document).ready(function() {
-
-					$("#item").autocomplete({
-						source: 'searchStaff.php',
-						type: 'POST',
-						delay: 10,
-						autoFocus: false,
-						minLength: 1,
-						select: function(event, ui) {
-							event.preventDefault();
-							$("#item").val(ui.item.value);
-							$item = $("#item").val();
-							//$('#add_item_form').ajaxSubmit({beforeSubmit: salesBeforeSubmit, success: itemScannedSuccess});
-							$('#add_item_form').ajaxSubmit({
-								beforeSubmit: salesBeforeSubmit,
-								type: "POST",
-								url: "pfa.php",
-								success: function(data) {
-									window.location.href = "edit_email.php?item=" + $item;
-								}
-
-
-							});
-						}
-					});
-
-					$('#item').focus();
-					var last_focused_id = null;
-					var submitting = false;
-
-					function salesBeforeSubmit(formData, jqForm, options) {
-						if (submitting) {
-							return false;
-						}
-						submitting = true;
-						$("#ajax-loader").show();
-
-					}
-
-					function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-						if (($('#code').val()) == 1) {
-							gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-						} else {
-							gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-							//	window.location.reload(true);
-							$("#ajax-loader").hide();
-
-						}
-						setTimeout(function() {
-							$('#item').focus();
-						}, 10);
-
-						setTimeout(function() {
-
-							$.gritter.removeAll();
-							return false;
-
-						}, 1000);
-
-					}
-
-
-
-					$('#item').click(function() {
-						$(this).attr('placeholder', '');
-					});
-					//Ajax submit current location
-					$("#employee_current_location_id").change(function() {
-						$("#form_set_employee_current_location_id").ajaxSubmit(function() {
-							window.location.reload(true);
-						});
-					});
-
-
-					$('#employee_form').validate({
-
-						// Specify the validation rules
-						rules: {
-
-							namee: "required",
-							dept: "required",
-
-
-
-
-						},
-
-						// Specify the validation error messages
-						messages: {
-							namee: "The name is a required field.",
-
-
-						},
-
-						errorClass: "text-danger",
-						errorElement: "span",
-						highlight: function(element, errorClass, validClass) {
-							$(element).parents('.form-group').removeClass('has-success').addClass('has-error');
-						},
-						unhighlight: function(element, errorClass, validClass) {
-							$(element).parents('.form-group').removeClass('has-error').addClass('has-success');
-						},
-
-						submitHandler: function(form) {
-
-							//form.submit();
-							doEmployeeSubmit(form);
-						}
-					});
-
-					document.getElementById('item').focus();
-
-					//						$('#sample_1').Tabledit({
-					//			      url:'action.php',
-					//			      columns:{
-					//			       identifier:[0, "StaffNo"],
-					//			       editable:[[5, 'PFAPIN']
-					//			      },
-					//			      restoreButton:false,
-					//			      onSuccess:function(data, textStatus, jqXHR)
-					//			      {
-					//			       if(data.action == 'delete')
-					//			       {
-					//			        $('#'+data.id).remove();
-					//			       }
-					//			      }
-					//			     });
-
-
-				});
-			</script>
-
-
-			<script>
-				$(document).ready(function() {
-
-
-
-					$('#sample_1').Tabledit({
-						url: 'emailTable_edit.php',
-						deleteButton: false,
-						columns: {
-							identifier: [0, "id"],
-							editable: [
-								[3, 'value']
-							]
-
-						},
-						dropdowns: {},
-						dblclick: true,
-						keyboard: true,
-						hideIdentifier: true,
-						restoreButton: false,
-						onSuccess: function(data, textStatus, jqXHR) {
-
-							if (data.action == 'delete') {
-								$('#' + data.id).remove();
-							}
-						}
-					});
-
-				});
-			</script>
-			<script src="js/tableExport.js"></script>
-			<script src="js/main.js"></script>
-		</div><!--end #content-->
-	</div><!--end #wrapper-->
-
-	<ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Email - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <style>
+        /* Fallback CSS for DataTables if CDN fails */
+        .dataTable {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+        .dataTable th, .dataTable td {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .dataTable thead {
+            background-color: #f9fafb;
+        }
+        .dataTable tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <?php include 'header.php'; ?>
+    <div class="flex min-h-screen">
+        <?php include 'sidebar.php'; ?>
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Edit Email</span>
+                </nav>
+
+                <?php if (isset($_SESSION['msg'])): ?>
+                    <div class="bg-<?php echo $_SESSION['alertcolor']; ?>-100 text-<?php echo $_SESSION['alertcolor']; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                        <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                        <button onclick="this.parentElement.remove()" class="text-<?php echo $_SESSION['alertcolor']; ?>-600 hover:text-<?php echo $_SESSION['alertcolor']; ?>-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
+
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-table mr-2"></i> Edit Email
+                </h1>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <form id="add_item_form" action="edit_email.php" method="get" class="flex items-center space-x-4">
+                        <input type="text" name="item" id="item" placeholder="Enter Staff Name or Staff No" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"><i class="fas fa-search"></i> Search</button>
+                    </form>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Salary Table <span class="text-blue-600 text-sm">Total Employees: <?php echo $total_records; ?></span></h2>
+                        <button onclick="window.print()" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"><i class="fas fa-print"></i> Print</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table id="employeeTable" class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff No</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($employees as $employee): ?>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($employee['staff_id']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap uppercase"><?php echo htmlspecialchars($employee['NAME']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($employee['dept']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap email-cell" data-staff-id="<?php echo htmlspecialchars($employee['staff_id']); ?>">
+                                            <?php echo htmlspecialchars($employee['EMAIL'] ?: ''); ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <button class="edit-email text-blue-600 hover:text-blue-800" data-staff-id="<?php echo htmlspecialchars($employee['staff_id']); ?>">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav class="mt-4" aria-label="Page navigation">
+                        <ul class="flex justify-center space-x-2">
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <li>
+                                    <a href="edit_email.php?page=<?php echo $i; ?><?php echo isset($_GET['item']) ? '&item=' . urlencode($_GET['item']) : ''; ?>" 
+                                       class="px-3 py-2 rounded-md <?php echo $i == $page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                </li>
+                            <?php endfor; ?>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Check if jQuery UI Autocomplete is available
+            if (!$.fn.autocomplete) {
+                console.error('jQuery UI Autocomplete is not loaded. Falling back to basic search.');
+                $('#item').on('keypress', function(e) {
+                    if (e.which === 13) { // Enter key
+                        $('#add_item_form').submit();
+                    }
+                });
+            } else {
+                // Initialize Autocomplete
+                $('#item').autocomplete({
+                    source: 'searchStaff.php',
+                    minLength: 1,
+                    delay: 100,
+                    select: function(event, ui) {
+                        event.preventDefault();
+                        $('#item').val(ui.item.value);
+                        $('#add_item_form').submit();
+                    }
+                }).autocomplete('instance')._renderItem = function(ul, item) {
+                    return $('<li>').append('<div>').text(item.label).appendTo(ul);
+                };
+            }
+
+            // Initialize DataTable
+            try {
+                $('#employeeTable').DataTable({
+                    responsive: false,
+                    pageLength: 100,
+                    searching: false, // Disable DataTables search to use custom form
+                    ordering: true,
+                    columnDefs: [
+                        { orderable: false, targets: 4 } // Disable sorting on Action column
+                    ]
+                });
+            } catch (e) {
+                console.error('DataTable initialization failed:', e);
+            }
+
+            // Focus on search input
+            $('#item').focus();
+
+            // Handle edit email
+            $('.edit-email').on('click', function() {
+                const staffId = $(this).data('staff-id');
+                const emailCell = $(this).closest('tr').find('.email-cell');
+                const currentEmail = emailCell.text().trim();
+                
+                Swal.fire({
+                    title: 'Edit Email',
+                    input: 'email',
+                    inputValue: currentEmail,
+                    showCancelButton: true,
+                    confirmButtonText: 'Save',
+                    cancelButtonText: 'Cancel',
+                    inputValidator: function(value) {
+                        if (!value) return 'Email is required!';
+                        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/.test(value)) {
+                            return 'Please enter a valid email!';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'emailTable_edit.php',
+                            method: 'POST',
+                            data: { id: staffId, email: result.value,action: 'edit' },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    emailCell.text(result.value);
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Email updated successfully.',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message || 'Failed to update email.'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred while updating the email.'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 </body>
-
 </html>
-<?php
-//mysqli_free_result($employee);
-?>

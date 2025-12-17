@@ -1,1145 +1,862 @@
-<?php ini_set('max_execution_time', '300');
-require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
+require_once('Connections/paymaster.php');
+include_once('classes/model.php');
+require_once 'libs/App.php';
+$App = new App();
+$App->checkAuthentication();
+require_once 'libs/middleware.php';
+checkPermission();
 
-//Start session
-session_start();
-
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) == '' || $_SESSION['role'] != 'Admin') {
     header("location: index.php");
     exit();
 }
 
+$results_per_page = 200;
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$status_filter = isset($_GET['status']) ? trim($_GET['status']) : '';
 
-$currentPage = $_SERVER["PHP_SELF"];
+$where = '';
+$params = [];
+$conditions = [];
 
+if ($search) {
+    $conditions[] = '(employee.NAME LIKE :search OR employee.staff_id LIKE :search)';
+    $params[':search'] = "%$search%";
+}
 
+if ($status_filter) {
+    $conditions[] = 'employee.STATUSCD = :status';
+    $params[':status'] = $status_filter;
+}
 
+if (!empty($conditions)) {
+    $where = 'WHERE ' . implode(' AND ', $conditions);
+}
+$countSql = "SELECT COUNT(*) as total FROM employee $where";
+$stmt = $conn->prepare($countSql);
+$stmt->execute($params);
+$total = $stmt->fetch()['total'] ?? 0;
+$total_pages = ceil($total / $results_per_page);
 
-$today = '';
-$today = date('Y-m-d');
+$sql = "SELECT 
+            employee.*, tbl_dept.dept, tbl_pfa.PFANAME, tbl_bank.BNAME 
+        FROM employee 
+        LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE 
+        LEFT JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE 
+        LEFT JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD 
+        $where 
+        ORDER BY statuscd, staff_id ASC 
+        LIMIT :start, :limit";
+$stmt = $conn->prepare($sql);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
+$stmt->bindValue(':start', ($page - 1) * $results_per_page, PDO::PARAM_INT);
+$stmt->bindValue(':limit', $results_per_page, PDO::PARAM_INT);
+$stmt->execute();
+$employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
-<!-- saved from url=(0055)http://www.optimumlinkup.com.ng/pos/index.php/customers -->
-<html>
-<?php include('header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat" style="zoom: 1;">
-    <div class="modal fade hidden-print" id="myModal"></div>
-    <div id="wrapper">
-        <div id="header" class="hidden-print">
-            <h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-            <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-            <div class="clear"></div>
-        </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Employees | OOUTH Salary Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/theme-manager.js"></script>
+    <style>
+    html,
+    body {
+        overflow-x: hidden;
+    }
+    </style>
+</head>
 
-        <?php include('header.php'); ?>
-
-
+<body class="bg-gray-100 min-h-screen">
+    <?php include('header.php'); ?>
+    <div class="flex min-h-screen">
         <?php include('sidebar.php'); ?>
-
-
-
-        <div id="content" class="clearfix sales_content_minibar">
-
-            <script type="text/javascript">
-                $(document).ready(function() {
-
-
-                });
-            </script>
-            <div id="content-header" class="hidden-print">
-                <h1> <i class="icon fa fa-user"></i>
-                    Employee</h1>
-
-
-            </div>
-
-
-            <div id="breadcrumb" class="hidden-print">
-                <a href="home.php"><i class="fa fa-home"></i> Dashboard</a><a class="current" href="employee.php">Employees</a>
-            </div>
-            <div class="clear"></div>
-            <div id="datatable_wrapper"></div>
-            <div class=" pull-right">
-                <div class="row">
-                    <div id="datatable_wrapper"></div>
-                    <div class="col-md-12 center" style="text-align: center;">
-                        <?php
-                        if (isset($_SESSION['msg'])) {
-                            echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                            unset($_SESSION['msg']);
-                            unset($_SESSION['alertcolor']);
-                        }
-                        ?>
-                        <?php
-                        if (isset($_SESSION['msg'])) {
-                            echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                            unset($_SESSION['msg']);
-                            unset($_SESSION['alertcolor']);
-                        }
-                        ?>
-                        <div class="btn-group  ">
-                            <div id="buttons">
-                                <a class="btn green btn-sm" href="exportemployee.php"><i class="fa fa-user-plus"></i> Download Employee </a>
-                                <a class="btn red btn-sm" data-toggle="modal" data-target="#new-employee"><i class="fa fa-user-plus"></i> New Employee </a>
-                                <button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a onclick="window.print();">Print</a></li>
-                                    <li><a onclick="exportAll('xls','<?php echo 'employee'; ?>');" href="javascript://">XLS</a></li>
-                                    <li><a onclick="exportAll('csv','<?php echo 'employee'; ?>');" href="javascript://">CSV</a></li>
-                                    <li><a onclick="exportAll('txt','<?php echo 'employee'; ?>');" href="javascript://">TXT</a></li>
-
-                                </ul>
-
-                            </div>
-                        </div>
-
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <div class="w-full max-w-5xl mx-auto flex-1 flex flex-col">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-users"></i> Employees
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Manage, search and add employee records.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="export_employees.php?<?php echo http_build_query($_GET); ?>"
+                            class="bg-green-700 hover:bg-green-900 text-white px-5 py-2 rounded-lg font-semibold shadow transition">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </a>
+                        <button type="button"
+                            class="bg-blue-700 hover:bg-blue-900 text-white px-5 py-2 rounded-lg font-semibold shadow transition"
+                            id="openAddEmpModal">
+                            <i class="fas fa-user-plus mr-2"></i> Add Employee
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="row ">
-                <form action="employee.php" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-                    <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-                    <input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Staff Name or Staff No" />
-                    <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
+                <?php if (isset($_SESSION['msg'])): ?>
+                <div class="mb-4">
+                    <div
+                        class="rounded px-4 py-3 shadow text-white 
+                        <?php echo ($_SESSION['alertcolor'] ?? 'info') === 'success' ? 'bg-green-500' : 'bg-red-500'; ?>">
+                        <?php echo htmlspecialchars($_SESSION['msg']); ?>
+                    </div>
+                </div>
+                <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
+                <form method="get" class="flex gap-2 mb-5">
+                    <input type="text" name="search" placeholder="Search by Name or Staff No"
+                        value="<?php echo htmlspecialchars($search); ?>"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded focus:outline-blue-500 bg-white shadow-sm" />
+                    <select name="status"
+                        class="px-4 py-2 border border-gray-300 rounded focus:outline-blue-500 bg-white shadow-sm">
+                        <option value="">All Status</option>
+                        <?php
+                        // Get status options from staff_status table or use hardcoded values as fallback
+                        try {
+                            $statusQuery = $conn->prepare('SELECT STATUSCD, STATUS FROM staff_status ORDER BY STATUSCD');
+                            $statusQuery->execute();
+                            $statuses = $statusQuery->fetchAll(PDO::FETCH_ASSOC);
+                        } catch (Exception $e) {
+                            // Fallback to hardcoded status values if table doesn't exist
+                            $statuses = [
+                                ['STATUSCD' => 'A', 'STATUS' => 'ACTIVE'],
+                                ['STATUSCD' => 'D', 'STATUS' => 'DISMISSED'],
+                                ['STATUSCD' => 'T', 'STATUS' => 'TERMINATION'],
+                                ['STATUSCD' => 'R', 'STATUS' => 'RESIGNATION'],
+                                ['STATUSCD' => 'S', 'STATUS' => 'SUSPENSION'],
+                                ['STATUSCD' => 'DE', 'STATUS' => 'DEATH']
+                            ];
+                        }
+                        foreach ($statuses as $status) {
+                            $selected = ($status_filter === $status['STATUSCD']) ? 'selected' : '';
+                            echo '<option value="' . htmlspecialchars($status['STATUSCD']) . '" ' . $selected . '>' . 
+                                 htmlspecialchars($status['STATUS']) . '</option>';
+                        }
+                        ?>
+                    </select>
+                    <button class="bg-blue-700 hover:bg-blue-900 text-white px-4 py-2 rounded shadow" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
                 </form>
-            </div>
+                <!-- Responsive Table (Desktop) -->
+                <div class="hidden md:block overflow-x-auto rounded-xl bg-white shadow">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-blue-50">
+                            <tr>
+                                <th class="py-2 px-2 text-left">Staff No</th>
+                                <th class="py-2 px-2 text-left">Name</th>
+                                <th class="py-2 px-2 text-left">Employment Date</th>
+                                <th class="py-2 px-2 text-left">Status</th>
+                                <th class="py-2 px-2 text-left">Department</th>
+                                <th class="py-2 px-2 text-left">Grade/Step</th>
+                                <th class="py-2 px-2 text-left">PFA</th>
+                                <th class="py-2 px-2 text-left">Bank - No</th>
+                                <th class="py-2 px-2 text-left">Call Duty</th>
+                                <th class="py-2 px-2 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($employees as $emp): ?>
+                            <tr class="border-b hover:bg-blue-50">
+                                <td class="py-1 px-2 font-mono text-blue-900">
+                                    <?php echo htmlspecialchars($emp['staff_id']); ?></td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['NAME']); ?></td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['EMPDATE'] ?? ''); ?></td>
+                                <td class="py-1 px-2">
+                                    <?php
+                                $statusMap = [
+                                    'A' => 'Active', 'D' => 'Dismissed', 'T' => 'Terminated',
+                                    'R' => 'Resigned', 'S' => 'Suspended'
+                                ];
+                                echo '<span class="px-2 py-1 rounded text-xs font-bold ' .
+                                    ($emp['STATUSCD'] === 'A' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') .
+                                    '">' . ($statusMap[$emp['STATUSCD']] ?? 'Unknown') . '</span>';
+                                ?>
+                                </td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['dept']); ?></td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['GRADE'].'/'.$emp['STEP']); ?>
+                                </td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['PFANAME'] ?? ''); ?></td>
+                                <td class="py-1 px-2"><?php echo htmlspecialchars($emp['BNAME'].'-'.$emp['ACCTNO']); ?>
+                                </td>
+                                <td class="py-1 px-2">
+                                    <?php
+                                $callMap = [0=>'None', 1=>'Doctor', 2=>'Others', 3=>'Nurse'];
+                                echo '<span class="text-blue-700">'.$callMap[$emp['CALLTYPE']] ?? '—'.'</span>';
+                                ?>
+                                </td>
+                                <td class="py-1 px-2">
+                                    <div class="flex gap-2">
+                                        <a href="javascript:void(0);"
+                                            onclick="showEmployeeModal('<?php echo $emp['staff_id']; ?>')"
+                                            class="text-blue-600 hover:text-blue-900" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="javascript:void(0);"
+                                            onclick="showEditEmployeeModal('<?php echo $emp['staff_id']; ?>')"
+                                            class="text-yellow-600 hover:text-yellow-900" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon">
-                                <i class="fa fa-th"></i>
-                            </span>
-                            <h5>List of Employees</h5>
-                            <span title="" class="label label-info tip-left" data-original-title="total Employee">Total Employee<?php echo '100' ?></span>
-
-                        </div>
-                        <!--endbegiing of employee details-->
-                        <div id="datatable_wrapper">
-
-                            <div class="row top-spacer-20">
-
-                                <div class="col-md-12">
-
-                                    <div class="container">
-                                        <nav aria-label="page navigation example" class="hidden-print">
-                                            <ul class="pagination">
-
-                                                <?php
-                                                $results_per_page = 100;
-                                                if (isset($_GET['page'])) {
-                                                    $page = $_GET['page'];
-                                                } else {
-                                                    $page = 1;
-                                                }
-                                                $results_per_page = 100;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM employee';
-                                                } else {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM employee where staff_id = "' . $_GET['item'] . '"';
-                                                }
-
-                                                $result = $conn->query($sql);
-                                                $row = $result->fetch();
-                                                $total_pages = ceil($row['Total'] / $results_per_page);
-                                                for ($i = 1; $i <= $total_pages; $i++) {
-                                                    //echo "<a href='payslip_all.php?page=".$i."'";
-                                                    //	if($i ==$page){echo " class='curPage'";}
-                                                    //	echo "> ".$i." </a>";
-                                                    echo '<li class="page-item ';
-                                                    if ($i == $page) {
-                                                        echo ' active"';
-                                                    };
-                                                    echo '"><a class="page-link" href="employee.php?page=' . $i . '">' . $i . '</a></li>';
-                                                }
-                                                ?>
-                                            </ul>
-                                        </nav>
+                                        <a href="javascript:void(0);"
+                                            onclick="showDeactivateModal('<?php echo $emp['staff_id']; ?>','<?php echo addslashes($emp['NAME']); ?>','<?php echo $emp['STATUSCD']; ?>')"
+                                            class="text-red-600 hover:text-red-900" title="Deactivate/Activate">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
                                     </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
 
-                                    <table class="table table-striped table-bordered table-hover table-checkable order-column tblbtn" id="sample_1">
-                                        <thead>
-                                            <tr>
-                                                <th width="10"> </th>
-                                                <th> Staff No# </th>
-                                                <th> Names </th>
-                                                <th> Date of Employment </th>
-                                                <th> Status </th>
-                                                <th> Department </th>
-                                                <th> Grade/Step </th>
-                                                <th> PFA </th>
-                                                <th> Bank details - NO. </th>
-                                                <th> Actions </th>
-
-
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-                                            <!--Begin Data Table-->
+                <!-- Card List (Mobile) -->
+                <div class="md:hidden flex-1 min-h-0">
+                    <div class="overflow-y-auto" style="max-height: calc(100dvh - 11rem);">
+                        <div class="flex flex-col gap-3 px-1 py-2">
+                            <?php foreach ($employees as $emp): ?>
+                            <div class="bg-white rounded-xl shadow p-4 flex flex-col gap-2 w-full">
+                                <div class="flex justify-between items-center">
+                                    <div class="font-bold text-blue-900 text-base">
+                                        <?php echo htmlspecialchars($emp['NAME']); ?></div>
+                                    <span
+                                        class="text-xs px-2 py-1 rounded font-bold
+                            <?php echo ($emp['STATUSCD'] === 'A') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
+                                        <?php
+                            $statusMap = [
+                              'A' => 'Active', 'D' => 'Dismissed', 'T' => 'Terminated',
+                              'R' => 'Resigned', 'S' => 'Suspended'
+                            ];
+                            echo $statusMap[$emp['STATUSCD']] ?? 'Unknown';
+                            ?>
+                                    </span>
+                                </div>
+                                <div class="flex gap-2 text-sm">
+                                    <span class="font-medium text-gray-600">Staff No:</span>
+                                    <span
+                                        class="font-mono text-blue-800"><?php echo htmlspecialchars($emp['staff_id']); ?></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
+                                    <div><span class="text-gray-600">Date:</span>
+                                        <span><?php echo htmlspecialchars($emp['EMPDATE'] ?? ''); ?></span>
+                                    </div>
+                                    <div><span class="text-gray-600">Dept:</span>
+                                        <span><?php echo htmlspecialchars($emp['dept'] ?? ''); ?></span>
+                                    </div>
+                                    <div><span class="text-gray-600">Grade/Step:</span>
+                                        <span><?php echo htmlspecialchars($emp['GRADE'] ?? ''.'/'.$emp['STEP']); ?></span>
+                                    </div>
+                                    <div><span class="text-gray-600">PFA:</span>
+                                        <span><?php echo htmlspecialchars($emp['PFANAME'] ?? ''); ?></span>
+                                    </div>
+                                    <div><span class="text-gray-600">Bank/No:</span>
+                                        <span><?php echo htmlspecialchars($emp['BNAME'] ?? ''.'-'.$emp['ACCTNO'] ?? ''); ?></span>
+                                    </div>
+                                    <div><span class="text-gray-600">Call Duty:</span>
+                                        <span class="text-blue-700">
                                             <?php
-                                            //retrieveData('employment_types', 'id', '2', '1');
-                                            $results_per_page = 20;
-                                            if (isset($_GET['page'])) {
-                                                $page = $_GET['page'];
-                                            } else {
-                                                $page = 1;
-                                            }
-
-                                            try {
-                                                $start_from = ($page - 1) * $results_per_page;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD, tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE, employee.STEP, employee.ACCTNO, SALARYTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD INNER JOIN tbl_salaryType ON tbl_salaryType.salaryType_id = employee.SALARY_TYPE ORDER BY statuscd ASC,  staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                } else {
-                                                    $sql = 'SELECT tbl_dept.dept, employee.STATUSCD,tbl_pfa.PFANAME, employee.PFAACCTNO, tbl_bank.BNAME, employee.staff_id, employee.`NAME`, employee.EMPDATE, employee.GRADE,  employee.STEP, employee.ACCTNO, SALARYTYPE FROM employee LEFT JOIN tbl_pfa ON tbl_pfa.PFACODE = employee.PFACODE INNER JOIN tbl_bank ON tbl_bank.BCODE = employee.BCODE INNER JOIN tbl_dept ON tbl_dept.dept_id = employee.DEPTCD WHERE staff_id = ' . $_GET['item'] . ' ORDER BY statuscd,staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                }
-                                                $query = $conn->prepare($sql);
-                                                $fin = $query->execute();
-                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                //sdsd
-
-                                                foreach ($res as $row => $link) {
-                                            ?><tr class="odd gradeX">
-                                                        <?php
-                                                        $thisemployeealterid = $link['staff_id'];
-                                                        $thisemployeeNum = $link['staff_id'];
-                                                        echo '<td><input type="checkbox"></td><td>' . $link['staff_id'] .  '</td><td class="stylecaps">' . $link['NAME'] . '</td><td>';
-                                                        echo   $link['EMPDATE'];
-                                                        echo '</td><td>';
-                                                        if ($link['STATUSCD'] == 'A') {
-                                                            echo 'Active';
-                                                        } elseif ($link['STATUSCD'] == 'D') {
-                                                            echo 'DISMISSED';
-                                                        } elseif ($link['STATUSCD'] == 'T') {
-                                                            echo 'TERMINATION';
-                                                        } elseif ($link['STATUSCD'] == 'R') {
-                                                            echo 'RESIGNATION';
-                                                        } elseif ($link['STATUSCD'] == 'S') {
-                                                            echo 'SUSPENSION';
-                                                        }
-                                                        //echo  $link['status'] ;   
-                                                        echo '</td><td>';
-                                                        echo $link['dept'];
-                                                        echo '</td><td>';
-                                                        echo $link['SALARYTYPE'] . ' ' . $link['GRADE'] . '/' . $link['STEP'];
-                                                        echo '</td><td>';
-                                                        echo $link['PFANAME'];
-                                                        echo '</td><td>';
-                                                        echo $link['BNAME'] . '-' . $link['ACCTNO'];
-                                                        echo '</td>';
-
-
-                                                        echo '<td> 
-                                                                             		
-                                                                                <button type="button" data-target="#viewemp' . $thisemployeealterid . '" class="btn btn-xs blue" data-toggle="modal" data-placement="top" title="View employee details"><span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span></button> 
-                                                                                <!--<a href="" class="btn btn-xs green" data-toggle="tooltip" data-placement="top" title="Edit employee details"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>--> 
-                                                                                <!--<button type="button" data-target="#suspend' . $thisemployeealterid . '" class="btn btn-xs yellow" data-toggle="modal" data-placement="top" title="Suspend Employee"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></button>--> 
- 																																								<button type="button" data-target="#deactivate' . $thisemployeealterid . '" class="btn btn-xs red" data-toggle="modal" data-placement="top" title="Terminate employee"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
-                                                                                <a href="classes/controller.php?act=vtrans&td=' . $link['staff_id'] . '" class="btn btn-xs purple" data-placement="top" title="View Transactions"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span></a>
-                                                                                <!--<a href="" class="btn btn-xs yellow" data-toggle="modal" data-placement="left" title="Go to employee Earnings / Deductions"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span></a></td></tr>-->';
-                                                        ?>
-
-
-                                                        <div id="suspend<?php echo $thisemployeealterid; ?>" class="modal fade" tabindex="-1" data-width="560">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                                        <button type=" button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                                                                        <h4 class="modal-title">Suspend Employee <?php echo $thisemployeeNum; ?> </h4>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <form class="horizontal-form" method="post" action="assets/classes/controller.php?act=suspendEmployee">
-                                                                            <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-body">
-
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-12">
-                                                                                                <input type="hidden" value="<?php echo $thisemployeealterid; ?>" name="empalterid">
-                                                                                                <input type="hidden" value="<?php echo $thisemployeeNum; ?>" name="empalternumber">
-
-                                                                                                <label>Please confirm you would like to suspend this employee?
-                                                                                                    <b><?php
-                                                                                                        //echo $thisemployeealterid;
-                                                                                                        retrieveDescSingleFilter('employee', 'NAME', 'staff_id', $thisemployeealterid);
-                                                                                                        echo " ";
-
-                                                                                                        echo " - " . $thisemployeeNum;
-                                                                                                        ?></b>
-                                                                                                </label>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <p></p>
-
-
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label>Start Date</label>
-
-                                                                                                    <div class="input-group date" data-provide="datepicker">
-                                                                                                        <input type="date" required name="startsuspension" class="form-control">
-                                                                                                        <div class="input-group-addon">
-                                                                                                            <span class="glyphicon glyphicon-th"></span>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                            <div class="col-md-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label>End Date</label>
-
-                                                                                                    <div class="input-group date" data-provide="datepicker">
-                                                                                                        <input type="date" required name="endsuspension" class="form-control">
-                                                                                                        <div class="input-group-addon">
-                                                                                                            <span class="glyphicon glyphicon-th"></span>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-12">
-                                                                                                <div class="form-group">
-                                                                                                    <label>Suspension Details</label>
-                                                                                                    <textarea class="form-control" rows="3" required name="suspendreason" placeholder="Enter reason for exit"></textarea>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-
-
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                                        <button type="submit" class="btn red">Deactivate Employee</button>
-                                                                    </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Deactiv Modal -->
-                                                        <div id="deactivate<?php echo $thisemployeealterid; ?>" class="modal fade" tabindex="-1" data-width="560">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                                        <button type=" button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                                                                        <h4 class="modal-title">Deactivate Employee <?php echo $thisemployeeNum; ?> </h4>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <form class="horizontal-form" method="post" action="classes/controller.php?act=deactivateEmployee">
-                                                                            <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-body">
-
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-12">
-                                                                                                <input type="hidden" value="<?php echo $thisemployeealterid; ?>" name="empalterid">
-                                                                                                <input type="hidden" value="<?php echo $thisemployeeNum; ?>" name="empalternumber">
-
-                                                                                                <label>Please confirm you would like to deactivate this employee?
-                                                                                                    <b><?php
-                                                                                                        //echo $thisemployeealterid;
-                                                                                                        retrieveDescSingleFilter('employee', 'NAME', 'staff_id', $thisemployeealterid);
-                                                                                                        echo " - " . $thisemployeeNum;
-                                                                                                        ?></b>
-                                                                                                </label>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <p></p>
-
-
-                                                                                        <div class="row">
-                                                                                            <div class="col-md-6">
-                                                                                                <div class="form-group">
-                                                                                                    <label for="dept" class="required  control-label ">Deative/Activate:</label>
-                                                                                                    <select name="deactivate" class="form-inps" required>
-                                                                                                        <option>Select Deactivate</option>
-                                                                                                        <?php
-
-                                                                                                        $query = $conn->prepare('SELECT * FROM staff_status');
-                                                                                                        $res = $query->execute();
-                                                                                                        $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                                        while ($row = array_shift($out)) {
-                                                                                                            echo '<option value="' . $row['STATUSCD'] . '"';
-                                                                                                            if ($link['STATUSCD'] == $row['STATUSCD']) {
-                                                                                                                echo 'SELECTED ';
-                                                                                                            }
-                                                                                                            echo '>' .  $row['STATUS'] . '</option>';
-                                                                                                        }
-
-                                                                                                        ?>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-
-
-                                                                                        </div>
-
-
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                    </div>
-
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                                        <button type="submit" class="btn red">Deactivate Employee</button>
-                                                                    </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Deactiv Modal -->
-
-
-                                                        <!-- Deactiv Modal -->
-
-                                                        <!-- Deactiv Modal -->
-
-
-                                                        <!-- View Emp Modal -->
-                                                        <div id="viewemp<?php echo $thisemployeealterid; ?>" class="modal fade" tabindex="-1" data-width="650">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content" style="width:800px">
-                                                                    <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                                        <h4 class=" modal-title" style="text-transform: uppercase;">Employee Details</h4>
-                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <?php
-                                                                    $query = $conn->prepare('SELECT * FROM employee WHERE staff_id = ?');
-                                                                    $fin = $query->execute(array($thisemployeealterid));
-                                                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                    //sdsd
-
-                                                                    foreach ($res as $row => $empd) {
-
-
-
-
-                                                                    ?>
-                                                                        <div class="modal-body">
-                                                                            <form method="post" action="classes/controller.php?act=updateEmp" class="horizontal-form">
-                                                                                <div class="row">
-                                                                                    <div class="col-md-12">
-                                                                                        <div class="form-body">
-
-
-                                                                                            <h4 class="form-section"><b>Personal Details</b></h4>
-                                                                                            <div class="row">
-                                                                                                <div class="col-md-6">
-                                                                                                    <div class="form-group">
-                                                                                                        <label>Employee No:</label>
-                                                                                                        <input type="text" name="emp_no" value="<?php echo $empd['staff_id'] ?>" class="form-inps focus" readonly>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div class="col-md-6">
-                                                                                                    <div class="form-group">
-                                                                                                        <label>Employee Name:</label>
-                                                                                                        <input name="namee" type="text" class="form-control" value="<?php echo $empd['NAME']; ?>">
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-
-                                                                                            <div class="row">
-                                                                                                <div class="col-md-6">
-                                                                                                    <div class="form-group">
-                                                                                                        <label for="dept" class="required  control-label ">Department:</label>
-                                                                                                        <select name="dept" class="form-inps" required>
-                                                                                                            <option>Select Department</option>
-                                                                                                            <?php $query = $conn->prepare('SELECT * FROM tbl_dept');
-                                                                                                            $res = $query->execute();
-                                                                                                            $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                                            while ($row = array_shift($out)) {
-                                                                                                                echo ('<option value="' . $row['dept_id'] . '"');
-                                                                                                                if ($row['dept_id'] == $empd['DEPTCD']) {
-                                                                                                                    echo 'SELECTED';
-                                                                                                                }
-                                                                                                                echo ('>' .  $row['dept'] . '</option>');
-                                                                                                            } ?>
-                                                                                                        </select>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                                <div class="col-md-6">
-                                                                                                    <div class="form-group" class="required  control-label "><label for="designation">Designation:</label>
-                                                                                                        <input name="post" type="text" class="form-inps" value="<?php echo $empd['POST'] ?>">
-                                                                                                    </div>
-                                                                                                </div>
-
-                                                                                                <div class="row">
-                                                                                                    <div class="col-md-6">
-                                                                                                        <div class="form-group"><br>
-                                                                                                            <label for="payType" class="required  control-label ">Call Duty Type:</label>
-                                                                                                            <label><br>
-                                                                                                                <input name="callType" type="radio" class="radio-inline" value="0" checked>
-                                                                                                                None</label><br>
-
-                                                                                                            <label>
-                                                                                                                <input name="callType" type="radio" class="radio-inline" value="1" <?php if ($empd['CALLTYPE'] == 1) {
-                                                                                                                                                                                        echo 'checked';
-                                                                                                                                                                                    } ?>>
-                                                                                                                Doctors</label><br>
-
-                                                                                                            <label>
-                                                                                                                <input type="radio" name="callType" value="2" class="radio-inline" <?php if ($empd['CALLTYPE'] == 2) {
-                                                                                                                                                                                        echo 'checked';
-                                                                                                                                                                                    } ?>>
-                                                                                                                Others</label><br>
-
-                                                                                                            <label>
-                                                                                                                <input type="radio" name="callType" value="3" class="radio-inline" <?php if ($empd['CALLTYPE'] == 3) {
-                                                                                                                                                                                        echo 'checked';
-                                                                                                                                                                                    } ?>>
-                                                                                                                Nurse</label>
-
-                                                                                                        </div>
-
-                                                                                                    </div>
-                                                                                                    <div class="col-md-6">
-                                                                                                        <div class="form-group">
-
-                                                                                                            <div class="col-md-6">
-                                                                                                                <div class="form-group"><br>
-                                                                                                                    <label for="hazardType" class="required  control-label ">Hazard Type:</label><br>
-
-                                                                                                                    <label>
-                                                                                                                        <input name="hazardType" type="radio" class="radio-inline" id="hazardType_0" value="1" <?php if ($empd['HARZAD_TYPE'] == 1) {
-                                                                                                                                                                                                                    echo 'checked';
-                                                                                                                                                                                                                } ?>>
-                                                                                                                        Clinical</label><br>
-                                                                                                                    <label>
-                                                                                                                        <input type="radio" name="hazardType" value="2" id="hazardType_1" class="radio-inline" <?php if ($empd['HARZAD_TYPE'] == 2) {
-                                                                                                                                                                                                                    echo 'checked';
-                                                                                                                                                                                                                } ?>>
-                                                                                                                        Non-clinical</label><br>
-
-                                                                                                                </div>
-                                                                                                            </div>
-
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                    <div class="row">
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="grade" class="required  control-label ">Grade:</label>
-                                                                                                                <input type="text" name="grade" value="<?php echo $empd['GRADE']; ?>" class="form-inps focus" required maxlength="3">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="grade" class="required  control-label ">Step:</label>
-                                                                                                                <input type="text" name="gradestep" value="<?PHP echo $empd['STEP'] ?>" class="form-inps focus" required maxlength="2">
-                                                                                                            </div>
-                                                                                                        </div>
-
-                                                                                                    </div>
-
-
-
-                                                                                                    <div class="row">
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="doe" class="required  control-label ">Date of Employment:</label>
-                                                                                                                <input name="doe" type="date" required="required" value="<?php echo $empd['EMPDATE']; ?>" class="form-inps" max="<?php echo $today; ?>">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group" <label for="dob" class="required  control-label ">Date of Birth:</label>
-                                                                                                                <input name="dob" type="date" class="form-inps" max="<?php echo $today; ?>">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-
-
-
-                                                                                                    <div class="row">
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-
-                                                                                                                <label for="bank" class="required  control-label ">Bank:</label>
-                                                                                                                <select name="bank" class="form-inps">
-                                                                                                                    <option>Select Bank</option>
-                                                                                                                    <?php $query = $conn->prepare('SELECT * FROM tbl_bank');
-                                                                                                                    $res = $query->execute();
-                                                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                                                    while ($row = array_shift($out)) {
-                                                                                                                        echo ('<option value="' . $row['BCODE'] . '"');
-                                                                                                                        if ($row['BCODE'] == $empd['BCODE']) {
-                                                                                                                            echo 'SELECTED';
-                                                                                                                        }
-                                                                                                                        echo ('>' .  $row['BNAME'] . '</option>');
-                                                                                                                    } ?>
-                                                                                                                </select>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="acct_no" class="required  control-label ">Account No:</label>
-                                                                                                                <input name="acct_no" type="text" class="form-inps" autocomplete="off" value="<?PHP echo $empd['ACCTNO'] ?>">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-
-                                                                                                    <div class="row">
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-
-                                                                                                                <label for="pfa" class="required  control-label ">PFA:</label>
-                                                                                                                <select name="pfa" class="form-inps">
-                                                                                                                    <option value="">Select PFA</option>
-                                                                                                                    <?php $query = $conn->prepare('SELECT * FROM tbl_pfa');
-                                                                                                                    $res = $query->execute();
-                                                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                                                    while ($row = array_shift($out)) {
-                                                                                                                        echo ('<option value="' . $row['PFACODE'] . '"');
-                                                                                                                        if ($row['PFACODE'] == $empd['PFACODE']) {
-                                                                                                                            echo 'SELECTED';
-                                                                                                                        }
-                                                                                                                        echo ('>' .  $row['PFANAME'] . '</option>');
-                                                                                                                    } ?>
-                                                                                                                </select>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                        <div class="col-md-6">
-                                                                                                            <div class="form-group">
-                                                                                                                <label for="rsa_pin" class="required control-label ">PFA PIN:</label>
-                                                                                                                <input name="rsa_pin" type="text" class="form-inps" autocomplete="off" value="<?PHP echo $empd['PFAACCTNO'] ?>">
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-
-
-
-
-
-
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                    </div>
-                                                                                    <div class="modal-footer">
-                                                                                        <button type="submit" class="btn red">Save Details</button>
-                                                                                        <button type="button" data-dismiss="modal" class="btn btn-primary dark">Close</button>
-                                                                                    </div>
-                                                                            </form>
-                                                                        </div>
-                                                                </div>
-
-                                                            <?php
-                                                                    }
-                                                            ?>
-
-
-
-                                                            </div>
-                                                            <!-- View Emp Modal -->
-
-                                                    <?php
-                                                }
-                                            } catch (PDOException $e) {
-                                                echo $e->getMessage();
-                                            }
-                                                    ?>
-                                                    <!--End Data Table-->
-
-
-
-
-
-                                        </tbody>
-                                    </table>
-
-                                    <!-- modal -->
-                                    <!-- modal -->
-                                    <div id="new-employee" class="modal fade" tabindex="-1" aria-hidden="true" data-width="800">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content" style="width:800px">
-                                                <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                    <button type=" button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
-                                                    <h4 class="modal-title">create new employee </h4>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form method="post" action="classes/controller.php?act=addNewEmp" class="horizontal-form" id="employee_form">
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-
-                                                                <!-- BEGIN New Employee Popup-->
-                                                                <?php
-                                                                mysqli_select_db($salary, $database_salary);
-                                                                $query_bank = 'SELECT tbl_bank.BNAME, tbl_bank.BCODE FROM tbl_bank';
-                                                                $bank = mysqli_query($salary, $query_bank) or die(mysqli_error($salary));
-                                                                $row_bank = mysqli_fetch_assoc($bank);
-
-                                                                mysqli_select_db($salary, $database_salary);
-                                                                $query_dept = 'SELECT tbl_dept.dept_id, tbl_dept.dept FROM tbl_dept';
-                                                                $dept = mysqli_query($salary, $query_dept) or die(mysqli_error($salary));
-                                                                $row_dept = mysqli_fetch_assoc($dept);
-
-                                                                mysqli_select_db($salary, $database_salary);
-                                                                $query_pfa = 'SELECT tbl_pfa.PFACODE, tbl_pfa.PFANAME FROM tbl_pfa';
-                                                                $pfa = mysqli_query($salary, $query_pfa) or die(mysqli_error($salary));
-                                                                $row_pfa = mysqli_fetch_assoc($pfa);
-                                                                ?>
-                                                                <div class="form-body">
-
-                                                                    <h4 class="form-section"><b>Personal Details</b></h4>
-
-                                                                    <div class="row">
-                                                                        <div class="co-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Name</label>
-                                                                                <input type="text" autocomplete="off" name="namee" id="namee" class="form-control" required placeholder="Name">
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    <div class="row">
-                                                                        <div class="co-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>tasce email</label>
-                                                                                <input type="text" autocomplete="off" name="email" id="email" class="form-control" required placeholder="Enter email in this format: surname.firstname">
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Bank</label>
-                                                                                <select name="bank" class="form-inps" id="bank" required>
-                                                                                    <option value=''>Select Bank</option>
-                                                                                    <?php $query = $conn->prepare('SELECT * FROM tbl_bank');
-                                                                                    $res = $query->execute();
-                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                    while ($row = array_shift($out)) {
-                                                                                        echo ('<option value="' . $row['BCODE'] . '"');
-
-                                                                                        echo ('>' .  $row['BNAME'] . '</option>');
-                                                                                    } ?>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Account No.</label>
-                                                                                <input type="number" name="acct_no" required class="form-control" placeholder="Account No" pattern="\d{10}" maxlength="10">
-                                                                            </div>
-
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Pension FA</label>
-                                                                                <select name="pfa" class="form-inps" id="pfa">
-                                                                                    <option value="">Select PFA</option>
-                                                                                    <?php $query = $conn->prepare('SELECT * FROM tbl_pfa');
-                                                                                    $res = $query->execute();
-                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                    while ($row = array_shift($out)) {
-                                                                                        echo ('<option value="' . $row['PFACODE'] . '"');
-                                                                                        echo ('>' .  $row['PFANAME'] . '</option>');
-                                                                                    } ?>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>RSA PIN.</label>
-                                                                                <input type="text" name="rsa_pin" class="form-control" placeholder="PFA PIN">
-                                                                            </div>
-
-                                                                        </div>
-                                                                    </div>
-
-
-
-                                                                    <h4 class="form-section"><b>Employment Details</b></h4>
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Employee No</label>
-                                                                                <?php
-                                                                                $payp = $conn->prepare('SELECT Max(employee.staff_id) as "nextNo" FROM employee');
-                                                                                $myperiod = $payp->execute();
-                                                                                $final = $payp->fetch();
-                                                                                ?>
-                                                                                <input type="text" readonly name="emp_no" class="form-control" required placeholder="Staff No" value="<?php echo intval($final['nextNo']) + 1 ?>">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Date of Employment</label>
-                                                                                <div class="input-group date" data-provide="datepicker">
-                                                                                    <input type="date" required name="doe" class="form-control">
-                                                                                    <div class="input-group-addon">
-                                                                                        <span class="glyphicon glyphicon-th"></span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Department</label>
-                                                                                <select name="dept" class="form-control">
-                                                                                    <option value="">- - - Select Department - - -</option>
-                                                                                    <?php
-
-                                                                                    $query = $conn->prepare('SELECT * FROM tbl_dept');
-                                                                                    $res = $query->execute();
-                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                    while ($row = array_shift($out)) {
-                                                                                        echo ('<option value="' . $row['dept_id'] . '">' .  $row['dept'] . '</option>');
-                                                                                    }
-
-                                                                                    ?>
-                                                                                </select>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Designation</label>
-                                                                                <input type="text" name="designation" required class="form-control" placeholder="Post">
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>OGNO 3</label>
-                                                                                <input type="text" name="ogNo" class="form-control" placeholder="OG NO">
-
-                                                                            </div>
-
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label>Salary Type</label>
-                                                                                <select name="salary_type" class="form-control">
-                                                                                    <option value="">- - - Salary Type - - -</option>
-                                                                                    <?php
-
-                                                                                    $query = $conn->prepare('SELECT * FROM tbl_salaryType');
-                                                                                    $res = $query->execute();
-                                                                                    $out = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                                                                    while ($row = array_shift($out)) {
-                                                                                        echo ('<option value="' . $row['salaryType_id'] . '">' .  $row['SalaryType'] . '</option>');
-                                                                                    }
-
-                                                                                    ?>
-                                                                                </select>
-                                                                            </div>
-
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="row">
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label for="grade" class="required  control-label ">Grade:</label>
-                                                                                <input type="text" name="grade" value="" class="form-inps focus" id="grade" required maxlength="3">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <div class="form-group">
-                                                                                <label for="grade" class="required  control-label ">Step:</label>
-                                                                                <input type="text" name="gradestep" value="" class="form-inps focus" id="gradestep" required maxlength="2">
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-
-
-                                                                </div>
-                                                                <!-- END New Employee Popup-->
-
-
-                                                            </div>
-                                                        </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                    <button type="submit" name="addemp" class="btn red">Add Employee</button>
-                                                </div>
-
-                                                </form>
-                                            </div>
-                                        </div>
+                            $callMap = [0=>'None', 1=>'Doctor', 2=>'Others', 3=>'Nurse'];
+                            echo $callMap[$emp['CALLTYPE']] ?? '—';
+                            ?>
+                                        </span>
                                     </div>
                                 </div>
+                                <div class="flex gap-4 mt-2">
+                                    <a href="javascript:void(0);"
+                                        onclick="showEmployeeModal('<?php echo $emp['staff_id']; ?>')"
+                                        class="text-blue-600 hover:text-blue-900" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="javascript:void(0);"
+                                        onclick="showEditEmployeeModal('<?php echo $emp['staff_id']; ?>')"
+                                        class="text-yellow-600 hover:text-yellow-900" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
 
-
-
-
-
+                                    <a href="javascript:void(0);"
+                                        onclick="showDeactivateModal('<?php echo $emp['staff_id']; ?>','<?php echo addslashes($emp['NAME']); ?>','<?php echo $emp['STATUSCD']; ?>')"
+                                        class="text-red-600 hover:text-red-900" title="Deactivate/Activate">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="container">
-                                <nav aria-label="page navigation example" class="hidden-print">
-                                    <ul class="pagination">
-
-                                        <?php
-                                        $results_per_page = 100;
-                                        if (isset($_GET['page'])) {
-                                            $page = $_GET['page'];
-                                        } else {
-                                            $page = 1;
-                                        }
-                                        $results_per_page = 100;
-                                        if (!isset($_GET['item'])) {
-                                            $sql = 'SELECT count(staff_id) as "Total" FROM employee';
-                                        } else {
-                                            $sql = 'SELECT count(staff_id) as "Total" FROM employee where staff_id = "' . $_GET['item'] . '"';
-                                        }
-                                        $result = $conn->query($sql);
-                                        $row = $result->fetch();
-                                        $total_pages = ceil($row['Total'] / $results_per_page);
-                                        for ($i = 1; $i <= $total_pages; $i++) {
-                                            //echo "<a href='payslip_all.php?page=".$i."'";
-                                            //	if($i ==$page){echo " class='curPage'";}
-                                            //	echo "> ".$i." </a>";
-                                            echo '<li class="page-item ';
-                                            if ($i == $page) {
-                                                echo ' active"';
-                                            };
-                                            echo '"><a class="page-link" href="employee.php?page=' . $i . '">' . $i . '</a></li>';
-                                        }
-                                        ?>
-                                    </ul>
-                                </nav>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
-                <!-- Button trigger modal -->
+
+                <!-- Pagination -->
+                <div class="flex justify-center mt-4">
+                    <nav class="inline-flex -space-x-px">
+                        <?php 
+                        for ($i=1; $i <= $total_pages; $i++): 
+                            $queryParams = ['page' => $i];
+                            if ($search) $queryParams['search'] = $search;
+                            if ($status_filter) $queryParams['status'] = $status_filter;
+                        ?>
+                        <a href="?<?php echo http_build_query($queryParams); ?>"
+                            class="px-3 py-1 border <?php echo $page==$i ? 'bg-blue-600 text-white' : 'bg-white text-blue-800'; ?> rounded mx-0.5 text-xs font-semibold hover:bg-blue-100">
+                            <?php echo $i; ?>
+                        </a>
+                        <?php endfor; ?>
+                    </nav>
+                </div>
+            </div>
+        </main>
+    </div>
 
 
-                <!-- Modal -->
+    <!-- Edit Employee Modal -->
+    <div id="editEmployeeModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-all duration-150 ease-in-out hidden">
+        <div
+            class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-2 p-0 overflow-hidden relative max-h-[90dvh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-4 bg-yellow-600 text-white">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-user-edit"></i> Edit Employee
+                </div>
+                <button onclick="$('#editEmployeeModal').addClass('hidden')"
+                    class="text-white hover:text-yellow-300 text-2xl leading-3">&times;</button>
+            </div>
+            <form method="post" action="classes/controller.php?act=updateEmp" class="p-6 space-y-5"
+                id="edit_employee_form" autocomplete="off">
+                <div id="editEmployeeFormMsg" class="text-center text-sm pb-2"></div>
+                <div id="editEmployeeFields"></div>
+                <!-- The fields will be loaded dynamically via JS below -->
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="$('#editEmployeeModal').addClass('hidden')"
+                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
+    <!-- Add Employee Modal -->
+    <div id="addEmployeeModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-all duration-150 ease-in-out hidden">
+        <div
+            class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-2 p-0 overflow-hidden relative max-h-[90dvh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-4 bg-blue-700 text-white">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-user-plus"></i> Add New Employee
+                </div>
+                <button onclick="$('#addEmployeeModal').addClass('hidden')"
+                    class="text-white hover:text-blue-300 text-2xl leading-3">&times;</button>
+            </div>
+            <form method="post" action="classes/controller.php?act=addNewEmp" class="p-6 space-y-5" id="employee_form"
+                autocomplete="off">
+                <div id="addEmployeeFormMsg" class="text-center text-sm pb-2"></div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Full Name</label>
+                        <input type="text" name="namee" required class="w-full px-3 py-2 border rounded"
+                            placeholder="e.g. John Doe">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">OOUTH Email</label>
+                        <input type="email" name="email" required pattern="[a-zA-Z0-9]+\.[a-zA-Z0-9]+@oouth\.com$"
+                            placeholder="surname.firstname@oouth.com" class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Bank</label>
+                        <select name="bank" required class="w-full px-3 py-2 border rounded">
+                            <option value="">Select Bank</option>
+                            <?php
+                        $query = $conn->prepare('SELECT * FROM tbl_bank');
+                        $query->execute();
+                        $banks = $query->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($banks as $bank) {
+                            echo '<option value="'.htmlspecialchars($bank['BCODE']).'">'.htmlspecialchars($bank['BNAME']).'</option>';
+                        }
+                        ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Account No.</label>
+                        <input type="number" name="acct_no" required pattern="\d{10}" maxlength="10"
+                            class="w-full px-3 py-2 border rounded" placeholder="Account Number">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Pension FA</label>
+                        <select name="pfa" class="w-full px-3 py-2 border rounded">
+                            <option value="">Select PFA</option>
+                            <?php
+                        $query = $conn->prepare('SELECT * FROM tbl_pfa');
+                        $query->execute();
+                        $pfas = $query->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($pfas as $pfa) {
+                            echo '<option value="'.htmlspecialchars($pfa['PFACODE']).'">'.htmlspecialchars($pfa['PFANAME']).'</option>';
+                        }
+                        ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">RSA PIN</label>
+                        <input type="text" name="rsa_pin" class="w-full px-3 py-2 border rounded" placeholder="RSA PIN">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Employee No</label>
+                        <?php
+                    $payp = $conn->prepare('SELECT Max(employee.staff_id) as "nextNo" FROM employee');
+                    $payp->execute();
+                    $final = $payp->fetch();
+                    ?>
+                        <input type="text" readonly name="emp_no" class="w-full px-3 py-2 border rounded bg-gray-100"
+                            required value="<?php echo intval($final['nextNo']) + 1 ?>">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Date of Employment</label>
+                        <input type="date" name="doe" required class="w-full px-3 py-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Department</label>
+                        <select name="dept" class="w-full px-3 py-2 border rounded">
+                            <option value="">- - - Select Department - - -</option>
+                            <?php
+                        $query = $conn->prepare('SELECT * FROM tbl_dept');
+                        $query->execute();
+                        $depts = $query->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($depts as $dept) {
+                            echo '<option value="'.htmlspecialchars($dept['dept_id']).'">'.htmlspecialchars($dept['dept']).'</option>';
+                        }
+                        ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Designation</label>
+                        <input type="text" name="designation" required class="w-full px-3 py-2 border rounded"
+                            placeholder="Post">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Grade</label>
+                        <input type="text" name="grade" maxlength="3" required class="w-full px-3 py-2 border rounded"
+                            placeholder="Grade">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Step</label>
+                        <input type="text" name="gradestep" maxlength="2" required
+                            class="w-full px-3 py-2 border rounded" placeholder="Step">
+                    </div>
+                </div>
+                <!-- Radios -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Call Duty Type:</label>
+                        <div class="flex gap-4 mt-1">
+                            <label class="inline-flex items-center"><input type="radio" name="callType" value="0"
+                                    checked class="mr-1"> None</label>
+                            <label class="inline-flex items-center"><input type="radio" name="callType" value="1"
+                                    class="mr-1"> Doctor</label>
+                            <label class="inline-flex items-center"><input type="radio" name="callType" value="2"
+                                    class="mr-1"> Others</label>
+                            <label class="inline-flex items-center"><input type="radio" name="callType" value="3"
+                                    class="mr-1"> Nurse</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-sm mb-1">Hazard Type:</label>
+                        <div class="flex gap-4 mt-1">
+                            <label class="inline-flex items-center"><input type="radio" name="hazardType" value="1"
+                                    class="mr-1"> Clinical</label>
+                            <label class="inline-flex items-center"><input type="radio" name="hazardType" value="2"
+                                    class="mr-1"> Non-clinical</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- Actions -->
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="$('#addEmployeeModal').addClass('hidden')"
+                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+                    <button type="submit" name="addemp"
+                        class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900">Add Employee</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <!-- Deactivate/Activate Modal -->
+    <div id="deactivateModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-all duration-150 ease-in-out hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-2 p-0 overflow-hidden relative">
+            <div class="flex items-center justify-between px-5 py-4 bg-blue-700 text-white">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-user-slash"></i> Change Employee Status
+                </div>
+                <button onclick="$('#deactivateModal').addClass('hidden')"
+                    class="text-white hover:text-blue-300 text-2xl leading-3">&times;</button>
+            </div>
+            <form id="deactivateEmpForm" method="post" action="classes/controller.php?act=deactivateEmployee">
+                <div class="p-5 space-y-4" id="deactivateModalBody"></div>
+                <div class="flex justify-end gap-2 px-5 pb-4">
+                    <button type="button" onclick="$('#deactivateModal').addClass('hidden')"
+                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-900">Update
+                        Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-
-
+    <!-- Employee Details Modal -->
+    <div id="employeeViewModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-all duration-150 ease-in-out hidden">
+        <div
+            class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-2 p-0 overflow-hidden relative max-h-[90dvh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-4 bg-blue-700 text-white">
+                <div class="font-bold text-lg flex items-center gap-2">
+                    <i class="fas fa-id-card"></i> Employee Details
+                </div>
+                <button onclick="$('#employeeViewModal').addClass('hidden')"
+                    class="text-white hover:text-blue-300 text-2xl leading-3">&times;</button>
+            </div>
+            <div id="employeeViewModalBody" class="p-5">
+                <div class="text-center text-gray-400 py-10">
+                    <i class="fas fa-spinner fa-spin text-2xl"></i> Loading...
+                </div>
             </div>
         </div>
-        <div id="footer" class="col-md-12 hidden-print">
-            Please visit our
-            <a href="#" target="_blank">
-                website </a>
-            to learn the latest information about the project.
-            <span class="text-info"> <span class="label label-info"> 14.1</span></span>
-        </div>
+    </div>
 
+    <script>
+    function showEditEmployeeModal(staff_id) {
+        $('#editEmployeeModal').removeClass('hidden');
+        $('#editEmployeeFormMsg').html('');
+        $('#editEmployeeFields').html(
+            '<div class="text-center text-gray-400 py-10"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>'
+        );
+        // Fetch employee data via AJAX
+        $.get('employee_view.php', {
+            id: staff_id,
+            edit: 1
+        }, function(data) {
+            if (data.error) {
+                $('#editEmployeeFields').html('<div class="text-center text-red-500 p-10">' + data.error +
+                    '</div>');
+                return;
+            }
+            // Build fields
+            $('#editEmployeeFields').html(`
+            <input type="hidden" name="emp_no" value="${escapeHtml(data.staff_id)}">
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Full Name</label>
+                    <input type="text" name="namee" value="${escapeHtml(data.NAME)}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">OOUTH Email</label>
+                    <input type="email" name="email" value="${escapeHtml(data.EMAIL)}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Bank</label>
+                    <select name="bank" required class="w-full px-3 py-2 border rounded">
+                        ${window.banksOptionsHtml.replace('value="'+escapeHtml(data.BCODE)+'"', 'value="'+escapeHtml(data.BCODE)+'" selected')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Account No.</label>
+                    <input type="number" name="acct_no" value="${escapeHtml(data.ACCTNO)}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Pension FA</label>
+                    <select name="pfa" class="w-full px-3 py-2 border rounded">
+                        ${window.pfasOptionsHtml.replace('value="'+escapeHtml(data.PFACODE)+'"', 'value="'+escapeHtml(data.PFACODE)+'" selected')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">RSA PIN</label>
+                    <input type="text" name="rsa_pin" value="${escapeHtml(data.PFAACCTNO)}" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Date of Employment</label>
+                    <input type="date" name="doe" value="${escapeHtml(data.EMPDATE)}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Department</label>
+                    <select name="dept" class="w-full px-3 py-2 border rounded">
+                        ${window.deptsOptionsHtml.replace('value="'+escapeHtml(data.DEPTCD)+'"', 'value="'+escapeHtml(data.DEPTCD)+'" selected')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Designation</label>
+                    <input type="text" name="designation" value="${escapeHtml(data.POST)}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Grade</label>
+                    <input type="text" name="grade" value="${escapeHtml(data.GRADE)}" maxlength="3" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Step</label>
+                    <input type="text" name="gradestep" value="${escapeHtml(data.STEP)}" maxlength="2" required class="w-full px-3 py-2 border rounded">
+                </div>
+            </div>
+            <!-- Radios -->
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Call Duty Type:</label>
+                    <div class="flex gap-4 mt-1">
+                        <label class="inline-flex items-center"><input type="radio" name="callType" value="0" ${data.CALLTYPE == 0 ? 'checked' : ''} class="mr-1"> None</label>
+                        <label class="inline-flex items-center"><input type="radio" name="callType" value="1" ${data.CALLTYPE == 1 ? 'checked' : ''} class="mr-1"> Doctor</label>
+                        <label class="inline-flex items-center"><input type="radio" name="callType" value="2" ${data.CALLTYPE == 2 ? 'checked' : ''} class="mr-1"> Others</label>
+                        <label class="inline-flex items-center"><input type="radio" name="callType" value="3" ${data.CALLTYPE == 3 ? 'checked' : ''} class="mr-1"> Nurse</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-sm mb-1">Hazard Type:</label>
+                    <div class="flex gap-4 mt-1">
+                        <label class="inline-flex items-center"><input type="radio" name="hazardType" value="1" ${data.HARZAD_TYPE == 1 ? 'checked' : ''} class="mr-1"> Clinical</label>
+                        <label class="inline-flex items-center"><input type="radio" name="hazardType" value="2" ${data.HARZAD_TYPE == 2 ? 'checked' : ''} class="mr-1"> Non-clinical</label>
+                    </div>
+                </div>
+            </div>
+        `);
+        }, 'json');
+    }
 
+    // Store the HTML options for select elements so we can reuse for edit modal
+    window.banksOptionsHtml = $('select[name="bank"]').html();
+    window.pfasOptionsHtml = $('select[name="pfa"]').html();
+    window.deptsOptionsHtml = $('select[name="dept"]').html();
 
-        <script type="text/javascript">
-            COMMON_SUCCESS = "Success";
-            COMMON_ERROR = "Error";
-            $.ajaxSetup({
-                cache: false,
-                headers: {
-                    "cache-control": "no-cache"
-                }
-            });
-
-            $(document).ready(function() {
-
-
-                $("#namee").on("blur", function() {
-
-                    var namee = $(this).val()
-
-                    $("#email").load("split_name.php", {
-                        namee: namee
-                    }, function(response, status, xhr) {
-                        $("#email").val(response)
-                    })
-                })
-
-                $("#item").autocomplete({
-                    source: 'searchStaff.php',
-                    type: 'POST',
-                    delay: 10,
-                    autoFocus: false,
-                    minLength: 1,
-                    select: function(event, ui) {
-                        event.preventDefault();
-                        $("#item").val(ui.item.value);
-                        $item = $("#item").val();
-                        //$('#add_item_form').ajaxSubmit({beforeSubmit: salesBeforeSubmit, success: itemScannedSuccess});
-                        $('#add_item_form').ajaxSubmit({
-                            beforeSubmit: salesBeforeSubmit,
-                            type: "POST",
-                            url: "employee.php",
-                            success: function(data) {
-                                window.location.href = "employee.php?item=" + $item;
-                            }
-
-
-                        });
-                    }
-                });
-
-                $('#item').focus();
-                var last_focused_id = null;
-                var submitting = false;
-
-                function salesBeforeSubmit(formData, jqForm, options) {
-                    if (submitting) {
-                        return false;
-                    }
-                    submitting = true;
-                    $("#ajax-loader").show();
-
-                }
-
-                function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-                    if (($('#code').val()) == 1) {
-                        gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-                    } else {
-                        gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-                        //	window.location.reload(true);
-                        $("#ajax-loader").hide();
-
-                    }
-                    setTimeout(function() {
-                        $('#item').focus();
-                    }, 10);
-
-                    setTimeout(function() {
-
-                        $.gritter.removeAll();
-                        return false;
-
-                    }, 1000);
-
-                }
-
-
-
-                $('#item').click(function() {
-                    $(this).attr('placeholder', '');
-                });
-                //Ajax submit current location
-                $("#employee_current_location_id").change(function() {
-                    $("#form_set_employee_current_location_id").ajaxSubmit(function() {
-                        window.location.reload(true);
+    // Edit Employee AJAX Submit
+    $('#edit_employee_form').on('submit', function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        var $msg = $('#editEmployeeFormMsg');
+        $msg.removeClass().html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: 'Employee updated successfully!',
+                        timer: 1200,
+                        showConfirmButton: false
+                    }).then(function() {
+                        $('#editEmployeeModal').addClass('hidden');
+                        $msg.html('');
+                        location.reload();
                     });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Update Failed',
+                        text: res.error || 'Unable to update employee'
+                    });
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Server error. Please try again.'
                 });
+            }
+        });
+    });
 
 
-                $('#employee_form').validate({
 
-                    // Specify the validation rules
-                    rules: {
+    // Auto-generate OOUTH email when user leaves the 'Full Name' input
+    $('input[name="namee"]').on('blur', function() {
+        var name = $(this).val().trim();
+        // Only generate if input is not empty and email is empty or not manually changed
+        if (name && !$('input[name="email"]').data('manual')) {
+            var parts = name.split(/\s+/);
+            if (parts.length >= 2) {
+                var first = parts[0].toLowerCase().replace(/[^a-z]/gi, '');
+                var last = parts.slice(-1)[0].toLowerCase().replace(/[^a-z]/gi, '');
+                var email = last + '.' + first + '@oouth.com';
+                $('input[name="email"]').val(email);
+            }
+        }
+    });
 
-                        namee: "required",
-                        dept: "required",
-                        acct_no: {
-                            required: {
-                                depends: function(element) {
-                                    if (($("#bank option:selected").text() != 'UNPAID') || $("#bank option:selected").text() != 'UNPAID') {
-                                        return true;
-                                    } else {
-                                        return false;
-                                    }
-                                }
-                            },
-                            //"required": false,
-                            minlength: 10,
-                            maxlength: 10,
-                            number: true
-                        },
-
-                        // rsa_pin: {
-                        //     required: {
-                        //         depends: function(element) {
-                        //             if ($("#pfa option:selected").text() != 'OTHERS') {
-                        //                 return true;
-                        //             } else {
-                        //                 return false;
-                        //             }
-                        //         }
-                        //     },
-                        //     number: true
-                        // }
+    // If user manually edits email, mark as manual to prevent overwriting
+    $('input[name="email"]').on('input', function() {
+        $(this).data('manual', true);
+    });
 
 
-                    },
+    // Show Add Modal
+    $('#openAddEmpModal').on('click', function() {
+        $('#addEmployeeModal').removeClass('hidden');
+    });
 
-                    // Specify the validation error messages
-                    messages: {
-                        namee: "The name is a required field.",
-
-
-                    },
-
-                    errorClass: "text-danger",
-                    errorElement: "span",
-                    highlight: function(element, errorClass, validClass) {
-                        $(element).parents('.form-group').removeClass('has-success').addClass('has-error');
-                    },
-                    unhighlight: function(element, errorClass, validClass) {
-                        $(element).parents('.form-group').removeClass('has-error').addClass('has-success');
-                    },
-
-                    submitHandler: function(form) {
-
-                        //form.submit();
-                        doEmployeeSubmit(form);
-                    }
-                });
-
-                document.getElementById('item').focus();
+    // AJAX Add Employee Form
+    $('#employee_form').on('submit', function(e) {
+        e.preventDefault();
+        var $form = $(this);
+        var $msg = $('#addEmployeeFormMsg');
+        $msg.removeClass().html('<i class="fas fa-spinner fa-spin"></i> Adding...');
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: $form.serialize(),
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    $msg.html(
+                        '<span class="text-green-600"><i class="fas fa-check-circle"></i> Employee added successfully!</span>'
+                    );
+                    setTimeout(function() {
+                        $('#addEmployeeModal').addClass('hidden');
+                        $form[0].reset();
+                        $msg.html('');
+                        location.reload();
+                    }, 1200);
+                } else {
+                    $msg.html(
+                        '<span class="text-red-600"><i class="fas fa-exclamation-triangle"></i> ' +
+                        (res.error || 'Unable to add employee') + '</span>');
+                }
+            },
+            error: function(xhr) {
+                $msg.html(
+                    '<span class="text-red-600"><i class="fas fa-exclamation-triangle"></i> Server error. Please try again.</span>'
+                );
+            }
+        });
+    });
+    // Deactivate/Activate Employee Modal
+    function showDeactivateModal(staff_id, name, currentStatus) {
+        $('#deactivateModal').removeClass('hidden');
+        $('#deactivateModalBody').html(
+            '<div class="py-6 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>'
+        );
+        $.get('get_staff_status.php', function(statusList) {
+            let options = `<option value="">Select Status</option>`;
+            statusList.forEach(function(stat) {
+                options +=
+                    `<option value="${stat.STATUSCD}"${stat.STATUSCD===currentStatus?' selected':''}>${stat.STATUS}</option>`;
             });
-        </script>
-        <script src="js/tableExport.js"></script>
-        <script src="js/main.js"></script>
-    </div><!--end #content-->
-    </div><!--end #wrapper-->
+            $('#deactivateModalBody').html(`
+            <input type="hidden" name="empalterid" value="${staff_id}">
+            <input type="hidden" name="empalternumber" value="${staff_id}">
+            <div class="mb-2 text-base font-bold text-blue-900 text-center">
+                Change status for <span class="text-blue-700">${name}</span> [<span class="font-mono">${staff_id}</span>]
+            </div>
+            <div class="mb-2 text-center text-gray-600">
+                Please confirm you want to change the status of this employee.<br>
+                <b>This action is logged and reversible.</b>
+            </div>
+            <div>
+                <label class="block font-semibold mb-1 text-sm">Deactivate/Activate:</label>
+                <select name="deactivate" required class="w-full px-3 py-2 border rounded">${options}</select>
+            </div>
+        `);
+        }, 'json');
+    }
 
-    <ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
+    // View Employee Details Modal
+    function showEmployeeModal(id) {
+        $('#employeeViewModal').removeClass('hidden');
+        $('#employeeViewModalBody').html(
+            '<div class="text-center text-gray-400 py-10"><i class="fas fa-spinner fa-spin text-2xl"></i> Loading...</div>'
+        );
+        $.get('edit_employee.php', {
+            id
+        }, function(data) {
+            if (data.error) {
+                $('#employeeViewModalBody').html('<div class="text-center text-red-500 p-10">' + data.error +
+                    '</div>');
+                return;
+            }
+            $('#employeeViewModalBody').html(`
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-xl text-blue-900 mb-1">${escapeHtml(data.NAME)}</div>
+                        <div class="text-gray-500 text-sm">${escapeHtml(data.staff_id)}</div>
+                    </div>
+                    <span class="px-2 py-1 rounded text-xs font-bold
+                        ${data.STATUSCD==='A'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">
+                        ${statusMap(data.STATUSCD)}
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div><span class="text-gray-600">Department:</span> <span>${escapeHtml(data.dept||'')}</span></div>
+                    <div><span class="text-gray-600">Designation:</span> <span>${escapeHtml(data.POST||'')}</span></div>
+                    <div><span class="text-gray-600">Date Employed:</span> <span>${escapeHtml(data.EMPDATE||'')}</span></div>
+                    <div><span class="text-gray-600">Grade/Step:</span> <span>${escapeHtml(data.GRADE+'/'+data.STEP)}</span></div>
+                    <div><span class="text-gray-600">PFA:</span> <span>${escapeHtml(data.PFANAME||'')}</span></div>
+                    <div><span class="text-gray-600">RSA PIN:</span> <span>${escapeHtml(data.PFAACCTNO||'')}</span></div>
+                    <div><span class="text-gray-600">Bank:</span> <span>${escapeHtml(data.BNAME||'')}</span></div>
+                    <div><span class="text-gray-600">Account No.:</span> <span>${escapeHtml(data.ACCTNO||'')}</span></div>
+                    <div><span class="text-gray-600">Call Duty:</span> <span class="text-blue-700">${callMap(data.CALLTYPE)}</span></div>
+                    <div><span class="text-gray-600">Hazard Type:</span> <span>${hazardMap(data.HARZAD_TYPE)}</span></div>
+                </div>
+            </div>
+        `);
+        }, 'json');
+    }
 
+    function escapeHtml(txt) {
+        return String(txt || '').replace(/[<>"'&]/g, s => ({
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '&': '&amp;'
+        })[s]);
+    }
+
+    function statusMap(s) {
+        return {
+            A: 'Active',
+            D: 'Dismissed',
+            T: 'Terminated',
+            R: 'Resigned',
+            S: 'Suspended'
+        } [s] || 'Unknown';
+    }
+
+    function callMap(c) {
+        return {
+            0: 'None',
+            1: 'Doctor',
+            2: 'Others',
+            3: 'Nurse'
+        } [c] || '—';
+    }
+
+    function hazardMap(h) {
+        return {
+            1: 'Clinical',
+            2: 'Non-clinical'
+        } [h] || '—';
+    }
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            $('#addEmployeeModal').addClass('hidden');
+            $('#employeeViewModal').addClass('hidden');
+            $('#deactivateModal').addClass('hidden');
+        }
+    });
+    </script>
 </body>
 
 </html>
-<?php
-//mysqli_free_result($employee);
-?>

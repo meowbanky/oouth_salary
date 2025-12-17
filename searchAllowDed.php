@@ -4,7 +4,11 @@ require_once('Connections/paymaster.php');
 $return_arr = array();
 
 //get search term
-$searchTerm = $_GET['term'];
+$searchTerm = isset($_GET['term']) ? filter_var($_GET['term'], FILTER_SANITIZE_FULL_SPECIAL_CHARS) : '';
+if (empty($searchTerm)) {
+    echo json_encode([]);
+    exit;
+}
 mysqli_select_db($salary, $database_salary);
 $query = $salary->query("SELECT DISTINCT allocode.ADJDESC FROM allowancetable INNER JOIN allocode ON allowancetable.allowcode = allocode.ADJCD WHERE ADJDESC like '%" . $searchTerm . "%'");
 while ($row = $query->fetch_assoc()) {

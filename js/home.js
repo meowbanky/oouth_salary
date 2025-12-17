@@ -23,23 +23,6 @@ function doLogin() {
 	}
 	else {
 
-		// $.ajax({
-		// 	type: "POST",
-		// 	url: "classes/controller.php?act=login",
-		// 	data: { username: username, password: password, location: location },
-		// 	dataType: 'json', // what type of data do we expect back from the server
-		// 	encode: true,
-		// 	xhrFields: {
-		// 		onprogress: function (e) {
-		// 			$('#id').val('loginin...');
-
-		// 		}
-		// 	},
-		// 	success: function (data) { doCheck(data); }
-
-
-		// });
-
 		$('#loginform').ajaxSubmit({
 			url: 'classes/controller.php?act=login',
 			data: { username: username, password: password },
@@ -52,6 +35,7 @@ function doLogin() {
 				}
 			},
 			success: function (data, message) {
+			    console.log(data);
 				doCheck(data);
 
 			}

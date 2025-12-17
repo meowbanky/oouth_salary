@@ -1,316 +1,597 @@
 <?php
-session_start();
-
-include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: ../index.php");
-	exit();
+include_once('../classes/model.php');
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
+
+// Initialize variables
+$period = $_POST['period'] ?? -1;
+$pfa = $_POST['pfa'] ?? -1;
+$month = '';
+// Capture the output of retrieveDescSingleFilter using output buffering
+ob_start();
+retrieveDescSingleFilter('tbl_pfa', 'PFANAME', 'PFACODE', $pfa);
+$pfaName = ob_get_clean() ?: 'All PFA'; // Default to 'All PFA' if no output
+
+// Fetch period description
+if ($period != -1) {
+    try {
+        $query = $conn->prepare('SELECT description, periodYear FROM payperiods WHERE periodId = ?');
+        $query->execute([$period]);
+        $row = $query->fetch(PDO::FETCH_ASSOC);
+        $month = $row ? $row['description'] . '-' . $row['periodYear'] : '';
+    } catch (PDOException $e) {
+        $month = '';
+    }
 }
-
-
-$pfaNames = '';
 ?>
+
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFA List Report - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/theme-manager.js"></script>
+</head>
 
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('report_sidebar_modern.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="../home.php"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-home w-4 h-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <a href="index.php"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">PFA List</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
 
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-piggy-bank"></i> PFA List Report
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate pension fund administrator reports with
+                            employee contributions.</p>
+                    </div>
+                </div>
 
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" action="pfalist.php" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
+                                    </label>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Pay Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('SELECT description, periodYear, periodId FROM payperiods WHERE payrollRun = ? ORDER BY periodId DESC');
+                                            $query->execute(['1']);
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = $row['periodId'] == $period ? 'selected' : '';
+                                                echo "<option value='{$row['periodId']}' $selected>{$row['description']} - {$row['periodYear']}</option>";
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading periods</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
 
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
+                                <div>
+                                    <label for="pfa" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-university mr-2 text-green-600"></i>Pension Fund Administrator
+                                    </label>
+                                    <select name="pfa" id="pfa"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select PFA</option>
+                                        <option value="-1" <?php echo $pfa == -1 ? 'selected' : ''; ?>>All PFA</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('SELECT PFACODE, PFANAME FROM tbl_pfa WHERE PFANAME <> "" ORDER BY PFANAME');
+                                            $query->execute();
+                                            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                $selected = $row['PFACODE'] == $pfa ? 'selected' : '';
+                                                echo "<option value='{$row['PFACODE']}' $selected>{$row['PFANAME']}</option>";
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo "<option value=''>Error loading PFAs</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
 
-		<?php include("report_sidebar.php"); ?>
+                            <!-- Email Recipient Field -->
+                            <div>
+                                <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-envelope mr-2 text-purple-600"></i>Recipient Email
+                                </label>
+                                <input type="email" id="recipient_email" name="recipient_email"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                    placeholder="Enter email address to send report">
+                                <p class="mt-1 text-xs text-gray-500">Email will be auto-filled when a specific PFA is
+                                    selected</p>
+                            </div>
 
+                            <div class="flex flex-wrap gap-3">
+                                <button name="generate_report" type="submit" id="generate_report"
+                                    class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                                <button type="button" id="download-excel-button"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-excel"></i> Download Excel
+                                </button>
+                                <button type="button" id="send-email-button"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-paper-plane"></i> Send via Email
+                                </button>
+                                <button type="button" id="download-pdf-button"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                    <i class="fas fa-file-pdf"></i> Download PDF
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
+                <?php if ($month != '' && $pfa != '') { ?>
+                <!-- Report Header -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 text-center">
+                            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL
+                        </h2>
+                        <p class="text-center text-blue-700 font-medium mt-2">
+                            <?php echo htmlspecialchars($pfaName); ?> Pension Report for the Month of:
+                            <?php echo htmlspecialchars($month); ?>
+                        </p>
+                    </div>
+                </div>
 
-		<div id="content" class="clearfix sales_content_minibar">
+                <!-- Report Table -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200" id="sample_1">
+                            <thead class="bg-blue-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        S/No.</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Staff No.</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        PFA</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        PIN</th>
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-blue-700 uppercase tracking-wider">
+                                        Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php
+                                    if ($period != -1 && $pfa != '') {
+                                        try {
+                                            $sql = $pfa != -1
+                                                ? 'SELECT tbl_master.deduc, master_staff.staff_id, master_staff.`NAME`, master_staff.PFAACCTNO, tbl_pfa.PFANAME 
+                                                           FROM tbl_master 
+                                                           INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id 
+                                                           INNER JOIN tbl_pfa ON master_staff.PFACODE = tbl_pfa.PFACODE 
+                                                           WHERE tbl_master.allow_id = ? AND master_staff.period = ? AND master_staff.PFACODE = ? AND tbl_master.period = ? 
+                                                           ORDER BY tbl_master.staff_id ASC'
+                                                : 'SELECT tbl_master.deduc, master_staff.staff_id, master_staff.`NAME`, master_staff.PFAACCTNO, tbl_pfa.PFANAME 
+                                                           FROM tbl_master 
+                                                           INNER JOIN master_staff ON master_staff.staff_id = tbl_master.staff_id 
+                                                           INNER JOIN tbl_pfa ON master_staff.PFACODE = tbl_pfa.PFACODE 
+                                                           WHERE tbl_master.allow_id = ? AND master_staff.period = ? AND tbl_master.period = ? 
+                                                           ORDER BY tbl_master.staff_id ASC';
 
-			<div id="content-header" class="hidden-print">
-				<h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-			</div>
+                                            $query = $conn->prepare($sql);
+                                            $params = $pfa != -1 ? ['50', $period, $pfa, $period] : ['50', $period, $period];
+                                            $query->execute($params);
 
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="pfalist.php">Report Input: Detailed Pension Funds Report</a>
-			</div>
-			<div class="clear"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-align-justify"></i>
-							</span>
-							<h5 align="center"></h5>
-							<div class="clear"></div>
-							<div class="clear"></div>
+                                            $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                            $counter = 1;
+                                            $sumTotal = 0;
 
-						</div>
-						<div class="row">
-							<?php
+                                            if (count($res) > 0) {
+                                                foreach ($res as $row) {
+                                                    echo '<tr class="hover:bg-gray-50 transition-colors duration-150">';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . $counter . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . htmlspecialchars($row['staff_id'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($row['NAME'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($row['PFANAME'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">' . htmlspecialchars($row['PFAACCTNO'] ?? '') . '</td>';
+                                                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">₦' . number_format($row['deduc'], 2) . '</td>';
+                                                    $sumTotal += floatval($row['deduc']);
+                                                    $counter++;
+                                                    echo '</tr>';
+                                                }
 
+                                                // Total row
+                                                echo '<tr class="bg-blue-50 border-t-2 border-blue-200">';
+                                                echo '<td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">TOTAL</td>';
+                                                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right">₦' . number_format($sumTotal, 2) . '</td>';
+                                                echo '</tr>';
+                                            } else {
+                                                echo '<tr>';
+                                                echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No pension data found for the selected criteria.</td>';
+                                                echo '</tr>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo '<tr>';
+                                            echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-red-500">Error: ' . htmlspecialchars($e->getMessage()) . '</td>';
+                                            echo '</tr>';
+                                        }
+                                    } else {
+                                        echo '<tr>';
+                                        echo '<td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Please select a pay period and PFA to generate the report.</td>';
+                                        echo '</tr>';
+                                    }
+                                    ?>
+                            </tbody>
+                        </table>
+                    </div>
 
-							if (!isset($_POST['period']) or !isset($_POST['pfa'])) {
-								$period = -1;
-								$pfa = -1;
-							} else {
-								$period = $_POST['period'];
-								$pfa = $_POST['pfa'];
-							}
-							?>
+                    <!-- Report Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Report Generated by:</strong> <?php echo $_SESSION['SESS_FIRST_NAME']; ?></p>
+                                <p><strong>Date:</strong> <?php 
+                                        $today = date('y:m:d');
+                                        $formattedDate = date('l, F d, Y', strtotime($today));
+                                        echo $formattedDate;
+                                    ?></p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>PFA:</strong> <?php echo htmlspecialchars($pfaName); ?></p>
+                                <p><strong>Period:</strong> <?php echo htmlspecialchars($month); ?></p>
+                                <?php if (isset($sumTotal) && $sumTotal > 0): ?>
+                                <p><strong>Total Contribution:</strong> ₦<?php echo number_format($sumTotal, 2); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php } ?>
+            </div>
+        </main>
+    </div>
 
-						</div>
-						<div class="row align-items-center">
-							<div class="col-md-2 pull-left">
-								<img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
-							</div>
-							<div class="col-md-10 pull-right">
-								<h3 style="margin:0px;"> OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL <br> <?php $pfaNames = retrieveDescSingleFilter('tbl_pfa', 'PFANAME', 'PFACODE', $pfa);
-																											echo $pfaNames; ?> Pension Report
-									for the Month of:
-									<?php
-									$month = '';
-									global $conn;
-									if (!isset($_POST['period'])) {
-										$period = -1;
-									} else {
-										$period = $_POST['period'];
-									}
-									try {
-										$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-										$res = $query->execute(array($period));
-										$out = $query->fetchAll(PDO::FETCH_ASSOC);
+    <script type="text/javascript" language="javascript">
+    $(document).ready(function() {
+        // Fetch PFA email when PFA is selected
+        $('#pfa').on('change', function() {
+            const pfaCode = $(this).val();
+            if (pfaCode && pfaCode !== '-1' && pfaCode !== '') {
+                // Fetch PFA details including email
+                $.ajax({
+                    url: '../libs/get_pfa_email.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        pfa_code: pfaCode
+                    },
+                    success: function(response) {
+                        if (response.status === 'success' && response.email) {
+                            $('#recipient_email').val(response.email);
+                        } else {
+                            // Clear email if PFA doesn't have one
+                            $('#recipient_email').val('');
+                        }
+                        updateButtonStates();
+                    },
+                    error: function() {
+                        // Silently fail - user can still enter email manually
+                        console.log('Could not fetch PFA email');
+                        updateButtonStates();
+                    }
+                });
+            } else {
+                // Clear email field when "All PFA" or empty selection
+                $('#recipient_email').val('');
+            }
+        });
 
-										while ($row = array_shift($out)) {
-											echo ($month = $row['description'] . '-' . $row['periodYear']);
-										}
-									} catch (PDOException $e) {
-										$e->getMessage();
-									}
+        // Update button states based on form inputs
+        function updateButtonStates() {
+            const hasData = $('#period').val() && $('#pfa').val();
+            const hasEmail = $('#recipient_email').val().trim();
 
-									?></h2>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12 hidden-print">
-								<form class="form-horizontal form-horizontal-mobiles" method="POST" action="pfalist.php">
-									<div class="form-group">
-										<label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period :</label>
-										<div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
-											<div class="input-group">
-												<span class="input-group-addon"><i class="fa fa-location-arrow hidden-print"></i></span>
-												<select name="period" id="period" class="form-control hidden-print">
-													<option value="">Select Pay Period</option>
+            $('#download-excel-button').prop('disabled', !hasData);
+            $('#download-pdf-button').prop('disabled', !hasData);
+            $('#send-email-button').prop('disabled', !hasData || !hasEmail);
+        }
 
-													<?php
-													global $conn;
+        // Update button states on input changes
+        $('#period, #pfa, #recipient_email').on('change input', function() {
+            updateButtonStates();
+        });
 
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
+        // Initial button state check
+        updateButtonStates();
 
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $period) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
+        // If a PFA is already selected on page load, fetch its email
+        <?php if ($pfa != -1 && $pfa != ''): ?>
+        $(document).ready(function() {
+            const pfaCode = '<?php echo htmlspecialchars($pfa); ?>';
+            if (pfaCode && pfaCode !== '-1') {
+                $.ajax({
+                    url: '../libs/get_pfa_email.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        pfa_code: pfaCode
+                    },
+                    success: function(response) {
+                        if (response.status === 'success' && response.email) {
+                            $('#recipient_email').val(response.email);
+                        }
+                        updateButtonStates();
+                    },
+                    error: function() {
+                        // Silently fail
+                        updateButtonStates();
+                    }
+                });
+            }
+        });
+        <?php endif; ?>
 
-													?>
-												</select>
-											</div>
-										</div>
+        // Form submission handling
+        $('#generate_report').click(function(e) {
+            if (!$('#period').val() || !$('#pfa').val()) {
+                e.preventDefault();
+                alert('Please select both Pay Period and PFA before generating the report.');
+            }
+        });
 
-									</div>
-									<div class="form-group">
-										<label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">PFA :</label>
-										<div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
-											<div class="input-group">
-												<span class="input-group-addon"><i class="fa fa-location-arrow hidden-print"></i></span>
-												<select name="pfa" id="pfa" class="form-control hidden-print" required="required">
-													<option value="">Select PFA </option>
+        // Export functionality
+        $('#download-excel-button').click(function() {
+            if (!$('#period').val() || !$('#pfa').val()) {
+                alert('Please select both Pay Period and PFA before downloading Excel.');
+                return;
+            }
+            downloadExcel();
+        });
 
-													<?php
-													global $conn;
-													try {
-														if (!isset($_POST['pfa'])) {
-															$_POST['pfa'] = -1;
-														}
-														$query = $conn->prepare('SELECT tbl_pfa.PFACODE, tbl_pfa.PFANAME FROM tbl_pfa WHERE PFANAME <> "" order by PFANAME');
-														$res = $query->execute();
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['PFACODE'] . '"';
-															if ($row['PFACODE'] == $_POST['pfa']) {
-																echo 'selected = "selected"';
-															};
-															echo '>' . $row['PFANAME'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
+        // Send Email functionality
+        $('#send-email-button').click(function() {
+            const email = $('#recipient_email').val().trim();
 
-													?>
-												</select>
-											</div>
-										</div>
+            if (!$('#period').val() || !$('#pfa').val()) {
+                alert('Please select both Pay Period and PFA before sending email.');
+                return;
+            }
 
-									</div>
-									<div class="form-actions">
-										<button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-									</div>
-								</form>
-							</div>
-						</div>
-						<?php if ($pfa != '') { ?><div class="top-panel pull-right hidden-print">
-								<div class="btn-group">
+            if (!email) {
+                alert('Please enter a recipient email address.');
+                $('#recipient_email').focus();
+                return;
+            }
 
-									<button type="button" class="btn btn-warning btn-large dropdown-toggle" data-toggle="dropdown">Export to <span class="caret"></span></button>
-									<ul class="dropdown-menu" role="menu">
-										<li><a onclick="window.print();">Print</a></li>
-										<li><a onclick="exportAll('xls','<?php echo retrieveDescSingleFilter('tbl_pfa', 'PFANAME', 'PFACODE', $pfa) . ' ' . $month; ?>');" href="javascript://">XLS</a></li>
-										<li><a onclick="exportAll('csv','<?php echo retrieveDescSingleFilter('tbl_pfa', 'PFANAME', 'PFACODE', $pfa) . ' ' . $month; ?>');" href="javascript://">CSV</a></li>
-										<li><a onclick="exportAll('txt','<?php echo retrieveDescSingleFilter('tbl_pfa', 'PFANAME', 'PFACODE', $pfa) . ' ' . $month; ?>');" href="javascript://">TXT</a></li>
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Please enter a valid email address.');
+                $('#recipient_email').focus();
+                return;
+            }
 
-									</ul>
-								</div>
-							</div><?php } ?>
-						<div class="widget-content nopadding">
-							<table class="table_without" id="sample_1">
-								<thead>
-									<tr>
+            sendEmail(email);
+        });
 
-										<th> S/No. </th>
-										<th> Staff No. </th>
-										<th> Name </th>
-										<th> PFA </th>
-										<th> PIN </th>
-										<th> Amount </th>
+        $('#download-pdf-button').click(function() {
+            if (!$('#period').val() || !$('#pfa').val()) {
+                alert('Please select both Pay Period and PFA before downloading PDF.');
+                return;
+            }
+            downloadPDF();
+        });
 
+        function downloadExcel() {
+            $('#ajax-loader').show();
+            $.ajax({
+                type: "POST",
+                url: 'pfalist_export_excel.php',
+                data: {
+                    period: $('#period').val(),
+                    pfa: $('#pfa').val(),
+                    period_text: '<?php echo $month; ?>',
+                    pfa_text: '<?php echo htmlspecialchars($pfaName); ?>'
+                },
+                timeout: 300000,
+                success: function(response) {
+                    $('#ajax-loader').hide();
+                    try {
+                        if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+                            console.error('Received HTML error page instead of data');
+                            alert(
+                                'Server error occurred. Please try again or contact administrator.'
+                            );
+                            return;
+                        }
 
-									</tr>
-								</thead>
-								<tbody>
-									<?php
-									//retrieveData('employment_types', 'id', '2', '1');
+                        var downloadLink = document.createElement('a');
+                        downloadLink.href =
+                            'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' +
+                            response;
+                        downloadLink.download = 'PFA_Report_' + '<?php echo $month; ?>' + '.xlsx';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    } catch (e) {
+                        console.error('Error processing Excel response:', e);
+                        alert('Error generating Excel file. Please try again.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#ajax-loader').hide();
+                    console.error('AJAX Error:', status, error);
+                    if (status === 'timeout') {
+                        alert(
+                            'Request timed out. The report may be too large. Please try with fewer records or contact administrator.'
+                        );
+                    } else {
+                        alert('Error downloading Excel file. Please try again.');
+                    }
+                }
+            });
+        }
 
-									try {
-										$query = $conn->prepare('SELECT tbl_master.deduc, master_staff.staff_id, master_staff.`NAME`, master_staff.PFAACCTNO, tbl_pfa.PFANAME FROM tbl_master INNER JOIN master_staff ON  master_staff.staff_id = tbl_master.staff_id INNER JOIN tbl_pfa ON  master_staff.PFACODE = tbl_pfa.PFACODE WHERE tbl_master.allow_id = ? AND master_staff.period = ? AND master_staff.PFACODE = ? and tbl_master.period = ? order by tbl_master.staff_id asc');
-										$fin = $query->execute(array('50', $period, $pfa, $period));
-										$res = $query->fetchAll(PDO::FETCH_ASSOC);
-										$numberofstaff = count($res);
-										$counter = 1;
-										//sdsd
-										$sumAll = 0;
-										$sumDeduct = 0;
-										$sumTotal = 0;
-										echo '<tr class="odd gradeX">';
-										foreach ($res as $row => $link) {
-									?>
-									<?php
-											echo '<td class="stylecaps">' . $counter .  '</td> <td class="stylecaps">' . $link['staff_id'] .  '</td> <td class="stylecaps">' . $link['NAME'] . '</td>';
-											echo '</td> <td class="stylecaps">' . $link['PFANAME'] . '</td>';
-											echo '</td> <td class="stylecaps">' . $link['PFAACCTNO'] . '</td>';
-											echo '<td align="right">' . number_format($link['deduc']) . '</td>';
-											$sumTotal = $sumTotal + floatval($link['deduc']);
-											$counter++;
-											echo '</tr>';
-										}
-										echo '<tr class="odd gradeX">';
-										echo '<td class="stylecaps">TOTAL</td><td align="right"> <strong></strong></td><td align="right"> <strong></strong></td>';
-										echo '<td align="right"><strong>' . number_format($sumTotal) . '</strong></td>';
+        function sendEmail(email) {
+            // Show loading alert
+            Swal.fire({
+                title: 'Sending Email',
+                text: 'Please wait while we generate and send the report...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-										echo '</tr>';
-									} catch (PDOException $e) {
-										echo $e->getMessage();
-									}
-									?>
+            $.ajax({
+                type: "POST",
+                url: 'pfalist_export_excel.php',
+                data: {
+                    period: $('#period').val(),
+                    pfa: $('#pfa').val(),
+                    period_text: '<?php echo $month; ?>',
+                    pfa_text: '<?php echo htmlspecialchars($pfaName); ?>',
+                    recipient_email: email,
+                    action: 'email'
+                },
+                timeout: 300000,
+                dataType: 'json',
+                success: function(response) {
+                    Swal.close();
 
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Email Sent!',
+                            text: response.message ||
+                                'Report has been successfully sent to ' + email,
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message ||
+                                'Failed to send email. Please try again.',
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.close();
+                    console.error('AJAX Error:', status, error, xhr.responseText);
 
-									<!--Begin Data Table-->
+                    let errorMsg = 'Error sending email. Please try again.';
+                    try {
+                        if (xhr.responseText) {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.message || response.error) {
+                                errorMsg = response.message || response.error;
+                            }
+                        }
+                    } catch (e) {
+                        if (xhr.responseText && xhr.responseText.length < 200) {
+                            errorMsg = xhr.responseText;
+                        }
+                    }
 
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg,
+                        showConfirmButton: true
+                    });
+                }
+            });
+        }
 
-									<!--End Data Table-->
+        function downloadPDF() {
+            $('#ajax-loader').show();
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'pfalist_export_pdf.php';
+            form.style.display = 'none';
 
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-				<div id="register_container" class="receiving"></div>
-			</div>
+            var fields = {
+                period: $('#period').val(),
+                pfa: $('#pfa').val(),
+                period_text: '<?php echo $month; ?>',
+                pfa_text: '<?php echo htmlspecialchars($pfaName); ?>'
+            };
 
-		</div>
+            for (var key in fields) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
 
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="http://www.oouth.com/" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
-
-	</div><!--end #content-->
-	<!--end #wrapper-->
-
-
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {
-			//'sales_report.php');
-
-
-			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
-				$("#complex_radio").prop('checked', true);
-			});
-
-			$("#report_date_range_simple").change(function() {
-				$("#simple_radio").prop('checked', true);
-			});
-
-		});
-
-		function receivingsBeforeSubmit(formData, jqForm, options) {
-			var submitting = false;
-			if (submitting) {
-				return false;
-			}
-			submitting = true;
-
-			$("#ajax-loader").show();
-			//	$("#finish_sale_button").hide();
-		}
-	</script>
-	<script src="js/tableExport.js"></script>
-	<script src="js/main.js"></script>
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            $('#ajax-loader').hide();
+        }
+    });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

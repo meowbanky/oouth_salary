@@ -1,688 +1,344 @@
-<?php require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
-//Start session
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+require_once 'classes/model.php';
+require_once 'libs/App.php';
+require_once 'libs/middleware.php';
+
+$App = new App();
+$App->checkAuthentication();
+checkPermission();
+
 session_start();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
-    header("location: index.php");
-    exit();
+// Restrict to admins
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '' || $_SESSION['role'] !== 'Admin') {
+    header("Location: index.php");
+    exit;
+}
+
+$currentYear = date('Y');
+$currentMonth = date('n');
+$months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Fetch pay periods
+try {
+    $stmt = $conn->prepare('SELECT * FROM payperiods ORDER BY periodId DESC');
+    $stmt->execute();
+    $periods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log("Query error: " . $e->getMessage());
+    $periods = [];
 }
 
 
-$currentYear = date('Y');
-$currentMonth = date('n'); // Month without leading zeros
-
-// Months array
-$months = array(
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-);
-
 ?>
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Periods - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="js/theme-manager.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <style>
+        .dataTable {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+        .dataTable th, .dataTable td {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .dataTable thead {
+            background-color: #f9fafb;
+        }
+        .dataTable tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+        /* Custom pagination styling */
+        .dataTables_paginate .paginate_button {
+            @apply px-3 py-2 mx-1 rounded-md text-gray-700 bg-gray-200 hover:bg-blue-600 hover:text-white;
+        }
+        .dataTables_paginate .paginate_button.current {
+            @apply bg-blue-600 text-white;
+        }
+        .dataTables_paginate .paginate_button.disabled {
+            @apply text-gray-400 bg-gray-100 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <?php include 'header.php'; ?>
+    <div class="flex min-h-screen">
+        <?php include 'sidebar.php'; ?>
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Pay Periods</span>
+                </nav>
 
-<html>
-<?php include('header1.php'); ?>
+                <?php if (isset($_SESSION['msg'])): ?>
+                    <div class="bg-<?php echo $_SESSION['alertcolor']; ?>-100 text-<?php echo $_SESSION['alertcolor']; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                        <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                        <button onclick="this.parentElement.remove()" class="text-<?php echo $_SESSION['alertcolor']; ?>-600 hover:text-<?php echo $_SESSION['alertcolor']; ?>-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
 
-<body data-color="grey" class="flat" style="zoom: 1;">
-    <div class="modal fade hidden-print" id="myModal"></div>
-    <div id="wrapper">
-        <div id="header" class="hidden-print">
-            <h1>
-                <a href="index.php">
-                    <img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt="">
-                </a>
-            </h1>
-            <a id="menu-trigger" href="#">
-                <i class="fa fa-bars fa fa-2x"></i>
-            </a>
-            <div class="clear"></div>
-        </div>
-        <div id="user-nav" class="hidden-print hidden-xs">
-            <ul class="btn-group ">
-                <li class="btn  hidden-xs">
-                    <a title="" href="switch_user" data-toggle="modal" data-target="#myModal">
-                        <i class="icon fa fa-user fa-2x"></i>
-                        <span class="text"> Welcome
-                            <b>
-                                <?php echo $_SESSION['SESS_FIRST_NAME']; ?>
-                            </b>
-                        </span>
-                    </a>
-                </li>
-                <li class="btn  hidden-xs disabled">
-                    <a title="" href="pos/" onclick="return false;">
-                        <i class="icon fa fa-clock-o fa-2x"></i>
-                        <span class="text">
-                            <?php
-                            $Today = date('y:m:d', time());
-                            $new = date('l, F d, Y', strtotime($Today));
-                            echo $new;
-                            ?>
-                        </span>
-                    </a>
-                </li>
-                <li class="btn ">
-                    <a href="#">
-                        <i class="icon fa fa-cog"></i>
-                        <span class="text">Settings</span>
-                    </a>
-                </li>
-                <li class="btn  ">
-                    <a href="index.php">
-                        <i class="fa fa-power-off"></i>
-                        <span class="text">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <?php include('sidebar.php'); ?>
-        <div id="content" class="clearfix sales_content_minibar">
-
-            <div id="content-header" class="hidden-print">
-                <h1>
-                    <i class="icon fa fa-calendar"></i>
-                    Pay Period
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-calendar mr-2"></i> Pay Periods
+                    <small class="text-base text-gray-600 ml-2">Create & manage payroll periods (close current period before moving to next)</small>
                 </h1>
-            </div>
-            <div id="breadcrumb" class="hidden-print">
-                <a href="home.php">
-                    <i class="fa fa-home"></i> Dashboard
-                </a>
-                <a class="current" href="payperiods.php">Pay Period</a>
-            </div>
-            <div class="clear"></div>
-            <div id="datatable_wrapper"></div>
-            <div class=" pull-right">
-                <div class="row">
-                    <div id="datatable_wrapper"></div>
-                    <div class="col-md-12 center" style="text-align: center;">
-                        <div class="btn-group  "></div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Pay Periods</h2>
+                        <button id="addNewPeriod" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <i class="fas fa-plus-square"></i> Add New Period
+                        </button>
                     </div>
-                </div>
-            </div>
-            <div class="row"></div>
-            <?php
-            if (isset($_SESSION['msg'])) {
-                echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                unset($_SESSION['msg']);
-                unset($_SESSION['alertcolor']);
-            }
-            ?>
-
-
-           
-            <!--Begin Page Content-->
-
-            <div class="row">
-
-                <div class="col-md-12">
-                    <h1 class="page-title"> Organization -
-                        <small>Create & Manage organization's payroll periods ( Close current period before moving to next period )</small>
-                    </h1>
-                    <!-- BEGIN EXAMPLE TABLE PORTLET-->
-                    <div class="portlet light bordered">
-
-                        <div class="portlet-body">
-                            <div class="table-toolbar">
-                                <div class="row">
-
-                                    <div class="col-md-6"></div>
-
-                                    <div class="col-md-6">
-                                        <div class="btn-group pull-right">
-
-                                            <button type="button" class="btn green" data-toggle="modal" data-target="#newperiod"> Add New Period <i class="fa fa-plus-square"></i></button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-
-                                <!-- Start Modal -->
-
-                                <div id="newperiod" class="modal fade" tabindex="-1" data-width="560">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header" style="background: #6e7dc7;">
-                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                                                <h4 class="modal-title">Add New Payment Period</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form class="form-horizontal" method="post" action="classes/controller.php?act=addperiod">
-                                                    <div class="row">
-                                                        <div class="col-md-12">
-                                                            <div class="form-body">
-                                                                <div class="form-group">
-                                                                    <label class="col-md-4 control-label">Description</label>
-                                                                    <div class="col-md-7">
-                                                                        <select class="form-control" name="perioddesc">
-                                                                            <?php for ($monthNumber = $currentMonth; $monthNumber <= 12; $monthNumber++) {
-                                                                                $monthName = $months[$monthNumber - 1];?>
-                                                                               
-                                                                            <option value="<?php echo $monthName ?>"><?php echo $monthName ?></option>
-                                                                            
-                                                                            <?php }
-                                                                             ?>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label class="col-md-4 control-label">Year</label>
-                                                                    <div class="col-md-7">
-                                                                        <select class="form-control" name="periodyear">
-                                                                            <option value="<?php echo date('Y') ?>"><?php echo date('Y') ?></option>
-                                                                            <option value="<?php echo date('Y') + 1 ?>"><?php echo date('Y') + 1 ?></option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                <button type="submit" class="btn red">Create Period</button>
-                                            </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!--End Modal-->
-
-
-
-                            </div>
-                            <table class="table table-striped table-bordered table-hover table-checkable order-column" id="sample_1">
-                                <thead>
+                    <div class="overflow-x-auto">
+                        <table id="periodsTable" class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Period</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <?php foreach ($periods as $period): ?>
                                     <tr>
-                                        <th> </th>
-                                        <th> Payment Period </th>
-                                        <th> Status </th>
-                                        <th> Actions </th>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($period['periodId']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo htmlspecialchars($period['description'] . ' ' . $period['periodYear']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php
+                                            if ($period['active'] == 0) {
+                                                echo '<span class="inline-block px-2 py-1 text-sm font-semibold text-yellow-800 bg-yellow-100 rounded">Open</span>';
+                                            } elseif ($period['active'] == 1) {
+                                                echo '<span class="inline-block px-2 py-1 text-sm font-semibold text-blue-800 bg-blue-100 rounded">Current Active</span>';
+                                            } elseif ($period['active'] == 2) {
+                                                echo '<span class="inline-block px-2 py-1 text-sm font-semibold text-red-800 bg-red-100 rounded">Closed</span>';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php if ($period['active'] == 1): ?>
+                                                <button class="close-period text-red-600 hover:text-red-800" data-period-id="<?php echo htmlspecialchars($period['periodId']); ?>">
+                                                    <i class="fas fa-times-circle"></i> Close Period
+                                                </button>
+                                            <?php elseif ($period['active'] == 2): ?>
+                                                <button class="reactivate-period text-yellow-600 hover:text-yellow-800" data-period-id="<?php echo htmlspecialchars($period['periodId']); ?>">
+                                                    <i class="fas fa-eye"></i> View/Re-activate
+                                                </button>
+                                            <?php else: ?>
+                                                <button class="edit-period text-gray-600 hover:text-gray-800" disabled>
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-
-                                    <!--Begin Data Table-->
-                                    <?php
-                                    try {
-                                        $query = $conn->prepare('SELECT * FROM payperiods ORDER BY periodId DESC');
-                                        $fin = $query->execute();
-                                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                                        foreach ($res as $row => $link) {
-                                            $thisperiod = $link['periodId'];
-                                    ?><tr class="odd gradeX">
-                                                <td></td><?php echo '<td>' . $link['description'] . " " . $link['periodYear'] . '</td>';
-
-                                                            if ($link['active'] == 0) {
-                                                                echo '<td> <span class="label label-inverse label-sm label-warning">Open </span> </td>';
-                                                            } elseif ($link['active'] == 1) {
-                                                                echo '<td> <span class="label label-inverse label-sm label-primary"> Current Active </span> </td>';
-                                                            } elseif ($link['active'] == 2) {
-                                                                echo '<td> <span class="label label-inverse label-sm label-danger"> Closed </span> </td>';
-                                                            }
-
-                                                            echo '<td>';
-                                                            if ($link['active'] == 1) {
-                                                                echo '<!--<a href="" class="btn btn-xs yellow"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a> <a href="" class="btn btn-xs red"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>--> 
-                                                                            <a data-toggle="modal" href="#viewperiod' . $thisperiod . '" class="btn btn-xs red"><span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span> Close Active Period </a>';
-                                                            } else {
-                                                                if ($link['active'] == 2) {
-                                                                    echo '<a data-toggle="modal" href="#viewperiod' . $thisperiod . '" class="btn btn-xs yellow"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> View Closed Period</a> ';
-                                                                } else {
-                                                                    echo '<button class="btn btn-zs yellow"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></button> <!--<button disabled class="btn btn-xs red"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>-->';
-                                                                }
-                                                            }
-                                                            echo '</td></tr>';
-                                                            ?>
-
-                                                <!--View Closed Period-->
-                                                <div id="viewperiod<?php echo $thisperiod; ?>" class="modal fade" tabindex="-1" data-width="560">
-                                                    <div class="modal-header">
-                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                                                        <h4 class="modal-title"><b>Re-activate Period To View Data</b></h4>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form class="form-horizontal" method="post" action="classes/controller.php?act=activateclosedperiod">
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-body">
-                                                                        <div class="form-group">
-                                                                            <label class="col-md-12 txt-ctr">Please confirm you would like to reactivate this <b>CLOSED</b> period to <b>VIEW</b> data. <b>Please note you cannot transact in this period.</b>
-                                                                                <p></p>
-                                                                            </label>
-                                                                        </div>
-                                                                        <input type="hidden" value="<?php echo $thisperiod; ?>" name="reactivateperiodid">
-                                                                        <div class="form-group">
-                                                                            <label class="col-md-4 control-label txt-right"><b>Period</b></label>
-                                                                            <div class="col-md-7">
-                                                                                <input type="text" disabled class="form-control" value="<?php
-                                                                                                                                        retrieveDescSingleFilter('payperiods', 'description', 'periodId', $thisperiod);
-                                                                                                                                        echo " ";
-                                                                                                                                        retrieveDescSingleFilter('payperiods', 'periodYear', 'periodId', $thisperiod);
-                                                                                                                                        ?>">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                        <button type="submit" class="btn red">Reactivate Period</button>
-                                                    </div>
-                                                    </form>
-                                                </div>
-                                                <!--View Closed Period-->
-
-
-
-                                                <!--Close Period-->
-                                                <div id="closeperiod" class="modal fade" tabindex="-1" data-width="560">
-                                                    <div class="modal-header">
-                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                                                        <h4 class="modal-title">Close Current Period</h4>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form class="form-horizontal" method="post" action="classes/controller.php?act=closeActivePeriod">
-                                                            <div class="row">
-                                                                <div class="col-md-12">
-                                                                    <div class="form-body">
-                                                                        <div class="form-group">
-                                                                            <label class="col-md-12 txt-ctr">Please confirm you would like to close the period below. Ensure you have completed all transactional changes and processing for the current month. <b>This process is irreversible.</b>
-                                                                                <p></p>
-                                                                            </label>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label class="col-md-4 control-label txt-right"><b>Period</b></label>
-                                                                            <div class="col-md-7">
-                                                                                <input type="text" disabled class="form-control" value="<?php
-                                                                                                                                        retrieveDescSingleFilter('payperiods', 'description', 'periodId', $_SESSION['currentactiveperiod']);
-                                                                                                                                        echo " ";
-                                                                                                                                        retrieveDescSingleFilter('payperiods', 'periodYear', 'periodId', $_SESSION['currentactiveperiod']);
-                                                                                                                                        ?>">
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                        <button type="submit" class="btn red">Close Period</button>
-                                                    </div>
-                                                    </form>
-                                                </div>
-                                                <!--Close Period-->
-
-                                        <?php
-                                        }
-                                    } catch (PDOException $e) {
-                                        echo $e->getMessage();
-                                    }
-                                        ?>
-                                        <!--End Data Table-->
-
-                                </tbody>
-                            </table>
-                        </div>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
-                    <!-- END EXAMPLE TABLE PORTLET-->
                 </div>
             </div>
-
-            <div class="clearfix"></div>
-            <!-- END DASHBOARD STATS 1-->
-
-
-
         </div>
-        <!-- END CONTENT BODY -->
-    </div>
-    <!-- END CONTENT -->
-
-    </div>
-    <!-- END CONTENT -->
-
-
-
-    <div id="footer" class="col-md-12 hidden-print">
-        Please visit our
-        <a href="#" target="_blank">
-            website </a>
-        to learn the latest information about the project.
-        <span class="text-info">
-            <span class="label label-info"> 14.1</span>
-        </span>
     </div>
 
-    <script src="js/tableExport.js"></script>
-    <script src="js/main.js"></script>
-    <script type="text/javascript">
+    <script>
         $(document).ready(function() {
-            //$("#ajax-loader").show();
-            //$("#pickEmployee").select2();
-            //$("#newdeductioncodeunion").select2();
-            //$("Input[type=Select]").select2();
-            $('#item').focus();
-            var last_focused_id = null;
-            var submitting = false;
-
-            function salesBeforeSubmit(formData, jqForm, options) {
-                if (submitting) {
-                    return false;
-                }
-                submitting = true;
-                $("#ajax-loader").show();
-
+            // Initialize DataTable
+            try {
+                $('#periodsTable').DataTable({
+                    responsive: false,
+                    pageLength: 50,
+                    searching: false,
+                    ordering: true,
+                    order: [[0, 'desc']], // Sort Payment Period (column 0) in descending order
+                    columnDefs: [
+                        { orderable: false, targets: 2 } // Disable sorting on Actions
+                    ]
+                });
+            } catch (e) {
+                console.error('DataTable initialization failed:', e);
             }
 
-            function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-                if (($('#code').val()) == 1) {
-                    gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-                } else {
-                    gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-                    window.location.reload(true);
-                    $("#ajax-loader").hide();
-
-                }
-                setTimeout(function() {
-                    $('#item').focus();
-                }, 10);
-
-                setTimeout(function() {
-
-                    $.gritter.removeAll();
-                    return false;
-
-                }, 1000);
-
-            }
-
-            $("#item").autocomplete({
-                source: 'searchStaff.php',
-                type: 'POST',
-                delay: 10,
-                autoFocus: false,
-                minLength: 1,
-                select: function(event, ui) {
-                    event.preventDefault();
-                    $("#item").val(ui.item.value);
-                    $('#add_item_form').ajaxSubmit({
-                        beforeSubmit: salesBeforeSubmit,
-                        success: itemScannedSuccess
-                    });
-
-                }
-            });
-
-            $('#item').click(function() {
-                $(this).attr('placeholder', '');
-            });
-
-            $("#no_times_repayment").blur(function() {
-                // alert(parseFloat($("#principal").val().trim()));
-                var monthlyPayment = ((parseFloat($("#Principal").val()) + parseFloat($("#interest").val())) / parseFloat($("#no_times_repayment").val()));
-
-                $("#monthlyRepayment").val(monthlyPayment);
-            });
-
-            $("#monthlyRepayment").blur(function() {
-                // alert(parseFloat($("#principal").val().trim()));
-                var monthlyPayment = ((parseFloat($("#Principal").val()) + parseFloat($("#interest").val())) / parseFloat($(this).val()));
-
-                $("#no_times_repayment").val(monthlyPayment);
-            });
-
-
-            //Ajax submit current location
-
-            $("#addearningsButton").click(function() {
-
-                $("#form_newearningcode").ajaxSubmit({
-                    url: 'classes/controller.php?act=addemployeeearning',
-                    success: function(response, message) {
-
-                        $("#form_newearningcode").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-                            $("#reloadtable").load(location.href + " #reloadtable");
-
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
+            // Add New Period
+            $('#addNewPeriod').on('click', function() {
+                Swal.fire({
+                    title: 'Add New Payment Period',
+                    html: `
+                        <form id="addPeriodForm">
+                            <div class="mb-4 text-left">
+                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                <select name="perioddesc" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                    <?php for ($monthNumber = $currentMonth; $monthNumber <= 12; $monthNumber++): 
+                                        $currentMonthIndex = $monthNumber - 1;
+                                        $nextMonthIndex = ($currentMonthIndex + 1) % 12;
+                                        ?>
+                                        <option value="<?php echo $months[$currentMonthIndex]; ?>"><?php echo $months[$currentMonthIndex]; ?></option>
+                                        <option value="<?php echo $months[$nextMonthIndex]; ?>"><?php echo $months[$nextMonthIndex]; ?></option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="mb-4 text-left">
+                                <label class="block text-sm font-medium text-gray-700">Year</label>
+                                <select name="periodyear" class="mt-1 block w-full border border-gray-300 rounded-md p-2">
+                                    <option value="<?php echo $currentYear; ?>"><?php echo $currentYear; ?></option>
+                                    <option value="<?php echo $currentYear + 1; ?>"><?php echo $currentYear + 1; ?></option>
+                                </select>
+                            </div>
+                        </form>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Create Period',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: () => {
+                        const formData = new FormData(document.getElementById('addPeriodForm'));
+                        return $.ajax({
+                            url: 'classes/controller.php?act=addperiod',
+                            method: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            dataType: 'json'
+                        }).then(response => {
+                            if (response.status !== 'success') {
+                                throw new Error(response.message || 'Failed to create period.');
+                            }
+                            return response;
+                        }).catch(error => {
+                            Swal.showValidationMessage(`Error: ${error.message}`);
+                        });
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Pay period created successfully.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
                     }
                 });
-
-            })
-
-
-            $("#addDeductionButtonUnion").click(function() {
-
-                $("#form_newedeductioncodeunion").ajaxSubmit({
-                    url: 'classes/controller.php?act=addemployeedeductionunion',
-                    success: function(response, message) {
-
-                        $("#form_newedeductioncode").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-
-                            $("#reloadtable").load(location.href + " #reloadtable");
-
-
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
-                    }
-                });
-
-            })
-
-            $("#addDeductionButton").click(function() {
-
-                $("#form_newedeductioncode").ajaxSubmit({
-                    url: 'classes/controller.php?act=addemployeededuction',
-                    success: function(response, message) {
-
-                        $("#form_newedeductioncode").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-
-                            $("#reloadtable").load(location.href + " #reloadtable");
-
-
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
-                    }
-                });
-
-            })
-
-            $("#addLoanButton").click(function() {
-
-                $("#form_newloanemployeededuction").ajaxSubmit({
-                    url: 'classes/controller.php?act=loan_corporate',
-                    success: function(response, message) {
-
-                        $("#form_newedeductioncode").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-                            $("#reloadtable").load(location.href + " #reloadtable");
-
-
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
-                    }
-                });
-
-            })
-
-            $(".btn btn-outline dark").click(function() {
-
-                alert('ok');
-                location.reload(true);
-
-
             });
 
-            $("#newdeductioncode").change(function() {
-                var $option = $(this).find('option:selected');
-                var $value = $option.val();
-
-                if ($value == 41) {
-
-                    $("#form_newedeductioncode").ajaxSubmit({
-                        url: 'classes/getPensionValue.php',
-                        success: function(response, message) {
-
-                            $("#form").unmask();
-                            submitting = false;
-
-                            if (message == 'success') {
-                                if ($.trim(response) == 'manual') {
-
-                                    $("#deductionamount").val('');
-                                    $("#deductionamount").attr('readonly', false);
-
+            // Close Period
+            $('.close-period').on('click', function() {
+                const periodId = $(this).data('period-id');
+                Swal.fire({
+                    title: 'Close Current Period',
+                    html: `
+                        <p class="text-gray-600">Please confirm you would like to close the period below. Ensure all transactional changes and processing are complete. <b>This process is irreversible.</b></p>
+                        <p class="mt-2"><b>Period:</b> <?php echo retrieveDescSingleFilter('payperiods', 'description', 'periodId', $_SESSION['currentactiveperiod']); ?> <?php echo retrieveDescSingleFilter('payperiods', 'periodYear', 'periodId', $_SESSION['currentactiveperiod']); ?></p>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Close Period',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'classes/controller.php?act=closeActivePeriod',
+                            method: 'POST',
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Period closed successfully.',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => location.reload());
                                 } else {
-                                    $("#deductionamount").val(response);
-                                    $("#deductionamount").attr('readonly', true);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message || 'Failed to close period.'
+                                    });
                                 }
-                            } else {
-                                gritter("Error", message, 'gritter-item-error', false, false);
-
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred while closing the period.'
+                                });
                             }
-
-
-                        }
-                    });
-                } else {
-                    $("#deductionamount").val('');
-                    $("#deductionamount").attr('readonly', false);
-                }
-            });
-
-            $("#newdeductioncodeloan").change(function() {
-                $("#form_newloanemployeededuction").ajaxSubmit({
-                    url: 'classes/getLoanBalance.php',
-                    success: function(response, message) {
-
-                        $("#form").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-                            if (response > 0) {
-                                $("#addLoanButton").attr('disabled', true);
-                                $("#Balance").val(response);
-                            } else {
-                                $("#addLoanButton").attr('disabled', false);
-                                $("#Balance").val(response);
-                            }
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
-                    }
-                });
-
-            });
-
-            $("#newearningcode").change(function() {
-
-                $("#form_newearningcode").ajaxSubmit({
-                    url: 'classes/getSalaryValue.php',
-                    success: function(response, message) {
-
-                        $("#form").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-                            if ($.trim(response) == 'manual') {
-
-                                $("#earningamount").val('');
-                                $("#earningamount").attr('readonly', false);
-
-                            } else {
-                                $("#earningamount").val(response);
-                                $("#earningamount").attr('readonly', true);
-                            }
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
+                        });
                     }
                 });
             });
 
-            $("#newdeductioncodeunion").change(function() {
-
-                $("#form_newedeductioncodeunion").ajaxSubmit({
-                    url: 'classes/getUnionValue.php',
-                    success: function(response, message) {
-
-                        $("#form").unmask();
-                        submitting = false;
-
-                        if (message == 'success') {
-                            if ($.trim(response) == 'manual') {
-                                $("#deductionamountunion").val('');
-                                $("#deductionamountunion").attr('readonly', false);
-
-                            } else {
-
-                                $("#deductionamountunion").val(response);
-                                $("#deductionamountunion").attr('readonly', true);
-
+            // Reactivate Period
+            $('.reactivate-period').on('click', function() {
+                const periodId = $(this).data('period-id');
+                Swal.fire({
+                    title: 'Re-activate Period',
+                    html: `
+                        <p class="text-gray-600">Please confirm you would like to reactivate this <b>CLOSED</b> period to <b>VIEW</b> data. <b>You cannot transact in this period.</b></p>
+                        <p class="mt-2"><b>Period:</b> ${$(this).closest('tr').find('td:first').text()}</p>
+                        <input type="hidden" name="reactivateperiodid" value="${periodId}">
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Reactivate Period',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'classes/controller.php?act=activateclosedperiod',
+                            method: 'POST',
+                            data: { reactivateperiodid: periodId },
+                            dataType: 'json',
+                            success: function(response) {
+                                if (response.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: 'Period reactivated successfully.',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => location.reload());
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message || 'Failed to reactivate period.'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred while reactivating the period.'
+                                });
                             }
-                        } else {
-                            gritter("Error", message, 'gritter-item-error', false, false);
-
-                        }
-
-
+                        });
                     }
                 });
-
-
-
             });
-
         });
     </script>
-    </div>
-    <!--end #content-->
-    </div>
-    <!--end #wrapper-->
-    <ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
 </body>
-
 </html>

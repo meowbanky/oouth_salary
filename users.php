@@ -1,577 +1,456 @@
-<?php ini_set('max_execution_time', '300');
-require_once('Connections/paymaster.php');
-include_once('classes/model.php'); ?>
 <?php
+ini_set('max_execution_time', 300);
+require_once 'Connections/paymaster.php';
+require_once 'classes/model.php';
+require_once 'libs/App.php';
+require_once 'libs/middleware.php';
 
-//Start session
+$App = new App();
+$App->checkAuthentication();
+checkPermission();
+
 session_start();
 
-//Check whether the session variable SESS_MEMBER_ID is present or not
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '') || $_SESSION['role'] != 'Admin') {
-    header("location: index.php");
-    exit();
+if (!isset($_SESSION['SESS_MEMBER_ID']) || trim($_SESSION['SESS_MEMBER_ID']) === '' || ($_SESSION['role'] ?? '') !== 'Admin') {
+    header("Location: index.php");
+    exit;
 }
 
-if (!function_exists("GetSQLValueString")) {
-    function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-    {
-
-        global $con;
-        $theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($con, $theValue) : mysqli_escape_string($con, $theValue);
-
-        switch ($theType) {
-            case "text":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "long":
-            case "int":
-                $theValue = ($theValue != "") ? intval($theValue) : "NULL";
-                break;
-            case "double":
-                $theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-                break;
-            case "date":
-                $theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-                break;
-            case "defined":
-                $theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-                break;
-        }
-        return $theValue;
-    }
-}
-
-$currentPage = $_SERVER["PHP_SELF"];
-
-
-
-
-
-
-$today = '';
-$today = date('Y-m-d');
+// Load user list and roles
+$users = $App->getUsersDetails();
+$roles = $App->getRoles();
 ?>
 <!DOCTYPE html>
+<html lang="en">
 
-<html>
-<?php include('header1.php'); ?>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Manager - Salary Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<body data-color="grey" class="flat" style="zoom: 1;">
-    <div class="modal fade hidden-print" id="myModal"></div>
-    <div id="wrapper">
-        <div id="header" class="hidden-print">
-            <h1><a href="index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-            <a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-            <div class="clear"></div>
-        </div>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="js/theme-manager.js"></script>
+    
+    <style>
+        /* Ensure footer is always visible */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .flex-1 {
+            flex: 1;
+        }
+        
+        /* Modal positioning fixes */
+        #userModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+        }
+        
+        /* Status badge styling */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        /* Ensure status badges are always visible */
+        #userTable td:nth-child(4) {
+            min-width: 80px;
+        }
+        
+        #userTable td:nth-child(4) .status-badge {
+            display: inline-block !important;
+            visibility: visible !important;
+        }
+        
+        /* DataTable styling improvements */
+        .dataTables_wrapper {
+            margin-bottom: 1rem;
+        }
+        
+        /* Ensure proper spacing */
+        .container {
+            flex: 1;
+        }
+        
+        /* Modal backdrop */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+        }
+        
+        /* Prevent body scroll when modal is open */
+        body.overflow-hidden {
+            overflow: hidden;
+        }
+        
+        /* Ensure SweetAlert2 appears above modal */
+        .swal2-container {
+            z-index: 10000 !important;
+        }
+        
+        .swal2-popup {
+            z-index: 10001 !important;
+        }
+    </style>
 
-        <?php include('header.php'); ?>
+</head>
 
-
-        <?php include('sidebar.php'); ?>
-
-
-
-        <div id="content" class="clearfix sales_content_minibar">
-
-            <script type="text/javascript">
-                $(document).ready(function() {
-
-
-                });
-            </script>
-            <div id="content-header" class="hidden-print">
-                <h1> <i class="icon fa fa-user"></i>
-                    Users</h1>
-
-
-            </div>
-
-
-            <div id="breadcrumb" class="hidden-print">
-                <a href="home.php"><i class="fa fa-home"></i> Dashboard</a><a class="current" href="users.php">Users Manager</a>
-            </div>
-            <div class="clear"></div>
-            <div id="datatable_wrapper"></div>
-            <div class=" pull-right">
-                <div class="row">
-                    <div id="datatable_wrapper"></div>
-                    <div class="col-md-12 center" style="text-align: center;">
-                        <?php
-                        if (isset($_SESSION['msg'])) {
-                            echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                            unset($_SESSION['msg']);
-                            unset($_SESSION['alertcolor']);
-                        }
-                        ?>
-                        <?php
-                        if (isset($_SESSION['msg'])) {
-                            echo '<div class="alert alert-' . $_SESSION['alertcolor'] . ' alert-dismissable role="alert"> <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' . $_SESSION['msg'] . '</div>';
-                            unset($_SESSION['msg']);
-                            unset($_SESSION['alertcolor']);
-                        }
-                        ?>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="btn-group pull-right">
-                                    <button type="button" data-target="#responsive" class="btn red" data-toggle="modal"> Add User <i class="fa fa-plus"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<body class="bg-gray-100 font-sans">
+    <?php include 'header.php'; ?>
+    <div class="flex min-h-screen">
+        <?php include 'sidebar.php'; ?>
+        <div class="flex-1 p-6">
+            <div class="container mx-auto">
+                <nav class="mb-6">
+                    <a href="home.php" class="text-blue-600 hover:underline"><i class="fas fa-home"></i> Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Users Manager</span>
+                </nav>
+                <?php if (isset($_SESSION['msg'])): ?>
+                <div
+                    class="bg-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-100 text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-800 p-4 rounded-md mb-6 flex justify-between items-center">
+                    <span><?php echo htmlspecialchars($_SESSION['msg']); ?></span>
+                    <button onclick="this.parentElement.remove()"
+                        class="text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-600 hover:text-<?php echo $_SESSION['alertcolor'] ?? 'blue'; ?>-700">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-            </div>
-            <div class="row ">
-                <form action="#" method="post" accept-charset="utf-8" id="add_item_form" autocomplete="off">
-                    <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
-                    <input type="text" name="item" value="" id="item" class="ui-autocomplete-input" accesskey="i" placeholder="Enter Staff Name or Staff No" />
-                    <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-                </form>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="widget-box">
-                        <div class="widget-title">
-                            <span class="icon">
-                                <i class="fa fa-th"></i>
-                            </span>
-                            <h5>List of Users</h5>
-                            <span title="" class="label label-info tip-left" data-original-title="total users">Total Users<?php echo '100' ?></span>
-
-                        </div>
-                        <!--endbegiing of employee details-->
-                        <div id="datatable_wrapper">
-
-                            <div class="row top-spacer-20">
-
-                                <div class="col-md-12">
-
-                                    <div class="container">
-                                        <nav aria-label="page navigation example" class="hidden-print">
-                                            <ul class="pagination">
-
-                                                <?php
-                                                $results_per_page = 100;
-                                                if (isset($_GET['page'])) {
-                                                    $page = $_GET['page'];
-                                                } else {
-                                                    $page = 1;
-                                                }
-                                                $results_per_page = 100;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM username';
-                                                } else {
-                                                    $sql = 'SELECT count(staff_id) as "Total" FROM username where staff_id = "' . $_GET['item'] . '"';
-                                                }
-
-                                                $result = $conn->query($sql);
-                                                $row = $result->fetch();
-                                                $total_pages = ceil($row['Total'] / $results_per_page);
-                                                for ($i = 1; $i <= $total_pages; $i++) {
-                                                    //echo "<a href='payslip_all.php?page=".$i."'";
-                                                    //	if($i ==$page){echo " class='curPage'";}
-                                                    //	echo "> ".$i." </a>";
-                                                    echo '<li class="page-item ';
-                                                    if ($i == $page) {
-                                                        echo ' active"';
-                                                    };
-                                                    echo '"><a class="page-link" href="users.php?page=' . $i . '">' . $i . '</a></li>';
-                                                }
-                                                ?>
-                                            </ul>
-                                        </nav>
-                                    </div>
-
-                                    <table class="table table-striped table-bordered table-hover table-checkable order-column tblbtn" id="sample_1">
-                                        <thead>
-                                            <tr>
-                                                <th> </th>
-                                                <th> User Name </th>
-                                                <th> Name </th>
-                                                <th> User Type </th>
-                                                <th> Status </th>
-                                                <th> Actions </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-
-                                            <!--Begin Data Table-->
-                                            <?php
-                                            //retrieveData('employment_types', 'id', '2', '1');
-                                            $results_per_page = 100;
-                                            if (isset($_GET['page'])) {
-                                                $page = $_GET['page'];
-                                            } else {
-                                                $page = 1;
-                                            }
-
-                                            try {
-                                                $start_from = ($page - 1) * $results_per_page;
-                                                if (!isset($_GET['item'])) {
-                                                    $sql = 'SELECT username.staff_id, username.username, username.`password`, username.position, username.role, username.deleted, employee.`NAME` FROM username INNER JOIN employee ON employee.staff_id = username.staff_id ORDER BY username.staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                } else {
-                                                    $sql = 'SELECT username.staff_id, username.username, username.`password`, username.position, username.role, username.deleted, employee.`NAME` FROM username INNER JOIN employee ON employee.staff_id = username.staff_id WHERE username.staff_id = ' . $_GET['item'] . ' ORDER BY username.staff_id ASC LIMIT ' . $start_from . ',' . $results_per_page;
-                                                }
-                                                $query = $conn->prepare($sql);
-                                                $fin = $query->execute();
-                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                //sdsd
-
-                                                foreach ($res as $row => $link) {
-                                            ?><tr class="odd gradeX">
-                                                        <?php
-                                                        $thisemployeealterid = $link['staff_id'];
-                                                        $thisuser = $link['staff_id'];
-                                                        $thisemployeeNum = $link['staff_id'];
-                                                        echo     '<td><input type="checkbox"></td>';
-                                                        echo '<td>' . $link['staff_id'] .  '</td><td class="stylecaps">' . $link['NAME'] . '</td>';
-                                                        echo '<td>';
-                                                        echo $link['role'];
-                                                        echo '</td>';
-                                                        echo '<td>';
-                                                        if ($link['deleted'] == 1) {
-                                                            echo "In-Active";
-                                                        } else {
-                                                            echo "Active";
-                                                        }
-                                                        echo '</td>';
-                                                        echo '<td><button type="button" data-target="#edituser' . $thisuser . '" data-toggle="modal" class="btn btn-xs red"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>';
-                                                        echo '</tr>';
-                                                        ?>
-
-                                                        <div id="edituser<?php echo $thisuser; ?>" class="modal fade" tabindex="-1" data-width="560">
-                                                            <div class="modal-dialog" role="document">
-                                                                <form class="form-horizontal" method="post" action="classes/controller.php?act=deactivateuser">
-                                                                    <div class="modal-content">
-                                                                        <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span> </button>
-                                                                            <h4 class="modal-title">Deactivate User</h4>
-                                                                        </div>
-                                                                        <div class="modal-body">
-
-                                                                            <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <div class="form-body">
-                                                                                        <input type="hidden" name="thisuser" value="<?php echo $thisuser; ?>">
-
-                                                                                        <label class="col-md-12 control-label">Please confirm account deactivation for:</label>
-
-
-                                                                                        <div class="form-group">
-                                                                                            <label class="col-md-4 control-label">Name</label>
-                                                                                            <div class="col-md-7">
-                                                                                                <input type="text" class="form-control" value="<?php echo $link['NAME'] ?>" readonly placeholder="Name">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div class="form-group">
-                                                                                            <label class="col-md-4 control-label">Username</label>
-                                                                                            <div class="col-md-7">
-                                                                                                <input type="text" required readonly value="<?php echo $link['staff_id']; ?>" class="form-control" name="username" placeholder="username">
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                                                            <button type="submit" class="btn red">Deactivate User</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                    <?php
-                                                }
-                                            } catch (PDOException $e) {
-                                                echo $e->getMessage();
-                                            }
-                                                    ?>
-                                                    <!--End Data Table-->
-
-
-
-
-
-                                        </tbody>
-                                    </table>
-
-
-
-
-
-
-
-                                </div>
-
-                            </div>
+                <?php unset($_SESSION['msg'], $_SESSION['alertcolor']); ?>
+                <?php endif; ?>
+                <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-users mr-2"></i> Users Manager
+                    <small class="text-base text-gray-600 ml-2">Create & manage system users</small>
+                </h1>
+                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <div class="mb-4 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800">User List</h2>
+                        <div>
+                            <button id="reload-button"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <i class="fas fa-sync-alt"></i> Reload
+                            </button>
+                            <button id="add-user-button"
+                                class="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                            <button id="download-excel-button"
+                                class="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <i class="fas fa-file-excel"></i> Export Excel
+                            </button>
                         </div>
                     </div>
-                    <!-- Button trigger modal -->
-                    <div id="responsive" class="modal fade" tabindex="-1" data-width="560">
-                        <div class="modal-dialog" role="document">
-                            <form class="form-horizontal" method="post" action="classes/controller.php?act=adduser">
-                                <div class="modal-content">
-                                    <div class="modal-header modal-title" style="background: #6e7dc7;">
-                                        <h4 class=" modal-title" style="text-transform: uppercase;">Create New Company User</h4>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
+                    <div class="overflow-x-auto">
+                        <table id="userTable" class="min-w-full bg-white border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-800 text-white">
+                                    <th class="py-2 px-4">Staff ID</th>
+                                    <th class="py-2 px-4">Name</th>
+                                    <th class="py-2 px-4">User Type</th>
+                                    <th class="py-2 px-4">Status</th>
+                                    <th class="py-2 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                        if (isset($users['staff_id'])) $users = [$users];
+                        foreach ($users as $user):
+                            $status = $user['deleted'] == '1' ? 'Inactive' : 'Active';
+                            $statusClass = $user['deleted'] == '1' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700';
+                        ?>
+                                <tr>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($user['staff_id']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($user['NAME']); ?></td>
+                                    <td class="py-2 px-4"><?php echo htmlspecialchars($user['role_name']); ?></td>
+                                    <td class="py-2 px-4" data-status="<?php echo $status; ?>"><?php echo $status; ?></td>
+                                    <td class="py-2 px-4">
+                                        <button class="edit-user-btn text-blue-600 hover:text-blue-900"
+                                            data-staff_id="<?php echo htmlspecialchars($user['staff_id']); ?>"
+                                            data-name="<?php echo htmlspecialchars($user['NAME']); ?>"
+                                            data-role="<?php echo htmlspecialchars($user['role_id']); ?>"
+                                            data-status="<?php echo htmlspecialchars($user['deleted']); ?>"
+                                            data-email="<?php echo htmlspecialchars($user['EMAIL']); ?>">
+                                            <i class="fas fa-edit"></i> Edit
                                         </button>
-
-                                    </div>
-                                    <div class="modal-body">
-
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-body">
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Name</label>
-                                                        <div class="col-md-7">
-                                                            <input type="text" value="" required class="form-control" name="name" id="name" placeholder="Name">
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" name="staff_id" id="staff_id" value="">
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Email Address</label>
-                                                        <div class="col-md-7">
-                                                            <input type="email" required class="form-control" name="uemail" id="email" placeholder="Email Address">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Password</label>
-                                                        <div class="col-md-7">
-                                                            <input type="password" required class="form-control" name="upass" placeholder="Password">
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Repeat Password</label>
-                                                        <div class="col-md-7">
-                                                            <input type="password" required class="form-control" name="upass1" placeholder="Repeat Password">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" data-dismiss="modal" class="btn btn-outline dark">Cancel</button>
-                                        <button type="submit" class="btn red">Create User</button>
-                                    </div>
-                            </form>
-                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
-
-
-
-
-
                 </div>
             </div>
-
-
-
-
-            <script type="text/javascript">
-                COMMON_SUCCESS = "Success";
-                COMMON_ERROR = "Error";
-                $.ajaxSetup({
-                    cache: false,
-                    headers: {
-                        "cache-control": "no-cache"
-                    }
-                });
-
-                $(document).ready(function() {
-
-                    $("#item").autocomplete({
-                        source: 'searchStaff.php',
-                        type: 'POST',
-                        delay: 10,
-                        autoFocus: false,
-                        minLength: 1,
-                        select: function(event, ui) {
-                            event.preventDefault();
-                            $("#item").val(ui.item.value);
-                            $item = $("#item").val();
-                            //$('#add_item_form').ajaxSubmit({beforeSubmit: salesBeforeSubmit, success: itemScannedSuccess});
-                            $('#add_item_form').ajaxSubmit({
-                                beforeSubmit: salesBeforeSubmit,
-                                type: "POST",
-                                url: "users.php",
-                                success: function(data) {
-                                    window.location.href = "users.php?item=" + $item;
-                                }
-
-
-                            });
-                        }
-                    });
-
-                    $("#name").autocomplete({
-                        source: 'searchStaff.php',
-                        type: 'POST',
-                        delay: 10,
-                        autoFocus: false,
-                        minLength: 1,
-                        select: function(event, ui) {
-                            event.preventDefault();
-                            $("#name").val(ui.item.label);
-                            $('#staff_id').val(ui.item.value);
-                            $('#email').val(ui.item.EMAIL);
-                        }
-                    });
-
-                    $('#item').focus();
-                    var last_focused_id = null;
-                    var submitting = false;
-
-                    function salesBeforeSubmit(formData, jqForm, options) {
-                        if (submitting) {
-                            return false;
-                        }
-                        submitting = true;
-                        $("#ajax-loader").show();
-
-                    }
-
-                    function itemScannedSuccess(responseText, statusText, xhr, $form) {
-
-                        if (($('#code').val()) == 1) {
-                            gritter("Error", 'Item not Found', 'gritter-item-error', false, true);
-
-                        } else {
-                            gritter("Success", "Staff No Found Successfully", 'gritter-item-success', false, true);
-                            //	window.location.reload(true);
-                            $("#ajax-loader").hide();
-
-                        }
-                        setTimeout(function() {
-                            $('#item').focus();
-                        }, 10);
-
-                        setTimeout(function() {
-
-                            $.gritter.removeAll();
-                            return false;
-
-                        }, 1000);
-
-                    }
-
-
-
-                    $('#item').click(function() {
-                        $(this).attr('placeholder', '');
-                    });
-                    //Ajax submit current location
-                    $("#employee_current_location_id").change(function() {
-                        $("#form_set_employee_current_location_id").ajaxSubmit(function() {
-                            window.location.reload(true);
-                        });
-                    });
-
-
-                    $('#employee_form').validate({
-
-                        // Specify the validation rules
-                        rules: {
-
-                            namee: "required",
-                            dept: "required",
-                            acct_no: {
-                                required: {
-                                    depends: function(element) {
-                                        if (($("#bank option:selected").text() != 'CHEQUE/CASH') || $("#bank option:selected").text() != 'CHEQUE/CASH') {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                //"required": false,
-                                minlength: 10,
-                                maxlength: 10,
-                                number: true
-                            },
-
-                            rsa_pin: {
-                                required: {
-                                    depends: function(element) {
-                                        if ($("#pfa option:selected").text() != 'OTHERS') {
-                                            return true;
-                                        } else {
-                                            return false;
-                                        }
-                                    }
-                                },
-                                number: true
-                            }
-
-
-                        },
-
-                        // Specify the validation error messages
-                        messages: {
-                            namee: "The name is a required field.",
-
-
-                        },
-
-                        errorClass: "text-danger",
-                        errorElement: "span",
-                        highlight: function(element, errorClass, validClass) {
-                            $(element).parents('.form-group').removeClass('has-success').addClass('has-error');
-                        },
-                        unhighlight: function(element, errorClass, validClass) {
-                            $(element).parents('.form-group').removeClass('has-error').addClass('has-success');
-                        },
-
-                        submitHandler: function(form) {
-
-                            //form.submit();
-                            doEmployeeSubmit(form);
-                        }
-                    });
-
-                    document.getElementById('item').focus();
-
-                    //						$('#sample_1').Tabledit({
-                    //			      url:'action.php',
-                    //			      columns:{
-                    //			       identifier:[0, "StaffNo"],
-                    //			       editable:[[5, 'PFAPIN']
-                    //			      },
-                    //			      restoreButton:false,
-                    //			      onSuccess:function(data, textStatus, jqXHR)
-                    //			      {
-                    //			       if(data.action == 'delete')
-                    //			       {
-                    //			        $('#'+data.id).remove();
-                    //			       }
-                    //			      }
-                    //			     });
-
-
-                });
-            </script>
-
-
-            <script src="js/tableExport.js"></script>
-            <script src="js/main.js"></script>
-        </div><!--end #content-->
-    </div><!--end #wrapper-->
-
-    <ul class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" id="ui-id-1" tabindex="0" style="display: none;"></ul>
-    <div id="footer" class="col-md-12 hidden-print">
-        Please visit our
-        <a href="#" target="_blank">
-            website </a>
-        to learn the latest information about the project.
-        <span class="text-info"> <span class="label label-info"> 14.1</span></span>
+        </div>
     </div>
-</body>
+    <!-- Edit/Add Modal -->
+    <div id="userModal" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" id="modalTitle">Add/Edit User</h2>
+                <button type="button" id="closeModalButton" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="userForm" method="POST" autocomplete="off">
+                <input type="hidden" name="action" id="action" value="create">
+                <input type="hidden" name="staff_id" id="staff_id">
 
-</html>
-<?php
-//mysqli_free_result($employee);
-?>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Staff</label>
+                    <input type="text" id="search" name="search" placeholder="Search for staff..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input type="text" id="employee_name" name="employee_name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select id="roles_id" name="roles_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                        <option value="">Select Role</option>
+                        <?php foreach ($roles as $role): ?>
+                        <option value="<?php echo htmlspecialchars($role['role_id']); ?>">
+                            <?php echo htmlspecialchars($role['role_name']); ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select id="status_id" name="status_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                        <option value="0">Active</option>
+                        <option value="1">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancelBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
+                    <button type="submit" id="saveBtn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    $(function() {
+        // Initialize DataTable with proper configuration
+        var userTable = $('#userTable').DataTable({
+            pageLength: 25,
+            ordering: true,
+            columnDefs: [
+                { orderable: false, targets: 4 }, // Disable sorting on Actions column
+                { 
+                    targets: 3, // Status column
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            var statusValue = data.trim();
+                            var statusClass = statusValue === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                            return '<span class="status-badge ' + statusClass + '">' + statusValue + '</span>';
+                        }
+                        return data;
+                    }
+                }
+            ],
+            drawCallback: function() {
+                // Ensure status badges are properly rendered after each draw
+                $('#userTable tbody tr').each(function() {
+                    var $row = $(this);
+                    var $statusCell = $row.find('td:eq(3)'); // Status column
+                    var statusValue = $statusCell.text().trim();
+                    
+                    if (statusValue === 'Active' || statusValue === 'Inactive') {
+                        var statusClass = statusValue === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                        $statusCell.html('<span class="status-badge ' + statusClass + '">' + statusValue + '</span>');
+                    }
+                });
+            },
+            initComplete: function() {
+                // Ensure status badges are rendered after initial load
+                setTimeout(function() {
+                    $('#userTable tbody tr').each(function() {
+                        var $row = $(this);
+                        var $statusCell = $row.find('td:eq(3)'); // Status column
+                        var statusValue = $statusCell.text().trim();
+                        
+                        if (statusValue === 'Active' || statusValue === 'Inactive') {
+                            var statusClass = statusValue === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                            $statusCell.html('<span class="status-badge ' + statusClass + '">' + statusValue + '</span>');
+                        }
+                    });
+                }, 100);
+            }
+        });
+
+        // Reload button
+        $('#reload-button').click(function() {
+            location.reload();
+        });
+        
+        // Download Excel button
+        $('#download-excel-button').click(function() {
+            window.location.href = 'libs/export_users_excel.php';
+        });
+
+        // Add user button
+        $('#add-user-button').click(function() {
+            $('#modalTitle').text('Add New User');
+            $('#userForm')[0].reset();
+            $('#action').val('create');
+            $('#staff_id').val('');
+            showModal();
+        });
+
+        // Edit user button with event delegation
+        $(document).on('click', '.edit-user-btn', function() {
+            $('#modalTitle').text('Edit User');
+            $('#action').val('update');
+            $('#staff_id').val($(this).data('staff_id'));
+            $('#employee_name').val($(this).data('name'));
+            $('#email').val($(this).data('email'));
+            $('#username').val($(this).data('staff_id'));
+            $('#roles_id').val($(this).data('role'));
+            $('#status_id').val($(this).data('status'));
+            showModal();
+        });
+
+        // Close modal buttons
+        $('#closeModalButton, #cancelBtn').click(function() {
+            hideModal();
+        });
+
+        // Close modal when clicking outside
+        $('#userModal').click(function(e) {
+            if (e.target === this) {
+                hideModal();
+            }
+        });
+
+        // Autocomplete for staff search
+        $("#search").autocomplete({
+            source: '../searchStaff.php',
+            type: 'GET',
+            delay: 10,
+            autoFocus: false,
+            minLength: 3,
+            select: function(event, ui) {
+                event.preventDefault();
+                $("#staff_id").val(ui.item.value);
+                $('#employee_name').val(ui.item.label);
+                $('#email').val(ui.item.EMAIL);
+                $("#username").val(ui.item.value);
+            }
+        });
+
+        // Form submission
+        $('#userForm').submit(function(event) {
+            event.preventDefault();
+            var formData = $(this).serialize();
+            
+            // Show loading state
+            $('#saveBtn').prop('disabled', true).text('Saving...');
+            
+            $.ajax({
+                url: 'libs/add_user.php',
+                type: 'POST',
+                dataType: 'json',
+                data: formData,
+                success: function(response) {
+                    // Hide modal first
+                    hideModal();
+                    
+                    // Show alert after modal is hidden
+                    setTimeout(function() {
+                        Swal.fire({
+                            icon: response.status === 'success' ? 'success' : 'error',
+                            title: response.status === 'success' ? 'Success' : 'Error',
+                            text: response.message,
+                            timer: response.status === 'success' ? 2000 : 0,
+                            showConfirmButton: response.status !== 'success'
+                        }).then((result) => {
+                            if (response.status === 'success') {
+                                location.reload();
+                            }
+                        });
+                    }, 100);
+                },
+                error: function() {
+                    // Hide modal first
+                    hideModal();
+                    
+                    // Show error alert
+                    setTimeout(function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while saving the user',
+                            showConfirmButton: true
+                        });
+                    }, 100);
+                },
+                complete: function() {
+                    // Reset button state
+                    $('#saveBtn').prop('disabled', false).text('Save');
+                }
+            });
+        });
+
+        // Modal functions
+        function showModal() {
+            $('#userModal').removeClass('hidden').addClass('flex');
+            $('body').addClass('overflow-hidden');
+        }
+
+        function hideModal() {
+            $('#userModal').addClass('hidden').removeClass('flex');
+            $('body').removeClass('overflow-hidden');
+        }
+    });
+    </script>
+    <?php include 'footer.php'; ?>

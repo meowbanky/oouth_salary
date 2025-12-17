@@ -5,7 +5,7 @@ include_once('classes/model.php'); ?>
 
 	//Start session
 	session_start();
-	mysqli_select_db($salary,'salary');
+	mysqli_select_db($salary,'oouthco_salary');
 	$query = "SELECT tbl_pfa.PFACODE, tbl_pfa.PFANAME FROM tbl_pfa";
 	$result = mysqli_query($salary,$query) or (mysqli_error($salary));
 		
