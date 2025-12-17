@@ -4,8 +4,12 @@ require_once __DIR__ . '/../config/Database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-$appId = "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
-$apiKey = "os_v2_app_ybfa6fphbngubi6gfbfrrgfvwynxspmvfroukifxxpmmrooq2lnc7nuy4rfvonjhqc6kbd5ziwsehccorfoo5w2b7zrispcuzvob2ha";
+$appId = getenv('ONESIGNAL_APP_ID') ?: "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
+$apiKey = getenv('ONESIGNAL_REST_API_KEY') ?: '';
+
+if (empty($apiKey)) {
+    die("ERROR: OneSignal REST API Key not configured! Set ONESIGNAL_REST_API_KEY environment variable.");
+}
 
 // Get all registered devices from OneSignal
 function getRegisteredDevices() {

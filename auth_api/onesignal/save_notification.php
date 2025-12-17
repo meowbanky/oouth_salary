@@ -63,8 +63,13 @@ function saveNotificationForAll($db, $title, $message) {
 }
 
 function sendNotificationToDevice($deviceId, $title, $message) {
-    $appId = "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
-    $apiKey = "os_v2_app_ybfa6fphbngubi6gfbfrrgfvwynxspmvfroukifxxpmmrooq2lnc7nuy4rfvonjhqc6kbd5ziwsehccorfoo5w2b7zrispcuzvob2ha";
+    $appId = getenv('ONESIGNAL_APP_ID') ?: "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
+    $apiKey = getenv('ONESIGNAL_REST_API_KEY') ?: '';
+    
+    if (empty($apiKey)) {
+        error_log("ERROR: OneSignal REST API Key not configured!");
+        return false;
+    }
 
     $content = ["en" => $message];
     $headings = ["en" => $title];
@@ -88,8 +93,13 @@ function sendNotificationToAll($db, $title, $message) {
     // First save notification for all staff
     saveNotificationForAll($db, $title, $message);
 
-    $appId = "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
-    $apiKey = "os_v2_app_ybfa6fphbngubi6gfbfrrgfvwynxspmvfroukifxxpmmrooq2lnc7nuy4rfvonjhqc6kbd5ziwsehccorfoo5w2b7zrispcuzvob2ha";
+    $appId = getenv('ONESIGNAL_APP_ID') ?: "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
+    $apiKey = getenv('ONESIGNAL_REST_API_KEY') ?: '';
+    
+    if (empty($apiKey)) {
+        error_log("ERROR: OneSignal REST API Key not configured!");
+        return false;
+    }
 
     $content = ["en" => $message];
     $headings = ["en" => $title];
