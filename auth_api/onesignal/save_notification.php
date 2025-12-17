@@ -1,4 +1,35 @@
 <?php
+// Load environment variables from .env file
+if (file_exists(__DIR__ . '/../../.env')) {
+    $lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, '#') === 0) continue; // Skip empty lines and comments
+        if (strpos($line, '=') === false) continue; // Skip invalid lines
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        // Remove quotes if present
+        $value = trim($value, '"\'');
+        $_ENV[$name] = $value;
+        putenv($name . '=' . $value);
+    }
+}
+
+// Alternative: Use DotEnv library if available
+if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+    try {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        if (class_exists('Dotenv\Dotenv')) {
+            $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
+            $dotenv->load();
+        }
+    } catch (Exception $e) {
+        // DotEnv not available or failed, continue with manual loading
+        error_log("DotEnv loading failed: " . $e->getMessage());
+    }
+}
+
 require_once __DIR__ . '/../config/Database.php';
 $database = new Database();
 $db = $database->getConnection();

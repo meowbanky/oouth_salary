@@ -1,14 +1,44 @@
 <?php
 // test_devices.php
+
+// Load environment variables from .env file
+if (file_exists(__DIR__ . '/../../.env')) {
+    $lines = file(__DIR__ . '/../../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        $value = trim($value, '"\'');
+        $_ENV[$name] = $value;
+        putenv($name . '=' . $value);
+    }
+}
+
+// Alternative: Use DotEnv library if available
+if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+    try {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        if (class_exists('Dotenv\Dotenv')) {
+            $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../..');
+            $dotenv->load();
+        }
+    } catch (Exception $e) {
+        error_log("DotEnv loading failed: " . $e->getMessage());
+    }
+}
+
 require_once __DIR__ . '/../config/Database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-$appId = getenv('ONESIGNAL_APP_ID') ?: "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
-$apiKey = getenv('ONESIGNAL_REST_API_KEY') ?: '';
+$appId = getenv('ONESIGNAL_APP_ID') ?: $_ENV['ONESIGNAL_APP_ID'] ?? "c04a0f15-e70b-4d40-a3c6-284b1898b5b6";
+$apiKey = getenv('ONESIGNAL_REST_API_KEY') ?: $_ENV['ONESIGNAL_REST_API_KEY'] ?? '';
 
 if (empty($apiKey)) {
-    die("ERROR: OneSignal REST API Key not configured! Set ONESIGNAL_REST_API_KEY environment variable.");
+    die("ERROR: OneSignal REST API Key not configured! Set ONESIGNAL_REST_API_KEY environment variable in .env file.");
 }
 
 // Get all registered devices from OneSignal
