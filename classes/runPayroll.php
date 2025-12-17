@@ -398,6 +398,27 @@ try { //echo $period ;
 //set openview status
 $statuschange = $conn->prepare('UPDATE payperiods SET payrollRun = ? WHERE periodId = ?');
 $perres = $statuschange->execute(array('1', $period));
+
+// Trigger webhook: payroll.processed
+if (file_exists(__DIR__ . '/../api/utils/webhook_dispatcher.php')) {
+    require_once __DIR__ . '/../api/utils/webhook_dispatcher.php';
+    
+    // Get period details for webhook
+    $periodStmt = $conn->prepare('SELECT periodId, description, periodYear FROM payperiods WHERE periodId = ?');
+    $periodStmt->execute([$period]);
+    $periodData = $periodStmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($periodData) {
+        triggerWebhook('payroll.processed', [
+            'period_id' => $periodData['periodId'],
+            'description' => $periodData['description'],
+            'year' => $periodData['periodYear'],
+            'processed_at' => date('c'),
+            'processed_by' => $_SESSION['SESS_FIRST_NAME'] ?? 'System'
+        ]);
+    }
+}
+
 echo '<script>parent.document.getElementById("information").innerHTML="<div style=\"text-align:center; display:block; font-weight:bold\">Process completed</div>";
         			parent.document.getElementById("payprocessbtn").disabled = false;
         			</script>';

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font: bold 32px sans-serif; fill: #1a1a1a; }
+      .subtitle { font: 20px sans-serif; fill: #4a4a4a; }
+      .heading { font: bold 18px sans-serif; fill: #ffffff; }
+      .text { font: 14px sans-serif; fill: #333333; }
+      .small-text { font: 12px sans-serif; fill: #666666; }
+      .box { fill: #ffffff; stroke: #2c3e50; stroke-width: 2; }
+      .security-box { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .feature-box { fill: #3498db; stroke: #2980b9; stroke-width: 2; }
+      .endpoint-box { fill: #2ecc71; stroke: #27ae60; stroke-width: 2; }
+      .webhook-box { fill: #f39c12; stroke: #d68910; stroke-width: 2; }
+      .client-box { fill: #9b59b6; stroke: #8e44ad; stroke-width: 2; }
+      .arrow { stroke: #34495e; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .badge { font: bold 14px sans-serif; fill: #ffffff; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#34495e" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" class="title">OOUTH Salary Management API</text>
+  <text x="600" y="70" text-anchor="middle" class="subtitle">Enterprise-Ready REST API Architecture</text>
+  
+  <!-- Clients Section -->
+  <rect x="50" y="120" width="280" height="180" rx="10" class="client-box"/>
+  <text x="190" y="150" text-anchor="middle" class="heading">External Clients</text>
+  
+  <circle cx="100" cy="190" r="8" fill="#ffffff"/>
+  <text x="120" y="195" class="text">Pension Administrators</text>
+  
+  <circle cx="100" cy="220" r="8" fill="#ffffff"/>
+  <text x="120" y="225" class="text">Banks &amp; Financial Institutions</text>
+  
+  <circle cx="100" cy="250" r="8" fill="#ffffff"/>
+  <text x="120" y="255" class="text">Tax Authorities</text>
+  
+  <circle cx="100" cy="280" r="8" fill="#ffffff"/>
+  <text x="120" y="285" class="text">Third-Party Vendors</text>
+  
+  <!-- Arrow from Clients to Security -->
+  <path d="M 330 210 L 420 210" class="arrow"/>
+  <text x="360" y="205" class="small-text">HTTPS</text>
+  
+  <!-- Security Layer -->
+  <rect x="420" y="120" width="280" height="180" rx="10" class="security-box"/>
+  <text x="560" y="150" text-anchor="middle" class="heading">6-Layer Security</text>
+  
+  <text x="450" y="185" class="text" fill="#ffffff">✓ HTTPS Enforcement</text>
+  <text x="450" y="210" class="text" fill="#ffffff">✓ JWT Authentication</text>
+  <text x="450" y="235" class="text" fill="#ffffff">✓ HMAC-SHA256 Signatures</text>
+  <text x="450" y="260" class="text" fill="#ffffff">✓ Rate Limiting (100/min)</text>
+  <text x="450" y="285" class="text" fill="#ffffff">✓ IP Whitelisting</text>
+  
+  <!-- Arrow from Security to API Core -->
+  <path d="M 700 210 L 790 210" class="arrow"/>
+  
+  <!-- API Core -->
+  <rect x="790" y="120" width="360" height="180" rx="10" class="feature-box"/>
+  <text x="970" y="150" text-anchor="middle" class="heading">API Core Features</text>
+  
+  <text x="820" y="185" class="text" fill="#ffffff">⚡ Multi-tenant Architecture</text>
+  <text x="820" y="210" class="text" fill="#ffffff">📊 JSON / XML / CSV Responses</text>
+  <text x="820" y="235" class="text" fill="#ffffff">🔄 Token Refresh &amp; Revocation</text>
+  <text x="820" y="260" class="text" fill="#ffffff">📝 Complete Audit Logging</text>
+  <text x="820" y="285" class="text" fill="#ffffff">🎯 Role-based Access Control</text>
+  
+  <!-- Endpoints Section -->
+  <rect x="50" y="350" width="350" height="400" rx="10" class="endpoint-box"/>
+  <text x="225" y="380" text-anchor="middle" class="heading">17 RESTful Endpoints</text>
+  
+  <!-- Authentication Endpoints -->
+  <rect x="70" y="400" width="310" height="90" rx="5" fill="#ffffff" opacity="0.9"/>
+  <text x="225" y="420" text-anchor="middle" class="text" font-weight="bold">Authentication</text>
+  <text x="85" y="445" class="small-text">POST /auth/token - Generate JWT</text>
+  <text x="85" y="465" class="small-text">POST /auth/refresh - Refresh token</text>
+  <text x="85" y="485" class="small-text">POST /auth/revoke - Revoke token</text>
+  
+  <!-- Payroll Endpoints -->
+  <rect x="70" y="505" width="310" height="130" rx="5" fill="#ffffff" opacity="0.9"/>
+  <text x="225" y="525" text-anchor="middle" class="text" font-weight="bold">Payroll Data</text>
+  <text x="85" y="550" class="small-text">GET /payroll/periods - All periods</text>
+  <text x="85" y="570" class="small-text">GET /payroll/periods/{id} - Period details</text>
+  <text x="85" y="590" class="small-text">GET /payroll/periods/active - Current period</text>
+  <text x="85" y="610" class="small-text">GET /payroll/allowances/{id} - Allowance data</text>
+  <text x="85" y="630" class="small-text">GET /payroll/deductions/{id} - Deduction data</text>
+  
+  <!-- Webhook Endpoints -->
+  <rect x="70" y="650" width="310" height="90" rx="5" fill="#ffffff" opacity="0.9"/>
+  <text x="225" y="670" text-anchor="middle" class="text" font-weight="bold">Webhooks</text>
+  <text x="85" y="695" class="small-text">POST /webhooks/register - Register webhook</text>
+  <text x="85" y="715" class="small-text">GET /webhooks/{id}/test - Test delivery</text>
+  <text x="85" y="735" class="small-text">+ 6 more endpoints</text>
+  
+  <!-- Webhooks Section -->
+  <rect x="450" y="350" width="330" height="400" rx="10" class="webhook-box"/>
+  <text x="615" y="380" text-anchor="middle" class="heading">Real-Time Webhooks</text>
+  
+  <rect x="470" y="400" width="290" height="320" rx="5" fill="#ffffff" opacity="0.9"/>
+  <text x="615" y="425" text-anchor="middle" class="text" font-weight="bold">7 Event Types</text>
+  
+  <circle cx="490" cy="455" r="6" fill="#f39c12"/>
+  <text x="510" y="460" class="small-text">payroll.period.activated</text>
+  
+  <circle cx="490" cy="485" r="6" fill="#f39c12"/>
+  <text x="510" y="490" class="small-text">payroll.processed</text>
+  
+  <circle cx="490" cy="515" r="6" fill="#f39c12"/>
+  <text x="510" y="520" class="small-text">payroll.approved</text>
+  
+  <circle cx="490" cy="545" r="6" fill="#f39c12"/>
+  <text x="510" y="550" class="small-text">employee.added</text>
+  
+  <circle cx="490" cy="575" r="6" fill="#f39c12"/>
+  <text x="510" y="580" class="small-text">employee.updated</text>
+  
+  <circle cx="490" cy="605" r="6" fill="#f39c12"/>
+  <text x="510" y="610" class="small-text">deduction.changed</text>
+  
+  <circle cx="490" cy="635" r="6" fill="#f39c12"/>
+  <text x="510" y="640" class="small-text">allowance.changed</text>
+  
+  <rect x="470" y="665" width="290" height="45" rx="5" fill="#e67e22"/>
+  <text x="615" y="690" text-anchor="middle" class="badge">Auto Retry + HMAC Verification</text>
+  
+  <!-- Tech Stack Section -->
+  <rect x="830" y="350" width="320" height="400" rx="10" class="box"/>
+  <text x="990" y="380" text-anchor="middle" class="heading" fill="#2c3e50">Tech Stack &amp; Tools</text>
+  
+  <!-- Tech Stack Items -->
+  <rect x="850" y="400" width="280" height="40" rx="5" fill="#3498db"/>
+  <text x="990" y="425" text-anchor="middle" class="badge">PHP 8.4 + MySQL</text>
+  
+  <rect x="850" y="455" width="280" height="40" rx="5" fill="#2ecc71"/>
+  <text x="990" y="480" text-anchor="middle" class="badge">JWT + HMAC-SHA256</text>
+  
+  <rect x="850" y="510" width="280" height="40" rx="5" fill="#9b59b6"/>
+  <text x="990" y="535" text-anchor="middle" class="badge">RESTful Architecture</text>
+  
+  <rect x="850" y="565" width="280" height="40" rx="5" fill="#e74c3c"/>
+  <text x="990" y="590" text-anchor="middle" class="badge">Sliding Window Rate Limit</text>
+  
+  <rect x="850" y="620" width="280" height="115" rx="5" fill="#ecf0f1"/>
+  <text x="990" y="645" text-anchor="middle" class="text" font-weight="bold">Documentation</text>
+  <text x="870" y="670" class="small-text">✓ Complete API Reference</text>
+  <text x="870" y="690" class="small-text">✓ 8 Language Examples</text>
+  <text x="870" y="710" class="small-text">✓ Postman Collection</text>
+  <text x="870" y="730" class="small-text">✓ Testing Tools</text>
+  
+  <!-- Footer Stats -->
+  <rect x="50" y="765" width="1100" height="25" fill="#2c3e50"/>
+  <text x="150" y="782" class="badge">🚀 Production Ready</text>
+  <text x="350" y="782" class="badge">⚡ 17 Endpoints</text>
+  <text x="550" y="782" class="badge">🔔 7 Webhook Events</text>
+  <text x="750" y="782" class="badge">📚 100+ Pages Docs</text>
+  <text x="950" y="782" class="badge">✅ Zero Errors</text>
+  
+</svg>
+

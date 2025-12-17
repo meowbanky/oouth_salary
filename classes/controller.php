@@ -1272,6 +1272,18 @@ switch ($act) {
             $statuschange = $conn->prepare('UPDATE payperiods SET openview = ? WHERE periodId = ?');
             $perres = $statuschange->execute(array('1', $_SESSION['currentactiveperiod']));
             $_SESSION['periodstatuschange'] = '1';
+            
+            // Trigger webhook: payroll.period.activated
+            if (file_exists(__DIR__ . '/../api/utils/webhook_dispatcher.php')) {
+                require_once __DIR__ . '/../api/utils/webhook_dispatcher.php';
+                triggerWebhook('payroll.period.activated', [
+                    'period_id' => $reactivateperiodid,
+                    'description' => $reactivatedperioddesc,
+                    'year' => $reactivatedperiodyear,
+                    'activated_at' => date('c'),
+                    'activated_by' => $_SESSION['SESS_FIRST_NAME'] ?? 'System'
+                ]);
+            }
 
             $_SESSION['msg'] = "You are now viewing data from a closed period. Transactions are not allowed.";
             $_SESSION['alertcolor'] = "success";
@@ -1334,6 +1346,19 @@ switch ($act) {
                     $salary_type, $insertemail, $emp_no, $namee, $doe, $dept, $designation, $grade, $gradestep,
                     $acct_no, $bank, 'A', $pfa, $rsa_pin, $callType, $hazardType, $userID, $recordtime
                 ]);
+                
+                // Trigger webhook: employee.added
+                if (file_exists(__DIR__ . '/../api/utils/webhook_dispatcher.php')) {
+                    require_once __DIR__ . '/../api/utils/webhook_dispatcher.php';
+                    triggerWebhook('employee.added', [
+                        'staff_id' => $emp_no,
+                        'name' => $namee,
+                        'email' => $insertemail,
+                        'department' => $dept,
+                        'added_at' => date('c'),
+                        'added_by' => $_SESSION['SESS_FIRST_NAME'] ?? 'System'
+                    ]);
+                }
         
                 // Call the email creation API
                 $apiUrl = 'https://oouth.com/admin_mail/create-email-api.php';
