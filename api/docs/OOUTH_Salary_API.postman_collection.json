@@ -1,0 +1,357 @@
+{
+  "info": {
+    "name": "OOUTH Salary API",
+    "description": "Complete API collection for OOUTH Salary Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "oouth-salary-api-v1",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://oouthsalary.com.ng/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "YOUR_API_KEY_HERE",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Generate JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.data.access_token) {",
+                  "        pm.collectionVariables.set('jwt_token', jsonData.data.access_token);",
+                  "        console.log('JWT Token saved to collection variable');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "token"]
+            },
+            "description": "Generate JWT token using API key. Token expires in 15 minutes."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh JWT Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"YOUR_REFRESH_TOKEN_HERE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh an expired JWT token using refresh token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Payroll Periods",
+      "item": [
+        {
+          "name": "List All Periods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods?page=1&limit=100",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get all payroll periods with pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Period",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods/active",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods", "active"]
+            },
+            "description": "Get the current active payroll period."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Period",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods/44",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods", "44"]
+            },
+            "description": "Get details of a specific period by ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Allowances",
+      "item": [
+        {
+          "name": "Get Allowance Data (Current Period)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/allowances/5",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "allowances", "5"]
+            },
+            "description": "Get allowance data for all staff. Defaults to active period. Replace '5' with your allowance ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Allowance Data (Specific Period)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/allowances/5?period=44",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "allowances", "5"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "44",
+                  "description": "Period ID"
+                }
+              ]
+            },
+            "description": "Get allowance data for a specific payroll period."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Deductions",
+      "item": [
+        {
+          "name": "Get Deduction Data (Current Period)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/deductions/12",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "deductions", "12"]
+            },
+            "description": "Get deduction data for all staff. Defaults to active period. Replace '12' with your deduction ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Response Formats",
+      "item": [
+        {
+          "name": "Get Periods (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods"]
+            },
+            "description": "Get data in JSON format (default)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Periods (XML)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/xml"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods"]
+            },
+            "description": "Get data in XML format."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Periods (CSV)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{api_key}}"
+              },
+              {
+                "key": "Accept",
+                "value": "text/csv"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payroll/periods",
+              "host": ["{{base_url}}"],
+              "path": ["payroll", "periods"]
+            },
+            "description": "Get data in CSV format."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="fe732a0e-d3b1-4e8d-88a8-cb5ce7d8e8b3" name="oouthsalary" url="http://oouthsalary.com.ng">
+        <fileTransfer rootFolder="/home/oouthsal/public_html" accessType="SFTP" host="ftp.oouthsalary.com.ng" port="22" sshConfigId="06a57f01-b3bc-4443-89e0-dcba81ac9944" sshConfig="oouthsal@ftp.oouthsalary.com.ng:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

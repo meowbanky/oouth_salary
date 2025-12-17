@@ -1,226 +1,217 @@
 <?php
-session_start();
-
-include_once('../classes/model.php');
 require_once('../Connections/paymaster.php');
-if (!isset($_SESSION['SESS_MEMBER_ID']) || (trim($_SESSION['SESS_MEMBER_ID']) == '')) {
-	header("location: ../index.php");
-	exit();
+include_once('../classes/model.php');
+require_once('../libs/App.php');
+$App = new App();
+$App->checkAuthentication();
+require_once('../libs/middleware.php');
+checkPermission();
+
+// Initialize variables
+$month = '';
+$period = isset($_POST['period']) ? $_POST['period'] : (isset($_GET['period']) ? $_GET['period'] : -1);
+
+// Get period information
+if ($period != -1) {
+    try {
+        $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear FROM payperiods WHERE periodId = ?');
+        $query->execute([$period]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+        if ($result) {
+            $month = $result['description'] . '-' . $result['periodYear'];
+        }
+    } catch (PDOException $e) {
+        $month = '';
+    }
 }
-if (!function_exists("GetSQLValueString")) {
-	function GetSQLValueString($theValue, $theType, $theDefinedValue = "", $theNotDefinedValue = "")
-	{
-		global $salary;
-
-
-		$theValue = function_exists("mysql_real_escape_string") ? mysqli_real_escape_string($salary, $theValue) : mysqli_escape_string($salary, $theValue);
-
-		switch ($theType) {
-			case "text":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "long":
-			case "int":
-				$theValue = ($theValue != "") ? intval($theValue) : "NULL";
-				break;
-			case "double":
-				$theValue = ($theValue != "") ? doubleval($theValue) : "NULL";
-				break;
-			case "date":
-				$theValue = ($theValue != "") ? "'" . $theValue . "'" : "NULL";
-				break;
-			case "defined":
-				$theValue = ($theValue != "") ? $theDefinedValue : $theNotDefinedValue;
-				break;
-		}
-		return $theValue;
-	}
-}
-
-
 ?>
 <!DOCTYPE html>
-<?php include('../header1.php'); ?>
+<html lang="en">
 
-<body data-color="grey" class="flat">
-	<div class="modal fade hidden-print" id="myModal"></div>
-	<div id="wrapper">
-		<div id="header" class="hidden-print">
-			<h1><a href="../index.php"><img src="img/header_logo.png" class="hidden-print header-log" id="header-logo" alt=""></a></h1>
-			<a id="menu-trigger" href="#"><i class="fa fa-bars fa fa-2x"></i></a>
-			<div class="clear"></div>
-		</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Export Report - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="../css/dark-mode.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script><script src="../js/theme-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 
-
-
-
-		<div id="user-nav" class="hidden-print hidden-xs">
-			<ul class="btn-group ">
-				<li class="btn  hidden-xs"><a title="" href="switch_user" data-toggle="modal" data-target="#myModal"><i class="icon fa fa-user fa-2x"></i> <span class="text"> Welcome <b> <?php echo $_SESSION['SESS_FIRST_NAME']; ?> </b></span></a></li>
-				<li class="btn  hidden-xs disabled">
-					<a title="" href="/" onclick="return false;"><i class="icon fa fa-clock-o fa-2x"></i> <span class="text">
-							<?php
-							$Today = date('y:m:d', time());
-							$new = date('l, F d, Y', strtotime($Today));
-							echo $new;
-							?> </span></a>
-				</li>
-				<li class="btn "><a href="#"><i class="icon fa fa-cog"></i><span class="text">Settings</span></a></li>
-				<li class="btn  ">
-					<a href="index.php"><i class="fa fa-power-off"></i><span class="text">Logout</span></a>
-				</li>
-			</ul>
-		</div>
-
-		<?php include("report_sidebar.php"); ?>
-
-
-
-		<div id="content" class="clearfix sales_content_minibar">
-			<div id="content-header" class="hidden-print">
-				<h1><i class="fa fa-beaker"></i> Report Input</h1> <span id="ajax-loader"><img src="img/ajax-loader.gif" alt="" /></span>
-			</div>
-
-			<div id="breadcrumb" class="hidden-print">
-				<a href="../home.php"><i class="fa fa-home"></i> Dashboard</a><a href="index.php">Reports</a><a class="current" href="payrollDept.php">Report Input: Detailed Payroll Summary Report</a>
-			</div>
-			<div class="clear"></div>
-			<div class="row">
-				<div class="col-md-12">
-					<div class="widget-box">
-						<div class="widget-title">
-							<span class="icon">
-								<i class="fa fa-align-justify"></i>
-							</span>
-							<h5 align="center"></h5>
-							<div class="clear"></div>
-							<div class="clear"></div>
-
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<h3 style="text-transform: uppercase;" class="inline-block text-center"><img src="img/oouth_logo.gif" width="10%" height="10%" class="header-log" id="header-logo" alt="">
-
-									olabisi ONABANJO UNIVERSITY TEACHING HOSPITAL<br> TAX EXPORT FOR THE MONTH OF
+<body class="bg-gray-100 min-h-screen">
+    <?php include('../header.php'); ?>
+    <div class="flex min-h-screen">
+        <?php include('report_sidebar_modern.php'); ?>
+        <main class="flex-1 px-2 md:px-8 py-4 flex flex-col">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="../home.php"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-home w-4 h-4 mr-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <a href="index.php"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Reports</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-1"></i>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Tax Export</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
 
 
 
-									<?php $month = '';
-									global $conn;
-									if (!isset($_POST['period'])) {
-										$period = -1;
-									} else {
-										$period = $_POST['period'];
-									}
-									try {
-										$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE periodId = ?');
-										$res = $query->execute(array($period));
-										$out = $query->fetchAll(PDO::FETCH_ASSOC);
+            <div class="w-full max-w-7xl mx-auto flex-1 flex flex-col">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-file-export"></i> Tax Export Report
+                        </h1>
+                        <p class="text-sm text-blue-700/70 mt-1">Generate and export tax computation reports for
+                            selected pay periods.</p>
+                    </div>
+                </div>
 
-										while ($row = array_shift($out)) {
-											echo ($month = $row['description'] . '-' . $row['periodYear']);
-										}
-									} catch (PDOException $e) {
-										$e->getMessage();
-									}
+                <!-- Report Form -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div class="bg-blue-50 px-6 py-4 border-b">
+                        <h2 class="text-lg font-semibold text-blue-800 flex items-center gap-2">
+                            <i class="fas fa-filter"></i> Report Parameters
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" action="taxcomputation.php" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="period" class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Pay Period
+                                    </label>
+                                    <select name="period" id="period"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                        required>
+                                        <option value="">Select Pay Period</option>
+                                        <?php
+                                        try {
+                                            $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                            $query->execute(array('1'));
+                                            $periods = $query->fetchAll(PDO::FETCH_ASSOC);
 
-									?>
-								</h3>
-							</div>
+                                            foreach ($periods as $row) {
+                                                $selected = ($row['periodId'] == $_SESSION['currentactiveperiod']) ? 'selected' : '';
+                                                echo '<option value="' . $row['periodId'] . '" ' . $selected . '>';
+                                                echo $row['description'] . ' - ' . $row['periodYear'];
+                                                echo '</option>';
+                                            }
+                                        } catch (PDOException $e) {
+                                            echo '<option value="">Error loading periods</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                            </div>
 
-							<div class="col-md-12 hidden-print">
-								<form class="form-horizontal form-horizontal-mobiles" method="POST" action="taxcomputation.php">
-									<div class="form-group">
-										<label for="range" class="col-sm-3 col-md-3 col-lg-2 control-label hidden-print">Pay Period :</label>
-										<div class="col-sm-9 col-md-9 col-lg-10">&nbsp;
-											<div class="input-group">
-												<span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-												<select name="period" id="period" class="form-control hidden-print">
-													<option value="">Select Pay Period</option>
+                            <div class="flex justify-end pt-4">
+                                <button type="submit" name="generate_report"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2">
+                                    <i class="fas fa-play"></i>
+                                    Generate Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-													<?php
-													global $conn;
+                <!-- Report Header -->
+                <?php if ($month): ?>
+                <div class="bg-white rounded-xl shadow-lg p-8 mb-6">
+                    <div class="text-center">
+                        <img src="../img/oouth_logo.gif" alt="OOUTH Logo" class="mx-auto mb-4 h-16 w-auto">
+                        <h2 class="text-2xl font-bold text-gray-900 uppercase">
+                            Olabisi Onabanjo University Teaching Hospital
+                        </h2>
+                        <h3 class="text-xl text-gray-700 mt-2">
+                            Tax Export for the Month of
+                            <span class="font-semibold text-blue-600"><?php echo $month; ?></span>
+                        </h3>
+                    </div>
+                </div>
+                <?php endif; ?>
 
-													try {
-														$query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
-														$res = $query->execute(array('1'));
-														$out = $query->fetchAll(PDO::FETCH_ASSOC);
+                <!-- Footer -->
+                <footer class="mt-auto pt-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                        <p class="text-gray-600 text-sm">
+                            Please visit our
+                            <a href="http://www.oouth.com/" target="_blank"
+                                class="text-blue-600 hover:text-blue-800 transition-colors font-medium">
+                                website
+                            </a>
+                            to learn the latest information about the project.
+                        </p>
+                        <div class="mt-3">
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Version 14.1
+                            </span>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </main>
+    </div>
 
-														while ($row = array_shift($out)) {
-															echo '<option value="' . $row['periodId'] . '"';
-															if ($row['periodId'] == $_SESSION['currentactiveperiod']) {
-																echo 'selected = "selected"';
-															};
-															echo ' >' . $row['description'] . ' - ' . $row['periodYear'] . '</option>';
-														}
-													} catch (PDOException $e) {
-														echo $e->getMessage();
-													}
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 flex items-center space-x-4 shadow-2xl">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="text-gray-700 font-medium">Generating report...</span>
+        </div>
+    </div>
 
-													?>
-												</select>
-											</div>
-										</div>
+    <script>
+    $(document).ready(function() {
+        // Form submission handling
+        $('form').on('submit', function(e) {
+            const period = $('#period').val();
 
-									</div>
+            if (!period) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selection Required',
+                    text: 'Please select a pay period before generating the report.',
+                    confirmButtonColor: '#2563eb',
+                    confirmButtonText: 'OK'
+                });
+                return false;
+            }
 
-									<div class="form-actions">
-										<button name="generate_report" type="submit" id="generate_report" class="btn btn-primary submit_button btn-large hidden-print">Submit</button>
-									</div>
-								</form>
-							</div>
-						</div>
+            // Show loading overlay
+            $('#loading-overlay').removeClass('hidden');
+        });
 
-						<div class="widget-content nopadding">
-
-						</div>
-					</div>
-				</div>
-				<div id="register_container" class="receiving"></div>
-			</div>
-
-		</div>
-
-		<div id="footer" class="col-md-12 hidden-print">
-			Please visit our
-			<a href="http://www.oouth.com/" target="_blank">
-				website </a>
-			to learn the latest information about the project.
-			<span class="text-info"> <span class="label label-info"> 14.1</span></span>
-		</div>
-
-	</div><!--end #content-->
-	<!--end #wrapper-->
-
-
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {
-			//'sales_report.php');
-
-
-			$("#start_month, #start_day, #start_year, #end_month, #end_day, #end_year").change(function() {
-				$("#complex_radio").prop('checked', true);
-			});
-
-			$("#report_date_range_simple").change(function() {
-				$("#simple_radio").prop('checked', true);
-			});
-
-		});
-
-		function receivingsBeforeSubmit(formData, jqForm, options) {
-			var submitting = false;
-			if (submitting) {
-				return false;
-			}
-			submitting = true;
-
-			$("#ajax-loader").show();
-			//	$("#finish_sale_button").hide();
-		}
-	</script>
-	<script src="js/tableExport.js"></script>
-	<script src="js/main.js"></script>
+        // Period change handling
+        $('#period').on('change', function() {
+            const selectedPeriod = $(this).val();
+            if (selectedPeriod) {
+                // Update the month display if needed
+                // This could be enhanced with AJAX to fetch period details
+            }
+        });
+    });
+    </script>
 </body>
 
 </html>

@@ -1,6 +1,6 @@
 <?php
 require 'libs/middleware.php';
-checkPermission('employee.php');
+checkPermission();
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

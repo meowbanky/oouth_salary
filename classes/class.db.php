@@ -1,5 +1,5 @@
 <?php
-include_once('../Connections/paymaster.php');
+include_once('/home/oouthsal/public_html/Connections/paymaster.php');
 
 // 	$db_server = "localhost";
 // 	$db_user = 	"oouthsal_root";

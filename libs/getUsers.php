@@ -2,6 +2,8 @@
 require 'App.php';
 
 $App = new App;
- $employees = $App->getEmployeeDetails();
+$employees = $App->getEmployeeDetails();
+$users = $App->getUsersDetails();
+
 
 ?>

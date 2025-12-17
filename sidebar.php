@@ -1,30 +1,63 @@
- <div id="sidebar" class="hidden-print minibar sales_minibar">
+<?php
+// Ensure session is started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
- 	<ul style="display: block;"><?php $currentPage = (substr($_SERVER["SCRIPT_NAME"], strrpos($_SERVER["SCRIPT_NAME"], "/") + 1));
-									?>
+// Get current page for active class
+$currentPage = basename($_SERVER['SCRIPT_NAME']);
 
- 		<li <?php if ($currentPage == 'home.php') { ?> class="active" <?php } ?>><a href="home.php"><i class="icon fa fa-dashboard"></i><span class="hidden-minibar">Dashboard</span></a></li>
- 		<?php if ($_SESSION['role'] == 'Admin') { ?>
+// Define sidebar menu items
+$menuItems = [
+    ['href' => 'home.php', 'icon' => 'fas fa-home', 'label' => 'Dashboard'],
+    ['href' => 'report/index.php', 'icon' => 'fas fa-file-lines', 'label' => 'Reports'],
+    ['href' => 'index.php', 'icon' => 'fas fa-power-off', 'label' => 'Logout'],
+];
 
- 			<li <?php if ($currentPage == 'employee.php') { ?> class="active" <?php } ?>><a href="employee.php"><i class="fa fa-user"></i><span class="hidden-minibar">Employees</span></a></li>
- 			<li <?php if ($currentPage == 'empearnings.php') { ?> class="active" <?php } ?>><a href="empearnings.php"><i class="fa fa-credit-card"></i><span class="hidden-minibar">Earning/Deduction</span></a></li>
+// Admin-only menu items
+$adminItems = [
+    ['href' => 'employee.php', 'icon' => 'fas fa-user', 'label' => 'Employees'],
+    ['href' => 'empearnings.php', 'icon' => 'fas fa-credit-card', 'label' => 'Earnings/Deductions'],
+    ['href' => 'earningsdeductions.php', 'icon' => 'fas fa-list-alt', 'label' => 'Earnings/Deductions Items'],
+    ['href' => 'upload.php', 'icon' => 'fas fa-cloud-upload-alt', 'label' => 'Upload Items'],
+    ['href' => 'tax.php', 'icon' => 'fas fa-file-invoice-dollar', 'label' => 'Update Tax'],
+    ['href' => 'payperiods.php', 'icon' => 'fas fa-calendar', 'label' => 'Pay Periods'],
+    ['href' => 'edit_conhess_conmess.php', 'icon' => 'fas fa-table', 'label' => 'Edit Allow Table '],
+    ['href' => 'edit_deduction_table.php', 'icon' => 'fas fa-edit', 'label' => 'Edit Deduction Table'],
+    ['href' => 'users.php', 'icon' => 'fas fa-users', 'label' => 'Users'],
+    ['href' => 'permissions.php', 'icon' => 'fas fa-shield-alt', 'label' => 'Permissions'],
+    ['href' => 'payprocess.php', 'icon' => 'fas fa-cog', 'label' => 'Proces'],
+    ['href' => 'multiAdjustment.php', 'icon' => 'fas fa-shopping-cart', 'label' => 'Periodic Payments'],
+    ['href' => 'departments.php', 'icon' => 'fas fa-home', 'label' => 'Department'],
+    ['href' => 'bank.php', 'icon' => 'fas fa-university', 'label' => 'Bank'],
+    ['href' => 'editpfa.php', 'icon' => 'fas fa-coins', 'label' => 'PFA'],
+    ['href' => 'email_deduction.php', 'icon' => 'fas fa-envelope', 'label' => 'Email Deductions'],
+    ['href' => 'monthly_comparison_report.php', 'icon' => 'fas fa-chart-line', 'label' => 'Monthly Comparison'],
+    ['href' => 'abeokuta_variance_tracking_enhanced.php', 'icon' => 'fas fa-exchange-alt', 'label' => 'Abeokuta Variance'],
+    ['href' => 'abeokuta_audit_report.php', 'icon' => 'fas fa-clipboard-list', 'label' => 'Abeokuta Audit'],
+];
 
- 			<li <?php if ($currentPage == 'tax.php') { ?> class="active" <?php } ?>><a href="tax.php"><i class="fa fa-money"></i><span class="hidden-minibar">Update Tax<i class="fa fa-tax" aria-hidden="true"></i></span></a></li>
- 			<li <?php if ($currentPage == 'payperiods.php') { ?> class="active" <?php } ?>><a href="payperiods.php"><i class="fa fa-calendar"></i><span class="hidden-minibar">Pay Period</span></a></li>
- 			<li <?php if ($currentPage == 'edit_conhess_conmess.php') { ?> class="active" <?php } ?>><a href="edit_conhess_conmess.php"><i class="fa fa-table"></i><span class="hidden-minibar">Salary Table</span></a></li>
- 			<li <?php if ($currentPage == 'users.php') { ?> class="active" <?php } ?>><a href="users.php"><i class="fa fa-users"></i><span class="hidden-minibar">Users</span></a></li>
- 			<li <?php if ($currentPage == 'payprocess.php') { ?> class="active" <?php } ?>><a href="payprocess.php"><i class="fa fa-cog"></i><span class="hidden-minibar">Process Payroll</span></a></li>
- 			<li <?php if ($currentPage == 'multiAdjustment.php') { ?> class="active" <?php } ?>><a href="multiAdjustment.php"><i class="fa fa-shopping-cart"></i><span class="hidden-minibar">Periodic Data</span></a></li>
- 			<li <?php if ($currentPage == 'groupAdjustment.php') { ?> class="active" <?php } ?>><a href="groupAdjustment.php"><i class="fa fa-group"></i><span class="hidden-minibar">Group Adjustment</span></a></li>
- 			<li <?php if ($currentPage == 'departments.php') { ?> class="active" <?php } ?>><a href="departments.php"><i class="fa fa-home"></i><span class="hidden-minibar">Department</span></a></li>
- 			<li <?php if ($currentPage == 'bank.php') { ?> class="active" <?php } ?>><a href="bank.php"><i class="fa fa-money"></i><span class="hidden-minibar">Bank</span></a></li>
- 			<li <?php if ($currentPage == 'editpfa.php') { ?> class="active" <?php } ?>><a href="editpfa.php"><i class="fa fa-money"></i><span class="hidden-minibar">PFA</span></a></li>
- 			<li <?php if ($currentPage == 'email_deduction.php') { ?> class="active" <?php } ?>><a href="email_deduction.php"><i class="fa fa-envelope"></i><span class="hidden-minibar">email Ded.</span></a></li>
+// Merge admin items for admin users
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'Admin') {
+    $menuItems = array_merge(array_slice($menuItems, 0, 1), $adminItems, array_slice($menuItems, 1));
+}
+?>
 
- 		<?php
-			} ?><li <?php if ($currentPage == 'report/index.php') { ?> class="active" <?php } ?>><a href="report/index.php"><i class="fa fa-bar-chart-o"></i><span class="hidden-minibar">Reports</span></a></li>
- 		<li>
- 			<a href="index.php"><i class="fa fa-power-off"></i><span class="hidden-minibar">Logout</span></a>
- 		</li>
- 	</ul>
- </div>
+<aside id="sidebar" class="w-64 min-h-screen p-4 hidden md:block"
+    style="background-color: var(--bg-secondary); color: var(--text-primary);">
+    <h2 class="text-xl font-bold mb-6">Menu</h2>
+    <ul class="space-y-2">
+        <?php foreach ($menuItems as $item): ?>
+        <li>
+            <a href="<?php echo $item['href']; ?>"
+                class="flex items-center py-2 px-4 rounded transition-colors duration-200"
+                style="background-color: <?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'transparent'; ?>; color: var(--text-primary);"
+                onmouseover="this.style.backgroundColor='<?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'var(--bg-hover)'; ?>'"
+                onmouseout="this.style.backgroundColor='<?php echo $currentPage === $item['href'] ? 'var(--text-accent)' : 'transparent'; ?>'">
+                <i class="<?php echo $item['icon']; ?> mr-3 text-lg"></i>
+                <span><?php echo $item['label']; ?></span>
+            </a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</aside>

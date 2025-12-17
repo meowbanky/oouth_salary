@@ -1,6 +1,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title><?php echo $_SESSION['BUSINESSNAME']; ?> Salary Manager</title>
+<title>OOUTH Salary Manager</title>
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 		<!--<base href="http://www.optimumlinkup.com.ng/pos/">--><base href=".">

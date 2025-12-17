@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download OOUTH Mobile App - OOUTH Salary Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link href="css/dark-mode.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/theme-manager.js"></script>
+    <style>
+      .download-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .download-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+      .qr-code {
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        background: white;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col">
+    <?php include('header.php'); ?>
+
+    <main class="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+      <!-- Page Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-2" style="color: var(--text-primary)">
+          <i class="fas fa-mobile-alt mr-3"></i>OOUTH Mobile App
+        </h1>
+        <p class="text-lg text-gray-600">
+          Download the official OOUTH Salary Management mobile application
+        </p>
+      </div>
+
+      <!-- App Info Card -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-6 mb-6"
+        style="background-color: var(--bg-secondary)"
+      >
+        <div
+          class="flex flex-col md:flex-row items-center md:items-start gap-6"
+        >
+          <!-- App Icon -->
+          <div class="flex-shrink-0">
+            <div
+              class="w-32 h-32 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg"
+            >
+              <i class="fas fa-hospital text-white text-5xl"></i>
+            </div>
+          </div>
+
+          <!-- App Details -->
+          <div class="flex-1 text-center md:text-left">
+            <h2
+              class="text-2xl font-bold mb-2"
+              style="color: var(--text-primary)"
+            >
+              OOUTH Mobile
+            </h2>
+            <p class="text-gray-600 mb-4">
+              Access your salary information, payslips, and more on the go
+            </p>
+
+            <!-- Version Info -->
+            <div id="versionInfo" class="space-y-2">
+              <div
+                class="flex items-center justify-center md:justify-start gap-4"
+              >
+                <span class="text-sm text-gray-500">
+                  <i class="fas fa-tag mr-2"></i>Version:
+                  <strong id="appVersion">Loading...</strong>
+                </span>
+                <span class="text-sm text-gray-500">
+                  <i class="fas fa-code-branch mr-2"></i>Build:
+                  <strong id="buildNumber">Loading...</strong>
+                </span>
+              </div>
+              <div class="text-sm text-gray-500">
+                <i class="fas fa-calendar mr-2"></i>Released:
+                <strong id="releaseDate">Loading...</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Download Options -->
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Universal APK (Recommended) -->
+        <div
+          class="download-card bg-white rounded-lg shadow-lg p-6"
+          style="background-color: var(--bg-secondary)"
+        >
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-download text-green-600 text-2xl"></i>
+            </div>
+            <h3
+              class="text-xl font-bold mb-2"
+              style="color: var(--text-primary)"
+            >
+              Universal APK
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Works on all Android devices
+            </p>
+            <a
+              href="download/oouth_mobile.apk"
+              class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors w-full"
+              download
+            >
+              <i class="fas fa-download mr-2"></i>Download APK
+            </a>
+            <p class="text-xs text-gray-500 mt-2">Recommended for most users</p>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div
+          class="download-card bg-white rounded-lg shadow-lg p-6"
+          style="background-color: var(--bg-secondary)"
+        >
+          <div class="text-center">
+            <div
+              class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <i class="fas fa-qrcode text-blue-600 text-2xl"></i>
+            </div>
+            <h3
+              class="text-xl font-bold mb-2"
+              style="color: var(--text-primary)"
+            >
+              Scan to Download
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Scan QR code with your phone
+            </p>
+            <div class="qr-code inline-block">
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo urlencode('https://' . $_SERVER['HTTP_HOST'] . '/download.html'); ?>"
+                alt="QR Code"
+                class="w-32 h-32"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture-Specific Downloads -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-6 mb-6"
+        style="background-color: var(--bg-secondary)"
+      >
+        <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary)">
+          <i class="fas fa-microchip mr-2"></i>Architecture-Specific Downloads
+        </h3>
+        <p class="text-gray-600 text-sm mb-4">
+          Smaller file sizes for specific device architectures
+        </p>
+        <div class="grid md:grid-cols-3 gap-4" id="archDownloads">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Changelog -->
+      <div
+        class="bg-white rounded-lg shadow-lg p-6"
+        style="background-color: var(--bg-secondary)"
+      >
+        <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary)">
+          <i class="fas fa-list-ul mr-2"></i>What's New
+        </h3>
+        <div id="changelog" class="prose max-w-none">
+          <ul
+            class="list-disc list-inside space-y-2 text-gray-700"
+            id="changelogList"
+          >
+            <li>Loading changelog...</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Installation Instructions -->
+      <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6 mt-6">
+        <h3 class="text-lg font-bold mb-3 text-blue-800">
+          <i class="fas fa-info-circle mr-2"></i>Installation Instructions
+        </h3>
+        <ol class="list-decimal list-inside space-y-2 text-blue-700">
+          <li>Download the APK file to your Android device</li>
+          <li>Open your device's Settings → Security</li>
+          <li>
+            Enable "Install from Unknown Sources" or "Allow from this source"
+          </li>
+          <li>Open the downloaded APK file</li>
+          <li>Tap "Install" and wait for installation to complete</li>
+          <li>Open the app and log in with your credentials</li>
+        </ol>
+      </div>
+
+      <!-- Force Update Notice -->
+      <div
+        id="forceUpdateNotice"
+        class="hidden bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mt-6"
+      >
+        <h3 class="text-lg font-bold mb-2 text-red-800">
+          <i class="fas fa-exclamation-triangle mr-2"></i>Update Required
+        </h3>
+        <p class="text-red-700">
+          This version requires an update. Please download the latest version to
+          continue using the app.
+        </p>
+      </div>
+    </main>
+
+    <?php include('footer.php'); ?>
+
+    <script>
+      // Load version information
+      async function loadVersionInfo() {
+        try {
+          // Try version.json first, then fallback to PHP endpoint
+          let response;
+          let data;
+
+          // Try multiple paths
+          const paths = [
+            "download/version.json",
+            "/download/version.json",
+            "./download/version.json",
+            "download/version.php",
+            "/download/version.php",
+          ];
+
+          let lastError = null;
+          for (const path of paths) {
+            try {
+              response = await fetch(path, {
+                method: "GET",
+                headers: {
+                  Accept: "application/json",
+                },
+                cache: "no-cache",
+              });
+
+              if (response.ok) {
+                data = await response.json();
+                break;
+              }
+            } catch (e) {
+              lastError = e;
+              continue;
+            }
+          }
+
+          if (!data) {
+            throw (
+              lastError ||
+              new Error("Failed to load version info from all paths")
+            );
+          }
+
+          // Update version info with proper error handling
+          const versionElement = document.getElementById("appVersion");
+          const buildElement = document.getElementById("buildNumber");
+          const dateElement = document.getElementById("releaseDate");
+
+          if (versionElement)
+            versionElement.textContent = data.version || "1.0.0";
+          if (buildElement) buildElement.textContent = data.build_number || "1";
+          if (dateElement)
+            dateElement.textContent =
+              data.release_date || new Date().toISOString().split("T")[0];
+
+          // Update changelog
+          if (data.changelog) {
+            const changelogList = document.getElementById("changelogList");
+            if (typeof data.changelog === "string") {
+              // Split by newlines or bullets
+              const items = data.changelog
+                .split("\n")
+                .filter((item) => item.trim());
+              if (items.length > 0) {
+                changelogList.innerHTML = items
+                  .map((item) => {
+                    const cleanItem = item.replace(/^[-•]\s*/, "").trim();
+                    return `<li>${cleanItem}</li>`;
+                  })
+                  .join("");
+              } else {
+                changelogList.innerHTML = "<li>No changelog available</li>";
+              }
+            } else if (Array.isArray(data.changelog)) {
+              changelogList.innerHTML = data.changelog
+                .map((item) => `<li>${item}</li>`)
+                .join("");
+            } else {
+              changelogList.innerHTML = "<li>No changelog available</li>";
+            }
+          } else {
+            document.getElementById("changelogList").innerHTML =
+              "<li>No changelog available</li>";
+          }
+
+          // Show force update notice if needed
+          if (data.force_update) {
+            document
+              .getElementById("forceUpdateNotice")
+              .classList.remove("hidden");
+          }
+
+          // Generate architecture-specific download links
+          if (data.version) {
+            generateArchDownloads(data.version);
+          } else {
+            generateArchDownloads("1.0.0");
+          }
+        } catch (error) {
+          console.error("Error loading version info:", error);
+          // Set default values on error with null checks
+          const versionEl = document.getElementById("appVersion");
+          const buildEl = document.getElementById("buildNumber");
+          const dateEl = document.getElementById("releaseDate");
+          const changelogEl = document.getElementById("changelogList");
+
+          if (versionEl) versionEl.textContent = "1.0.0";
+          if (buildEl) buildEl.textContent = "1";
+          if (dateEl)
+            dateEl.textContent = new Date().toISOString().split("T")[0];
+          if (changelogEl)
+            changelogEl.innerHTML =
+              "<li>Unable to load changelog. Please check your connection.</li>";
+
+          try {
+            generateArchDownloads("1.0.0");
+          } catch (e) {
+            console.error("Error generating arch downloads:", e);
+          }
+        }
+      }
+
+      function generateArchDownloads(version) {
+        const archContainer = document.getElementById("archDownloads");
+        const architectures = [
+          {
+            name: "ARM64-v8a",
+            file: `oouth_arm64-v8a_${version}.apk`,
+            icon: "fas fa-microchip",
+            desc: "64-bit ARM devices (Most modern phones)",
+          },
+          {
+            name: "ARMv7",
+            file: `oouth_armeabi-v7a_${version}.apk`,
+            icon: "fas fa-microchip",
+            desc: "32-bit ARM devices (Older phones)",
+          },
+          {
+            name: "x86_64",
+            file: `oouth_x86_64_${version}.apk`,
+            icon: "fas fa-desktop",
+            desc: "64-bit x86 devices (Emulators)",
+          },
+        ];
+
+        archContainer.innerHTML = architectures
+          .map(
+            (arch) => `
+                <div class="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div class="text-center">
+                        <i class="${arch.icon} text-2xl text-blue-600 mb-2"></i>
+                        <h4 class="font-semibold mb-1">${arch.name}</h4>
+                        <p class="text-xs text-gray-600 mb-3">${arch.desc}</p>
+                        <a href="download/${arch.file}" 
+                           class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                           download>
+                            <i class="fas fa-download mr-1"></i>Download
+                        </a>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // Auto-detect device and suggest download
+      function detectDevice() {
+        const userAgent =
+          navigator.userAgent || navigator.vendor || window.opera;
+
+        // Check for iOS
+        if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+          return "ios";
+        }
+
+        // Check for Android
+        if (/android/i.test(userAgent)) {
+          return "android";
+        }
+
+        return "desktop";
+      }
+
+      // Load version info on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadVersionInfo();
+
+        const device = detectDevice();
+        if (device === "ios") {
+          // Show iOS message
+          const notice = document.createElement("div");
+          notice.className =
+            "bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 mb-6";
+          notice.innerHTML = `
+                    <p class="text-yellow-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        iOS version coming soon. For now, please use the web version at 
+                        <a href="https://oouth-e2a0e.web.app/" class="underline font-semibold">oouth-e2a0e.web.app</a>
+                    </p>
+                `;
+          document
+            .querySelector("main")
+            .insertBefore(notice, document.querySelector("main").firstChild);
+        }
+      });
+    </script>
+  </body>
+</html>
