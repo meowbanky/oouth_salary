@@ -42,9 +42,11 @@ The API uses the existing database connection from `Connections/paymaster.php`:
 ```php
 Database: oouthsal_salary3
 Username: oouthsal_root
-Password: [REDACTED]
+Password: [Use environment variable DB_PASSWORD]
 Host: localhost
 ```
+
+**⚠️ SECURITY NOTE:** Database credentials should be loaded from environment variables, not hardcoded. See `.env.example` for configuration.
 
 ✅ **Already configured!** No changes needed.
 

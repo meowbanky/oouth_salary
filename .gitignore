@@ -7,8 +7,14 @@
 Connections/paymaster.php
 config/config.php
 auth_api/config/config.php
+auth_api/config/Database.php
 api/config/api_config.php
 report/Connections/paymaster.php
+classes/paymaster.php
+classes/class.db.php
+report/deductionlist_email.php
+report/deductionlist_export2.php
+report/deductionlist_export_original.php
 
 # IDE and editor files
 .idea/
