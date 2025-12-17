@@ -18,14 +18,9 @@ Handles complex payroll computations, automated backups, and PDF reporting.
 
 ## 📸 Dashboard Preview
 
-> **Note**: Screenshots are being prepared. Check back soon for visual previews of the portal!
-
-<!-- 
-Once screenshots are available, uncomment and update the paths below:
 | Admin Dashboard | Payroll Processing | Staff Records | PDF Reports |
 |:---:|:---:|:---:|:---:|
 | <img src="screenshots/admin_dashboard.png" width="200" /> | <img src="screenshots/payroll_view.png" width="200" /> | <img src="screenshots/staff_list.png" width="200" /> | <img src="screenshots/report_pdf.png" width="200" /> |
--->
 
 ---
 
