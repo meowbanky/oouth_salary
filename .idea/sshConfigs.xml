@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SshConfigs">
-    <configs>
-      <sshConfig authType="PASSWORD" host="ftp.oouthsalary.com.ng" id="06a57f01-b3bc-4443-89e0-dcba81ac9944" port="22" nameFormat="DESCRIPTIVE" username="oouthsal" useOpenSSHConfig="true" />
-    </configs>
-  </component>
-</project>
