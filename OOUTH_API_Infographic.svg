@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1080" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .main-title { font: bold 48px sans-serif; fill: #ffffff; }
+      .subtitle { font: 24px sans-serif; fill: #ecf0f1; }
+      .section-title { font: bold 28px sans-serif; fill: #2c3e50; }
+      .feature-title { font: bold 20px sans-serif; fill: #2c3e50; }
+      .feature-text { font: 16px sans-serif; fill: #34495e; }
+      .stat-number { font: bold 64px sans-serif; fill: #ffffff; }
+      .stat-label { font: 18px sans-serif; fill: #ffffff; }
+      .badge-text { font: bold 16px sans-serif; fill: #ffffff; }
+    </style>
+    <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e67e22;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="redGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="#f8f9fa"/>
+  
+  <!-- Header -->
+  <rect width="1080" height="200" fill="url(#headerGradient)"/>
+  <text x="540" y="90" text-anchor="middle" class="main-title">OOUTH Salary API</text>
+  <text x="540" y="130" text-anchor="middle" class="subtitle">Enterprise-Ready REST API</text>
+  <text x="540" y="165" text-anchor="middle" class="subtitle">Production Deployed 🚀</text>
+  
+  <!-- Stats Section -->
+  <rect x="40" y="240" width="1000" height="150" rx="15" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+  
+  <rect x="70" y="270" width="180" height="90" rx="10" fill="url(#blueGradient)"/>
+  <text x="160" y="325" text-anchor="middle" class="stat-number">17</text>
+  <text x="160" y="355" text-anchor="middle" class="stat-label">Endpoints</text>
+  
+  <rect x="280" y="270" width="180" height="90" rx="10" fill="url(#greenGradient)"/>
+  <text x="370" y="325" text-anchor="middle" class="stat-number">6</text>
+  <text x="370" y="355" text-anchor="middle" class="stat-label">Security Layers</text>
+  
+  <rect x="490" y="270" width="180" height="90" rx="10" fill="url(#orangeGradient)"/>
+  <text x="580" y="325" text-anchor="middle" class="stat-number">7</text>
+  <text x="580" y="355" text-anchor="middle" class="stat-label">Webhooks</text>
+  
+  <rect x="700" y="270" width="180" height="90" rx="10" fill="url(#redGradient)"/>
+  <text x="790" y="325" text-anchor="middle" class="stat-number">100+</text>
+  <text x="790" y="355" text-anchor="middle" class="stat-label">Pages Docs</text>
+  
+  <!-- Key Features Section -->
+  <text x="540" y="450" text-anchor="middle" class="section-title">🔥 Key Features</text>
+  
+  <!-- Feature Grid -->
+  <rect x="40" y="480" width="480" height="120" rx="10" fill="#ffffff" stroke="#3498db" stroke-width="3"/>
+  <text x="280" y="515" text-anchor="middle" class="feature-title">🔐 Enterprise Security</text>
+  <text x="70" y="545" class="feature-text">• JWT Authentication</text>
+  <text x="70" y="570" class="feature-text">• HMAC-SHA256 Signatures</text>
+  <text x="70" y="595" class="feature-text">• Rate Limiting + IP Whitelist</text>
+  
+  <rect x="560" y="480" width="480" height="120" rx="10" fill="#ffffff" stroke="#2ecc71" stroke-width="3"/>
+  <text x="800" y="515" text-anchor="middle" class="feature-title">⚡ High Performance</text>
+  <text x="590" y="545" class="feature-text">• Multi-tenant Architecture</text>
+  <text x="590" y="570" class="feature-text">• Sliding Window Rate Limit</text>
+  <text x="590" y="595" class="feature-text">• Optimized Database Queries</text>
+  
+  <rect x="40" y="620" width="480" height="120" rx="10" fill="#ffffff" stroke="#f39c12" stroke-width="3"/>
+  <text x="280" y="655" text-anchor="middle" class="feature-title">📊 Flexible Responses</text>
+  <text x="70" y="685" class="feature-text">• JSON, XML, CSV formats</text>
+  <text x="70" y="710" class="feature-text">• Pagination + Filtering</text>
+  <text x="70" y="735" class="feature-text">• Real-time Data Access</text>
+  
+  <rect x="560" y="620" width="480" height="120" rx="10" fill="#ffffff" stroke="#e74c3c" stroke-width="3"/>
+  <text x="800" y="655" text-anchor="middle" class="feature-title">🔔 Real-time Notifications</text>
+  <text x="590" y="685" class="feature-text">• Webhook Events</text>
+  <text x="590" y="710" class="feature-text">• Auto-retry Mechanism</text>
+  <text x="590" y="735" class="feature-text">• Delivery Tracking</text>
+  
+  <!-- Tech Stack Section -->
+  <text x="540" y="800" text-anchor="middle" class="section-title">⚙️ Tech Stack</text>
+  
+  <rect x="100" y="820" width="880" height="60" rx="10" fill="#ffffff" stroke="#95a5a6" stroke-width="2"/>
+  <rect x="120" y="835" width="130" height="30" rx="5" fill="#8e44ad"/>
+  <text x="185" y="857" text-anchor="middle" class="badge-text">PHP 8.4</text>
+  
+  <rect x="270" y="835" width="130" height="30" rx="5" fill="#3498db"/>
+  <text x="335" y="857" text-anchor="middle" class="badge-text">MySQL</text>
+  
+  <rect x="420" y="835" width="130" height="30" rx="5" fill="#2ecc71"/>
+  <text x="485" y="857" text-anchor="middle" class="badge-text">JWT</text>
+  
+  <rect x="570" y="835" width="180" height="30" rx="5" fill="#e74c3c"/>
+  <text x="660" y="857" text-anchor="middle" class="badge-text">HMAC-SHA256</text>
+  
+  <rect x="770" y="835" width="180" height="30" rx="5" fill="#f39c12"/>
+  <text x="860" y="857" text-anchor="middle" class="badge-text">RESTful API</text>
+  
+  <!-- Use Cases Section -->
+  <text x="540" y="930" text-anchor="middle" class="section-title">🎯 Perfect For</text>
+  
+  <rect x="60" y="955" width="230" height="60" rx="10" fill="#9b59b6"/>
+  <text x="175" y="990" text-anchor="middle" class="badge-text">Pension Administrators</text>
+  
+  <rect x="310" y="955" width="230" height="60" rx="10" fill="#3498db"/>
+  <text x="425" y="990" text-anchor="middle" class="badge-text">Banks &amp; Financial</text>
+  
+  <rect x="560" y="955" width="230" height="60" rx="10" fill="#2ecc71"/>
+  <text x="675" y="990" text-anchor="middle" class="badge-text">Tax Authorities</text>
+  
+  <rect x="810" y="955" width="210" height="60" rx="10" fill="#e74c3c"/>
+  <text x="915" y="990" text-anchor="middle" class="badge-text">Third-Party Vendors</text>
+  
+  <!-- Footer -->
+  <rect y="1030" width="1080" height="50" fill="#2c3e50"/>
+  <text x="540" y="1062" text-anchor="middle" class="stat-label">https://oouthsalary.com.ng/api/v1/</text>
+  
+</svg>
+
