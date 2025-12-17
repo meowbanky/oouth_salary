@@ -1,2 +1,63 @@
-report copy/office_vendor/
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Sensitive configuration files
+Connections/paymaster.php
+config/config.php
+auth_api/config/config.php
+api/config/api_config.php
+report/Connections/paymaster.php
+
+# IDE and editor files
+.idea/
+.vscode/
+.phpintel/
+.codegpt/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+error_log
+logs/
+
+# Backup files
+*.bak
+*.backup
+*.sql.gz
+*.sql
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Vendor dependencies (if not using Composer)
+vendor/
+
+# Node modules (if any)
+node_modules/
+
+# Build files
+build/
+dist/
+
+# Keystore and key files
+*.keystore
+*.jks
+key.properties
+android/key.properties
+
+# GitHub workflows with secrets
+.github/workflows/*.yml
+
+# Report copy directory
+report copy/
 report copy/
