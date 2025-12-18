@@ -19,6 +19,9 @@ if (isset($_POST['staff_no'])) {
 } else {
 	$item = -1;
 }
+
+// Get custom email if provided
+$customEmail = isset($_POST['custom_email']) ? trim($_POST['custom_email']) : '';
 ?>
 
 <div id="progress" style="border:1px solid #ccc; border-radius: 5px;"></div>
@@ -49,7 +52,9 @@ try {
 	do {
 		$percent = $total > 0 ? intval($j / $total * 100) . "%" : "0%";
 
-		echo $message = generateAndSendPayslip($row_masterTransaction['staff_id'], $period);
+		// Pass custom email if provided (only for single staff, not bulk)
+		$emailToUse = ($All == 0 && !empty($customEmail)) ? $customEmail : null;
+		echo $message = generateAndSendPayslip($row_masterTransaction['staff_id'], $period, $emailToUse);
 
 		//generatePdf($row_masterTransaction['staff_id'], $period);
 		//$message = generatePdf(1140, $period);

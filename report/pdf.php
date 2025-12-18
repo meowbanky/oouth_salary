@@ -37,7 +37,7 @@ function getPayPeriod($conn, $period)
 //$period = 18; // Example period
 
 
-function generateAndSendPayslip($employeeId, $period)
+function generateAndSendPayslip($employeeId, $period, $customEmail = null)
 {
     $conn = new PDO(DB_DSN, DB_USERNAME, DB_PASSWORD);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -52,7 +52,7 @@ function generateAndSendPayslip($employeeId, $period)
 
     $pdfOutput = $pdf->Output('', 'S');
 
-    $emailResult = sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod);
+    $emailResult = sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod, $customEmail);
 
     return $emailResult;
 }
@@ -170,147 +170,148 @@ function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
     ob_start();
 ?>
 
-    <style>
-        .header {
-            background-color: #D9EAD3;
-            text-align: center;
-            font-weight: bold;
-        }
+<style>
+.header {
+    background-color: #D9EAD3;
+    text-align: center;
+    font-weight: bold;
+}
 
-        .section-header {
-            background-color: #4F6228;
-            color: #FFFFFF;
-            font-weight: bold;
-        }
+.section-header {
+    background-color: #4F6228;
+    color: #FFFFFF;
+    font-weight: bold;
+}
 
-        .totals-row {
-            font-weight: bold;
-        }
+.totals-row {
+    font-weight: bold;
+}
 
-        .details-table,
-        .totals-table {
-            border-collapse: collapse;
-            width: 50%;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
+.details-table,
+.totals-table {
+    border-collapse: collapse;
+    width: 50%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
 
-        .details-table td,
-        .totals-table td {
-            border: 1px solid #000000;
-            padding: 6px;
-        }
+.details-table td,
+.totals-table td {
+    border: 1px solid #000000;
+    padding: 6px;
+}
 
-        .details-table th,
-        .totals-table th {
-            border: 1px solid #000000;
-            padding: 6px;
-            background-color: #D9EAD3;
-        }
+.details-table th,
+.totals-table th {
+    border: 1px solid #000000;
+    padding: 6px;
+    background-color: #D9EAD3;
+}
 
-        .right {
-            text-align: right;
-            margin-right: 1em;
-        }
+.right {
+    text-align: right;
+    margin-right: 1em;
+}
 
-        .left {
-            text-align: left;
-            margin-left: 1em;
-        }
-    </style>
-    <table class="details-table">
-        <tr class="header">
-            <th colspan="2">OOUTH, SAGAMU PAYSLIP FOR <?php echo $fullPeriod; ?></th>
-        </tr>
-        <tr>
-            <td>Name:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['employee_name']); ?></td>
-        </tr>
-        <tr>
-            <td>Staff No.:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['staff_id']); ?></td>
-        </tr>
-        <tr>
-            <td>Dept:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['department']); ?></td>
-        </tr>
-        <tr>
-            <td>Bank:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['bank']); ?></td>
-        </tr>
-        <tr>
-            <td>Acct No.:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['account_number']); ?></td>
-        </tr>
-        <tr>
-           <?php if (preg_match('/[a-zA-Z]/', $employeeDetails['grade_level'])) {
+.left {
+    text-align: left;
+    margin-left: 1em;
+}
+</style>
+<table class="details-table">
+    <tr class="header">
+        <th colspan="2">OOUTH, SAGAMU PAYSLIP FOR <?php echo $fullPeriod; ?></th>
+    </tr>
+    <tr>
+        <td>Name:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['employee_name']); ?></td>
+    </tr>
+    <tr>
+        <td>Staff No.:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['staff_id']); ?></td>
+    </tr>
+    <tr>
+        <td>Dept:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['department']); ?></td>
+    </tr>
+    <tr>
+        <td>Bank:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['bank']); ?></td>
+    </tr>
+    <tr>
+        <td>Acct No.:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['account_number']); ?></td>
+    </tr>
+    <tr>
+        <?php if (preg_match('/[a-zA-Z]/', $employeeDetails['grade_level'])) {
             $salaryType = "CONMESS";
             } else {
                $salaryType = "CONHESS";
             }
             ?>
-            <td><?php echo $salaryType; ?>:</td>
-            <td><?php echo htmlspecialchars($employeeDetails['grade_level']); ?>/<?php echo htmlspecialchars($employeeDetails['STEP']); ?></td>
-        </tr>
-    </table>
+        <td><?php echo $salaryType; ?>:</td>
+        <td><?php echo htmlspecialchars($employeeDetails['grade_level']); ?>/<?php echo htmlspecialchars($employeeDetails['STEP']); ?>
+        </td>
+    </tr>
+</table>
 
-    <table class="totals-table">
-        <tr class="section-header">
-            <th colspan="2">CONSOLIDATED SALARY</th>
-        </tr>
-        <tr>
-            <td>CONSOLIDATED SALARY:</td>
-            <td class="right"><?php echo number_format($payslipDetails['consolidated'], 2); ?></td>
-        </tr>
-        <tr class="section-header">
-            <th colspan="2">ALLOWANCES</th>
-        </tr>
-        <!-- Repeat for each allowance -->
-        <?php
+<table class="totals-table">
+    <tr class="section-header">
+        <th colspan="2">CONSOLIDATED SALARY</th>
+    </tr>
+    <tr>
+        <td>CONSOLIDATED SALARY:</td>
+        <td class="right"><?php echo number_format($payslipDetails['consolidated'], 2); ?></td>
+    </tr>
+    <tr class="section-header">
+        <th colspan="2">ALLOWANCES</th>
+    </tr>
+    <!-- Repeat for each allowance -->
+    <?php
         if (!empty($payslipDetails['allowances'])) {
             foreach ($payslipDetails['allowances'] as $allowance) {
         ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($allowance['ed']); ?></td>
-                    <td class="right"><?php echo number_format($allowance['allow'], 2); ?></td>
-                </tr>
-        <?php }
+    <tr>
+        <td><?php echo htmlspecialchars($allowance['ed']); ?></td>
+        <td class="right"><?php echo number_format($allowance['allow'], 2); ?></td>
+    </tr>
+    <?php }
         }
         ?>
 
 
 
 
-        <tr class="totals-row">
-            <td>Gross Salary</td>
-            <td class="right"><?php echo number_format($payslipDetails['grosspay'], 2); ?></td>
-        </tr>
-    </table>
+    <tr class="totals-row">
+        <td>Gross Salary</td>
+        <td class="right"><?php echo number_format($payslipDetails['grosspay'], 2); ?></td>
+    </tr>
+</table>
 
-    <table class="totals-table">
-        <tr class="section-header">
-            <th colspan="2">Deductions</th>
-        </tr>
-        <!-- Repeat for each deduction -->
-        <?php if (!empty($payslipDetails['deductions'])) {
+<table class="totals-table">
+    <tr class="section-header">
+        <th colspan="2">Deductions</th>
+    </tr>
+    <!-- Repeat for each deduction -->
+    <?php if (!empty($payslipDetails['deductions'])) {
             foreach ($payslipDetails['deductions'] as $deduction) { ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($deduction['ed']); ?></td>
-                    <td class="right"><?php echo number_format($deduction['deduc'], 2); ?></td>
-                </tr>
-        <?php }
+    <tr>
+        <td><?php echo htmlspecialchars($deduction['ed']); ?></td>
+        <td class="right"><?php echo number_format($deduction['deduc'], 2); ?></td>
+    </tr>
+    <?php }
         } ?>
-        <tr class="totals-row">
-            <td>Total Deductions</td>
-            <td class="right"><?php echo number_format($payslipDetails['grossDeduction'], 2); ?></td>
-        </tr>
+    <tr class="totals-row">
+        <td>Total Deductions</td>
+        <td class="right"><?php echo number_format($payslipDetails['grossDeduction'], 2); ?></td>
+    </tr>
 
 
-        <tr class="totals-row">
-            <td>Net Pay</td>
-            <td class="right"><?php echo number_format($payslipDetails['netPay'], 2); ?></td>
-        </tr>
-    </table>
+    <tr class="totals-row">
+        <td>Net Pay</td>
+        <td class="right"><?php echo number_format($payslipDetails['netPay'], 2); ?></td>
+    </tr>
+</table>
 <?php
     // Return the output buffer
     $html = ob_get_clean();
@@ -318,7 +319,7 @@ function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
 }
 
 
-function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
+function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod, $customEmail = null)
 {
 
     $mail = new PHPMailer\PHPMailer\PHPMailer();
@@ -334,7 +335,13 @@ function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
     $mail->SMTPDebug = 3;
 
     $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
-    $mail->addAddress($employeeDetails['EMAIL'], $employeeDetails['employee_name']);
+    
+    // Use custom email if provided, otherwise use employee's default email
+    $emailToUse = (!empty($customEmail) && filter_var($customEmail, FILTER_VALIDATE_EMAIL)) 
+        ? $customEmail 
+        : $employeeDetails['EMAIL'];
+    
+    $mail->addAddress($emailToUse, $employeeDetails['employee_name']);
     $mail->addReplyTo(SMTP_REPLYTO_EMAIL, SMTP_REPLYTO_NAME);
 
     $mail->isHTML(true);
@@ -355,7 +362,10 @@ function sendPayslipEmail($employeeDetails, $pdfOutput, $period, $fullPeriod)
 
     try {
         $mail->send();
-        return 'Payslip email sent successfully to ' . $employeeDetails['EMAIL'];
+        $emailDisplay = (!empty($customEmail) && filter_var($customEmail, FILTER_VALIDATE_EMAIL)) 
+            ? $customEmail . ' (custom)' 
+            : $employeeDetails['EMAIL'];
+        return 'Payslip email sent successfully to ' . $emailDisplay;
     } catch (Exception $e) {
         return "Mailer Error: " . $mail->ErrorInfo;
     }

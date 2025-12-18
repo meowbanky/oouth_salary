@@ -375,6 +375,19 @@ if (isset($_GET['period'])) {
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <label for="recipient_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-envelope mr-2 text-purple-600"></i>Recipient Email Address (Optional)
+                            </label>
+                            <input type="email" name="recipient_email" id="recipient_email"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                                placeholder="Enter custom email address (leave empty to use employee's default email)" />
+                            <p class="mt-1 text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>If left empty, the payslip will be sent to the
+                                employee's registered email address
+                            </p>
+                        </div>
+
                         <div class="flex flex-wrap gap-3 mt-6">
                             <button type="button" onclick="generatePayslip()"
                                 class="bg-blue-700 hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
@@ -438,6 +451,19 @@ if (isset($_GET['period'])) {
                                     
                                     if ($out) {
                                         // Employee Information Card
+                                        // Get employee email for display
+                                        $employeeEmail = '';
+                                        try {
+                                            $emailQuery = $conn->prepare('SELECT EMAIL FROM employee WHERE staff_id = ?');
+                                            $emailQuery->execute([$thisemployee]);
+                                            $emailRow = $emailQuery->fetch(PDO::FETCH_ASSOC);
+                                            if ($emailRow && !empty($emailRow['EMAIL'])) {
+                                                $employeeEmail = $emailRow['EMAIL'];
+                                            }
+                                        } catch (PDOException $e) {
+                                            // Handle error silently
+                                        }
+                                        
                                         echo '<div class="bg-gray-50 rounded-lg p-6 mb-6">';
                                         echo '<h3 class="text-lg font-semibold text-gray-800 mb-4">Employee Information</h3>';
                                         echo '<div class="grid md:grid-cols-2 gap-4">';
@@ -447,8 +473,16 @@ if (isset($_GET['period'])) {
                                         echo '<div><strong>Bank:</strong> ' . htmlspecialchars($out['BNAME']) . '</div>';
                                         echo '<div><strong>Account No:</strong> ' . htmlspecialchars($out['ACCTNO']) . '</div>';
                                         echo '<div><strong>Grade/Step:</strong> ' . htmlspecialchars($out['GRADE'] . '/' . $out['STEP']) . '</div>';
+                                        if (!empty($employeeEmail)) {
+                                            echo '<div><strong>Email:</strong> ' . htmlspecialchars($employeeEmail) . '</div>';
+                                        }
                                         echo '</div>';
                                         echo '</div>';
+                                        
+                                        // Pre-fill email field if employee has email
+                                        if (!empty($employeeEmail)) {
+                                            echo '<script>$(document).ready(function() { $("#recipient_email").val("' . htmlspecialchars($employeeEmail, ENT_QUOTES) . '"); });</script>';
+                                        }
                                         
                                         // Payslip Details (printable area)
                                         echo '<div id="printThis" class="printMe">';
@@ -609,6 +643,12 @@ if (isset($_GET['period'])) {
                 event.preventDefault();
                 $("#item").val(ui.item.value);
                 $("#staff_id").val(ui.item.value);
+                // Auto-fill email field if available
+                if (ui.item.EMAIL && ui.item.EMAIL.trim() !== '') {
+                    $("#recipient_email").val(ui.item.EMAIL);
+                } else {
+                    $("#recipient_email").val('');
+                }
             }
         });
 
@@ -652,11 +692,26 @@ if (isset($_GET['period'])) {
             const staff_no = $('#staff_no').val();
             const period = $('#period_hidden').val();
             const All = 0;
+            const recipientEmail = $('#recipient_email').val().trim();
+
+            // Validate email if provided
+            if (recipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Email Address',
+                    text: 'Please enter a valid email address or leave it empty to use the employee\'s default email.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1E40AF'
+                });
+                $('#recipient_email').focus();
+                return;
+            }
 
             // Show loading state
             Swal.fire({
                 title: 'Sending Email...',
-                text: 'Please wait while we send the payslip.',
+                text: recipientEmail ? `Sending payslip to ${recipientEmail}` :
+                    'Sending payslip to employee\'s email address...',
                 allowOutsideClick: false,
                 didOpen: () => {
                     Swal.showLoading();
@@ -668,6 +723,9 @@ if (isset($_GET['period'])) {
             formData.append('staff_no', staff_no);
             formData.append('period', period);
             formData.append('All', All);
+            if (recipientEmail) {
+                formData.append('custom_email', recipientEmail);
+            }
 
             $.ajax({
                 url: 'callPdf.php',
@@ -676,10 +734,11 @@ if (isset($_GET['period'])) {
                 processData: false,
                 contentType: false,
                 success: function(response, textStatus, xhr) {
+                    const emailAddress = recipientEmail || 'employee\'s email address';
                     Swal.fire({
                         icon: 'success',
                         title: 'Email Sent Successfully!',
-                        text: 'The payslip has been sent to the employee\'s email address.',
+                        text: `The payslip has been sent to ${emailAddress}.`,
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#1E40AF'
                     });
@@ -733,6 +792,7 @@ if (isset($_GET['period'])) {
             }
         });
 
+        // Note: Email field will be auto-populated when payslip loads via PHP
         window.location.href = "payslip_personal.php?item=" + staffId + "&period=" + period;
     }
 
