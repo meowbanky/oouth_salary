@@ -399,8 +399,86 @@ if (isset($_GET['period'])) {
                             </button>
                             <button type="button" id="sendmail"
                                 class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
-                                <i class="fas fa-envelope"></i> Send Email
+                                <i class="fas fa-envelope"></i> Send Email (Current Period)
                             </button>
+                            <button type="button" id="sendMultiplePeriods"
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                                <i class="fas fa-envelope-open-text"></i> Send Multiple Periods
+                            </button>
+                        </div>
+
+                        <!-- Multiple Periods Selection Modal -->
+                        <div id="multiplePeriodsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+                            style="display: none;">
+                            <div
+                                class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                                <div class="bg-purple-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                                        <i class="fas fa-calendar-check"></i> Select Multiple Periods
+                                    </h3>
+                                    <button type="button" onclick="closeMultiplePeriodsModal()"
+                                        class="text-white hover:text-gray-200">
+                                        <i class="fas fa-times text-xl"></i>
+                                    </button>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-sm text-gray-600 mb-4">
+                                        <i class="fas fa-info-circle mr-2"></i>Select multiple pay periods to send all
+                                        payslips in one email.
+                                    </p>
+
+                                    <div class="mb-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="text-sm font-medium text-gray-700">
+                                                Available Periods
+                                            </label>
+                                            <div class="flex gap-2">
+                                                <button type="button" onclick="selectAllPeriods()"
+                                                    class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                                    Select All
+                                                </button>
+                                                <button type="button" onclick="deselectAllPeriods()"
+                                                    class="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                                                    Deselect All
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div id="periodsCheckboxContainer"
+                                            class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
+                                            <?php
+                                            try {
+                                                $query = $conn->prepare('SELECT payperiods.description, payperiods.periodYear, payperiods.periodId FROM payperiods WHERE payrollRun = ? order by periodId desc');
+                                                $query->execute(['1']);
+                                                while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                                                    $periodText = $row['description'] . ' - ' . $row['periodYear'];
+                                                    $periodId = $row['periodId'];
+                                                    echo '<label class="flex items-center p-2 hover:bg-white rounded cursor-pointer mb-1">';
+                                                    echo '<input type="checkbox" name="selected_periods[]" value="' . htmlspecialchars($periodId) . '" class="period-checkbox mr-3 w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">';
+                                                    echo '<span class="text-sm text-gray-700">' . htmlspecialchars($periodText) . '</span>';
+                                                    echo '</label>';
+                                                }
+                                            } catch (PDOException $e) {
+                                                echo '<p class="text-red-600 text-sm">Error loading periods</p>';
+                                            }
+                                            ?>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            <span id="selectedCount">0</span> period(s) selected
+                                        </p>
+                                    </div>
+
+                                    <div class="flex gap-3">
+                                        <button type="button" onclick="sendMultiplePeriodsEmail()" id="sendMultipleBtn"
+                                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold shadow transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <i class="fas fa-paper-plane"></i> Send Selected Periods
+                                        </button>
+                                        <button type="button" onclick="closeMultiplePeriodsModal()"
+                                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -654,6 +732,29 @@ if (isset($_GET['period'])) {
 
         $('#item').focus();
 
+        // Update selected count when checkboxes change
+        $(document).on('change', '.period-checkbox', function() {
+            updateSelectedCount();
+        });
+
+        // Multiple periods email button
+        $('#sendMultiplePeriods').click(function() {
+            const staffId = $('#staff_id').val();
+            if (!staffId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please search and select a staff member first.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1E40AF'
+                });
+                return;
+            }
+            $('#multiplePeriodsModal').removeClass('hidden').css('display', 'flex').addClass(
+                'items-center justify-center');
+            updateSelectedCount();
+        });
+
         // Email sending functionality
         $('#sendmail').click(function() {
             event.preventDefault();
@@ -794,6 +895,140 @@ if (isset($_GET['period'])) {
 
         // Note: Email field will be auto-populated when payslip loads via PHP
         window.location.href = "payslip_personal.php?item=" + staffId + "&period=" + period;
+    }
+
+    function updateSelectedCount() {
+        const selected = $('.period-checkbox:checked').length;
+        $('#selectedCount').text(selected);
+        $('#sendMultipleBtn').prop('disabled', selected === 0);
+    }
+
+    function selectAllPeriods() {
+        $('.period-checkbox').prop('checked', true);
+        updateSelectedCount();
+    }
+
+    function deselectAllPeriods() {
+        $('.period-checkbox').prop('checked', false);
+        updateSelectedCount();
+    }
+
+    function closeMultiplePeriodsModal() {
+        $('#multiplePeriodsModal').addClass('hidden').css('display', 'none').removeClass('items-center justify-center');
+    }
+
+    function sendMultiplePeriodsEmail() {
+        const staff_no = $('#staff_id').val();
+        const recipientEmail = $('#recipient_email').val().trim();
+        const selectedPeriods = $('.period-checkbox:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        if (!staff_no) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Information',
+                text: 'Please search and select a staff member first.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
+            return;
+        }
+
+        if (selectedPeriods.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Periods Selected',
+                text: 'Please select at least one period to send.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
+            return;
+        }
+
+        // Validate email if provided
+        if (recipientEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Email Address',
+                text: 'Please enter a valid email address or leave it empty to use the employee\'s default email.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#1E40AF'
+            });
+            $('#recipient_email').focus();
+            return;
+        }
+
+        Swal.fire({
+            title: 'Send Multiple Payslips?',
+            html: `This will send <strong>${selectedPeriods.length} payslip(s)</strong> to ${recipientEmail || 'employee\'s email address'}.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#9333EA',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Send All',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show progress modal
+                Swal.fire({
+                    title: 'Sending Payslips...',
+                    html: `Generating and sending ${selectedPeriods.length} payslip(s)...<br><div class="mt-4"><div class="progress-bar bg-purple-600 h-2 rounded" style="width: 0%"></div></div>`,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('staff_no', staff_no);
+                formData.append('periods', JSON.stringify(selectedPeriods));
+                formData.append('multiple_periods', '1');
+                if (recipientEmail) {
+                    formData.append('custom_email', recipientEmail);
+                }
+
+                $.ajax({
+                    url: 'callPdfMultiple.php',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhrFields: {
+                        onprogress: function(e) {
+                            // Parse progress from response if available
+                            const response = e.target.responseText;
+                            const progressMatch = response.match(/(\d+)%/);
+                            if (progressMatch) {
+                                const progress = progressMatch[1];
+                                $('.progress-bar').css('width', progress + '%');
+                            }
+                        }
+                    },
+                    success: function(response, textStatus, xhr) {
+                        closeMultiplePeriodsModal();
+                        const emailAddress = recipientEmail || 'employee\'s email address';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payslips Sent Successfully!',
+                            html: `<strong>${selectedPeriods.length} payslip(s)</strong> have been sent to ${emailAddress}.`,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#9333EA'
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Sending Payslips',
+                            text: 'There was an error sending the payslips. Please try again.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#1E40AF'
+                        });
+                    }
+                });
+            }
+        });
     }
 
     // Print functionality

@@ -47,7 +47,7 @@ function generateAndSendPayslip($employeeId, $period, $customEmail = null)
     $fullPeriod = getPayPeriod($conn, $period);
     $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
     configurePDF($pdf);
-    $htmlContent = generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod);
+    $htmlContent = generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod, $pdf);
     $pdf->writeHTMLCell(0, 0, '', '', $htmlContent, 0, 1, 0, true, '', true);
 
     $pdfOutput = $pdf->Output('', 'S');
@@ -59,29 +59,42 @@ function generateAndSendPayslip($employeeId, $period, $customEmail = null)
 
 function configurePDF($pdf)
 {
-
-
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetAuthor('SALARY UNIT');
     $pdf->SetTitle('OOUTH PAYSLIP');
     $pdf->SetSubject('Pay Slip');
     $pdf->SetKeywords('OOUTH, payslip, Sagamu');
-    $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE . ' 009', PDF_HEADER_STRING);
-
-    $pdf->setHeaderData('oouth_logo.png', 10, 'Olabisi Onabanjo University Teaching Hospital', 'Generated on ' . date('d-m-Y:H:s'), array(0, 64, 255), array(0, 64, 128));
-    $pdf->setFooterData(array(0, 64, 0), array(0, 64, 128));
-    $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-    $pdf->setHeaderFont(array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-    $pdf->setFooterFont(array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-    $pdf->setFooterData(array(0, 64, 0), array(0, 64, 128));
-    $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-    $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-    $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-    $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+    
+    // Remove default header/footer to have full control
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+    
     $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
     $pdf->SetFont('dejavusans', '', 10);
+    $pdf->SetMargins(24, 24, 24); // Match mobile app margins
+    $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
     $pdf->AddPage();
+    
+    // Get page dimensions for watermark
+    $pageWidth = $pdf->getPageWidth();
+    $pageHeight = $pdf->getPageHeight();
+    
+    // Add watermark background (faded image) - positioned in center
+    $watermarkPath = __DIR__ . '/img/oouth_logo.png';
+    if (file_exists($watermarkPath)) {
+        $watermarkSize = 200; // Size of watermark
+        $x = ($pageWidth - $watermarkSize) / 2;
+        $y = ($pageHeight - $watermarkSize) / 2;
+        
+        // Add watermark with transparency
+        if (method_exists($pdf, 'SetAlpha')) {
+            $pdf->SetAlpha(0.1); // 10% opacity
+        }
+        $pdf->Image($watermarkPath, $x, $y, $watermarkSize, $watermarkSize, '', '', '', false, 300, '', false, false, 0);
+        if (method_exists($pdf, 'SetAlpha')) {
+            $pdf->SetAlpha(1.0); // Reset opacity
+        }
+    }
 }
 
 function fetchEmployeeDetails($conn, $employeeId, $period)
@@ -164,154 +177,277 @@ function fetchPayslipDetails($conn, $employeeId, $period)
 }
 
 
-function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod)
+function generatePayslipHtml($employeeDetails, $payslipDetails, $fullPeriod, $pdf)
 {
     // Start buffering the output
     ob_start();
+    
+    // Determine salary type
+    $salaryType = preg_match('/[a-zA-Z]/', $employeeDetails['grade_level']) ? "CONMESS" : "CONHESS";
+    
+    // Image paths
+    $logoLeftPath = __DIR__ . '/img/ogun_logo.png';
+    $logoRightPath = __DIR__ . '/img/oouth_logo.png';
 ?>
 
 <style>
-.header {
-    background-color: #D9EAD3;
+body {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+}
+
+.header-row {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.logo-left {
+    width: 60px;
+    height: 60px;
+    float: left;
+}
+
+.logo-right {
+    width: 60px;
+    height: 60px;
+    float: right;
+}
+
+.header-center {
     text-align: center;
     font-weight: bold;
+    font-size: 16px;
+    margin: 0 auto;
 }
 
-.section-header {
-    background-color: #4F6228;
-    color: #FFFFFF;
+.period-title {
+    text-align: center;
     font-weight: bold;
+    font-size: 14px;
+    margin: 20px 0;
 }
 
-.totals-row {
+.container {
+    border: 1px solid #000000;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.container-title {
     font-weight: bold;
-}
-
-.details-table,
-.totals-table {
-    border-collapse: collapse;
-    width: 50%;
-    margin-top: 10px;
+    font-size: 14px;
     margin-bottom: 10px;
 }
 
-.details-table td,
-.totals-table td {
-    border: 1px solid #000000;
-    padding: 6px;
+.info-table {
+    width: 100%;
 }
 
-.details-table th,
-.totals-table th {
-    border: 1px solid #000000;
-    padding: 6px;
-    background-color: #D9EAD3;
+.info-table td {
+    padding: 4px 0;
 }
 
-.right {
+.info-label {
+    font-weight: bold;
+    width: 120px;
+}
+
+.amount-table {
+    width: 100%;
+}
+
+.amount-table td {
+    padding: 4px 0;
+}
+
+.amount-label {
+    width: 70%;
+}
+
+.amount-value {
     text-align: right;
-    margin-right: 1em;
+    width: 30%;
+    font-weight: normal;
 }
 
-.left {
-    text-align: left;
-    margin-left: 1em;
+.total-row {
+    font-weight: bold;
+}
+
+.net-pay-row {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.footer-row {
+    margin-top: 20px;
+    font-size: 8px;
+    color: #666666;
+}
+
+.two-column {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.column-left {
+    width: 48%;
+    float: left;
+}
+
+.column-right {
+    width: 48%;
+    float: right;
+}
+
+.clear {
+    clear: both;
 }
 </style>
-<table class="details-table">
-    <tr class="header">
-        <th colspan="2">OOUTH, SAGAMU PAYSLIP FOR <?php echo $fullPeriod; ?></th>
-    </tr>
+
+<!-- Header with logos on same line -->
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: collapse;">
     <tr>
-        <td>Name:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['employee_name']); ?></td>
-    </tr>
-    <tr>
-        <td>Staff No.:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['staff_id']); ?></td>
-    </tr>
-    <tr>
-        <td>Dept:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['department']); ?></td>
-    </tr>
-    <tr>
-        <td>Bank:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['bank']); ?></td>
-    </tr>
-    <tr>
-        <td>Acct No.:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['account_number']); ?></td>
-    </tr>
-    <tr>
-        <?php if (preg_match('/[a-zA-Z]/', $employeeDetails['grade_level'])) {
-            $salaryType = "CONMESS";
-            } else {
-               $salaryType = "CONHESS";
-            }
-            ?>
-        <td><?php echo $salaryType; ?>:</td>
-        <td><?php echo htmlspecialchars($employeeDetails['grade_level']); ?>/<?php echo htmlspecialchars($employeeDetails['STEP']); ?>
+        <!-- LEFT COLUMN: Aligned Left -->
+        <td width="20%" align="left" valign="middle">
+            <?php if (file_exists($logoLeftPath)): ?>
+            <img src="<?php echo $logoLeftPath; ?>" width="60" height="auto" style="display: block;" />
+            <?php endif; ?>
+        </td>
+
+        <!-- CENTER COLUMN: Aligned Center -->
+        <td width="60%" align="center" valign="middle"
+            style="font-family: Arial, sans-serif; font-weight: bold; font-size: 16px; line-height: 1.4;">
+            OLABISI ONABANJO UNIVERSITY TEACHING HOSPITAL<br>
+            <span style="font-size: 14px; font-weight: normal;">SAGAMU, OGUN STATE</span>
+        </td>
+
+        <!-- RIGHT COLUMN: Aligned Right -->
+        <td width="20%" align="right" valign="middle">
+            <?php if (file_exists($logoRightPath)): ?>
+            <img src="<?php echo $logoRightPath; ?>" width="60" height="auto" style="display: block;" />
+            <?php endif; ?>
         </td>
     </tr>
 </table>
 
-<table class="totals-table">
-    <tr class="section-header">
-        <th colspan="2">CONSOLIDATED SALARY</th>
-    </tr>
+
+
+<div class="period-title">
+    PAYSLIP FOR THE MONTH OF <?php echo htmlspecialchars($fullPeriod); ?>
+</div>
+
+<!-- Employee Details Container -->
+<div class="container">
+    <div class="container-title">Employee Details</div>
+    <table class="info-table">
+        <tr>
+            <td class="info-label">Name:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['employee_name']); ?></td>
+        </tr>
+        <tr>
+            <td class="info-label">Staff No.:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['staff_id']); ?></td>
+        </tr>
+        <tr>
+            <td class="info-label">Dept:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['department']); ?></td>
+        </tr>
+        <tr>
+            <td class="info-label">Bank:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['bank']); ?></td>
+        </tr>
+        <tr>
+            <td class="info-label">Acct No.:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['account_number']); ?></td>
+        </tr>
+        <tr>
+            <td class="info-label">Grade/Step:</td>
+            <td><?php echo htmlspecialchars($employeeDetails['grade_level']); ?>/<?php echo htmlspecialchars($employeeDetails['STEP']); ?>
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">Salary Structure:</td>
+            <td><?php echo htmlspecialchars($salaryType); ?></td>
+        </tr>
+    </table>
+</div>
+
+<!-- Allowances and Deductions Side by Side -->
+<div class="two-column">
+    <div class="column-left">
+        <div class="container">
+            <div class="container-title">Allowances</div>
+            <table class="amount-table">
+                <tr>
+                    <td class="amount-label"><strong>CONSOLIDATED SALARY</strong></td>
+                    <td class="amount-value"><strong>NGN
+                            <?php echo number_format($payslipDetails['consolidated'], 2); ?></strong></td>
+                </tr>
+                <?php
+                if (!empty($payslipDetails['allowances'])) {
+                    foreach ($payslipDetails['allowances'] as $allowance) {
+                        ?>
+                <tr>
+                    <td class="amount-label"><?php echo htmlspecialchars($allowance['ed']); ?></td>
+                    <td class="amount-value">NGN <?php echo number_format($allowance['allow'], 2); ?></td>
+                </tr>
+                <?php
+                    }
+                }
+                ?>
+                <tr class="total-row">
+                    <td class="amount-label">Gross Salary:</td>
+                    <td class="amount-value">NGN <?php echo number_format($payslipDetails['grosspay'], 2); ?></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="column-right">
+        <div class="container">
+            <div class="container-title">Deductions</div>
+            <table class="amount-table">
+                <?php
+                if (!empty($payslipDetails['deductions'])) {
+                    foreach ($payslipDetails['deductions'] as $deduction) {
+                        ?>
+                <tr>
+                    <td class="amount-label"><?php echo htmlspecialchars($deduction['ed']); ?></td>
+                    <td class="amount-value">NGN <?php echo number_format($deduction['deduc'], 2); ?></td>
+                </tr>
+                <?php
+                    }
+                }
+                ?>
+                <tr class="total-row">
+                    <td class="amount-label">Total Deductions:</td>
+                    <td class="amount-value">NGN <?php echo number_format($payslipDetails['grossDeduction'], 2); ?></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+<!-- Net Pay Container -->
+<div class="container">
+    <table class="amount-table">
+        <tr class="net-pay-row">
+            <td class="amount-label">NET PAY:</td>
+            <td class="amount-value">NGN <?php echo number_format($payslipDetails['netPay'], 2); ?></td>
+        </tr>
+    </table>
+</div>
+
+<!-- Footer -->
+<table class="footer-row" width="100%">
     <tr>
-        <td>CONSOLIDATED SALARY:</td>
-        <td class="right"><?php echo number_format($payslipDetails['consolidated'], 2); ?></td>
-    </tr>
-    <tr class="section-header">
-        <th colspan="2">ALLOWANCES</th>
-    </tr>
-    <!-- Repeat for each allowance -->
-    <?php
-        if (!empty($payslipDetails['allowances'])) {
-            foreach ($payslipDetails['allowances'] as $allowance) {
-        ?>
-    <tr>
-        <td><?php echo htmlspecialchars($allowance['ed']); ?></td>
-        <td class="right"><?php echo number_format($allowance['allow'], 2); ?></td>
-    </tr>
-    <?php }
-        }
-        ?>
-
-
-
-
-    <tr class="totals-row">
-        <td>Gross Salary</td>
-        <td class="right"><?php echo number_format($payslipDetails['grosspay'], 2); ?></td>
+        <td width="50%">Generated: <?php echo date('Y-m-d'); ?></td>
+        <td width="50%" align="right">Page 1 of 1</td>
     </tr>
 </table>
 
-<table class="totals-table">
-    <tr class="section-header">
-        <th colspan="2">Deductions</th>
-    </tr>
-    <!-- Repeat for each deduction -->
-    <?php if (!empty($payslipDetails['deductions'])) {
-            foreach ($payslipDetails['deductions'] as $deduction) { ?>
-    <tr>
-        <td><?php echo htmlspecialchars($deduction['ed']); ?></td>
-        <td class="right"><?php echo number_format($deduction['deduc'], 2); ?></td>
-    </tr>
-    <?php }
-        } ?>
-    <tr class="totals-row">
-        <td>Total Deductions</td>
-        <td class="right"><?php echo number_format($payslipDetails['grossDeduction'], 2); ?></td>
-    </tr>
-
-
-    <tr class="totals-row">
-        <td>Net Pay</td>
-        <td class="right"><?php echo number_format($payslipDetails['netPay'], 2); ?></td>
-    </tr>
-</table>
 <?php
     // Return the output buffer
     $html = ob_get_clean();
